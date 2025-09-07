@@ -4,11 +4,11 @@ const CORE = [
   './',            // root
   'index.html',
   'style.css',
-  'app.js',
+  'app.js',        // rimuovi se non lo usi
   'manifest.json',
   'icon-192.png',
   'icon-512.png',
-  'readme.html'    // (opzionale: rimuovi se non lo vuoi offline)
+  'readme.html'    // opzionale, toglilo se non vuoi il manuale offline
 ];
 
 self.addEventListener('install', (event) => {
@@ -24,23 +24,18 @@ self.addEventListener('activate', (event) => {
       Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
     )
   );
-  self.clients.claim(); // prendi il controllo delle pagine aperte
+  self.clients.claim(); // prendi subito controllo delle pagine aperte
 });
 
-// Strategia:
-// - Core asset: cache-first (veloce/offline)
-// - Altri GET same-origin: stale-while-revalidate
-// - Navigazione: fallback a index.html (SPA/offline)
 self.addEventListener('fetch', (event) => {
   const req = event.request;
 
-  // gestisci solo GET
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
   const sameOrigin = url.origin === self.location.origin;
 
-  // Navigazioni (barra indirizzi/link interni): offline fallback a index.html
+  // Navigazioni (barra indirizzi, link interni) → fallback a index.html
   if (req.mode === 'navigate' && sameOrigin) {
     event.respondWith(
       fetch(req).catch(() => caches.match('index.html'))
@@ -56,7 +51,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Default: stale-while-revalidate per risorse same-origin
+  // Default: stale-while-revalidate per altre richieste same-origin
   if (sameOrigin) {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE);
@@ -70,6 +65,5 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cross-origin: lascia passare (evita errori su richieste opache)
-  // event.respondWith(fetch(req)); // opzionale
+  // Cross-origin → lascio passare
 });
