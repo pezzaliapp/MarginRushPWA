@@ -10,50 +10,61 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
   :root{
-    --bg:#0b1220;
-    --card:#111a2e;
-    --ink:#e7eefc;
-    --muted:#b6c3e6;
-    --accent:#6be675;
-    --accent2:#87a7ff;
-    --bad:#ff7a88;
-    --grid:#1c2640;
-    --gold:#ffd166;
+    --bg:#0b1220; --card:#111a2e; --ink:#e7eefc; --muted:#b6c3e6;
+    --accent:#6be675; --accent2:#87a7ff; --bad:#ff7a88; --grid:#1c2640;
+    --gold:#ffd166; --bar:#1c2f66; --barFill:#6be675;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
   header{position:sticky;top:0;background:linear-gradient(180deg, rgba(11,18,32,.95), rgba(11,18,32,.75));backdrop-filter: blur(6px);z-index:10}
-  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+  .wrap{max-width:1200px;margin:0 auto;padding:16px}
   h1{font-size:1.25rem;margin:0 0 6px}
-  .sub{color:var(--muted);font-size:.9rem}
+  .sub{color:var(--muted);font-size:.95rem}
   .topbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px}
-  .badge{padding:6px 10px;border:1px solid var(--grid);border-radius:10px;color:var(--muted);}
+  .badge{padding:6px 10px;border:1px solid var(--grid);border-radius:10px;color:var(--muted);white-space:nowrap}
   .timer{font-weight:700;color:var(--accent)}
   .score{font-weight:700;color:var(--accent2)}
-  .buttons{margin-left:auto;display:flex;gap:8px}
+  .buttons{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   button{background:#192342;color:var(--ink);border:1px solid var(--grid);padding:8px 12px;border-radius:10px;cursor:pointer}
   button.primary{background:var(--accent2);color:#0a0f20;border-color:transparent;font-weight:700}
   button.danger{background:#ff5b6b;color:#0a0f20;border-color:transparent;font-weight:700}
   main{padding:12px 16px}
   .card{background:var(--card);border:1px solid var(--grid);border-radius:14px;overflow:hidden}
-  table{width:100%;border-collapse:collapse}
-  th,td{padding:10px;border-bottom:1px solid var(--grid);text-align:right}
-  th:nth-child(1), td:nth-child(1){text-align:left}
-  tr:last-child td{border-bottom:none}
-  input[type=range]{width:140px}
-  .muted{color:var(--muted);font-size:.9rem}
-  .footer{color:var(--muted);font-size:.85rem;margin-top:12px}
+  .note{background:#0f1730;border:1px dashed var(--grid);border-radius:10px;padding:10px;color:var(--muted)}
   .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#122042;border:1px solid var(--grid);color:var(--muted)}
   .ghost{color:#9ad3a1}
   .flex{display:flex;gap:12px;flex-wrap:wrap}
-  .half{flex:1 1 480px}
-  .note{background:#0f1730;border:1px dashed var(--grid);border-radius:10px;padding:10px;color:var(--muted)}
+  .half{flex:1 1 500px}
   .opt{color:var(--gold);font-weight:700}
-  .near{outline:2px solid var(--gold);}
-  .controls{display:grid;grid-template-columns: repeat(2,minmax(220px,1fr));gap:8px;margin-top:8px}
-  .controls label{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--grid);border-radius:10px;padding:8px;background:#0f1730}
-  .leader li{display:flex;justify-content:space-between;border-bottom:1px solid var(--grid);padding:6px 0}
-  .leader li:last-child{border-bottom:none}
+  .near{outline:2px solid var(--gold);outline-offset:-2px}
+  .meta{color:var(--muted);font-size:.9rem}
+  /* Desktop table */
+  .tablewrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:820px}
+  th,td{padding:10px;border-bottom:1px solid var(--grid);text-align:right;vertical-align:middle}
+  th:nth-child(1), td:nth-child(1){text-align:left;max-width:300px}
+  tr:last-child td{border-bottom:none}
+  input[type=range]{width:170px}
+  .bar{height:10px;background:var(--bar);border-radius:999px;overflow:hidden}
+  .bar>i{display:block;height:100%;width:0;background:var(--barFill)}
+  /* Mobile cards */
+  #cards{display:none}
+  .pcard{border-bottom:1px solid var(--grid);padding:12px}
+  .pcard:last-child{border-bottom:none}
+  .row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .row .left{font-weight:600}
+  .row .right{min-width:120px;text-align:right}
+  .sliderrow{display:flex;gap:8px;align-items:center;margin:8px 0}
+  .sliderrow input[type=range]{width:100%}
+  .demrow{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+  .footer{color:var(--muted);font-size:.85rem;margin-top:12px}
+  /* Responsive switches */
+  @media (max-width:800px){
+    #deskTable{display:none}
+    #cards{display:block}
+    .wrap{padding:12px}
+    .badge{padding:6px 8px}
+  }
 </style>
 </head>
 <body>
@@ -63,13 +74,14 @@
     <div class="sub">Massimizza l'<b>utile netto</b> regolando i prezzi in <b>60 secondi</b>. Ogni settimana una nuova <b>Season</b>.</div>
     <div class="topbar">
       <div class="badge">Season: <span id="seasonLabel">—</span></div>
+      <div class="badge">Modalità: <span id="modeEcho" class="pill">Season</span></div>
       <div class="badge">Tempo: <span class="timer" id="timeLeft">60</span>s</div>
       <div class="badge">Utile netto: <span class="score" id="score">0</span> €</div>
       <div class="badge">Best stagione: <span class="ghost" id="best">0</span> €</div>
       <div class="buttons">
         <button id="startBtn" class="primary">Start</button>
         <button id="retryBtn">Retry</button>
-        <button id="practiceBtn">Practice</button>
+        <button id="practiceBtn" title="Allenamento (no classifica)">Practice</button>
         <button id="shareBtn">Condividi</button>
         <button id="resetBtn" class="danger">Reset dati</button>
       </div>
@@ -79,103 +91,71 @@
 
 <main class="wrap">
   <div class="flex">
-    <section class="half card">
-      <table id="tbl">
-        <thead>
-          <tr>
-            <th>Prodotto</th>
-            <th>Cost (€)</th>
-            <th>Prezzo (€)</th>
-            <th>Domanda stim.</th>
-            <th>Utile</th>
-          </tr>
-        </thead>
-        <tbody id="tbody">
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="4" style="text-align:right;font-weight:700">Totale lordo</td>
-            <td id="totalGross" style="font-weight:700">0 €</td>
-          </tr>
-          <tr>
-            <td colspan="5" style="padding:0;border-bottom:none">
-              <div class="controls" style="padding:8px">
-                <label>Prezzi IVA inclusa?
-                  <input type="checkbox" id="ivaIncl">
-                </label>
-                <label>IVA (%) 
-                  <input type="number" id="ivaPct" value="22" min="0" max="100" step="0.1" style="width:90px;margin-left:8px">
-                </label>
-                <label>Costi fissi (€)
-                  <input type="number" id="fixedCost" value="0" step="1" style="width:120px;margin-left:8px">
-                </label>
-                <label>Aliquota imposta utile (%)
-                  <input type="number" id="taxPct" value="0" min="0" max="100" step="0.1" style="width:90px;margin-left:8px">
-                </label>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="4" style="text-align:right">Imponibile dopo costi fissi</td>
-            <td id="afterFixed">0 €</td>
-          </tr>
-          <tr>
-            <td colspan="4" style="text-align:right">Utile netto (dopo imposte)</td>
-            <td id="totalProfit" style="font-weight:900">0 €</td>
-          </tr>
-        </tfoot>
-      </table>
+    <section class="half card" id="deskTable">
+      <div class="tablewrap">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>Prodotto</th><th>Cost (€)</th><th>Prezzo (€)</th>
+              <th>Domanda (barra = vende di più)</th><th>Utile</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+          <tfoot>
+            <tr><td colspan="4" style="text-align:right;font-weight:700">Totale lordo</td><td id="totalGross" style="font-weight:700">0 €</td></tr>
+            <tr>
+              <td colspan="5" style="padding:0;border-bottom:none">
+                <div class="controls" style="display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:8px;padding:8px">
+                  <label>Prezzi IVA inclusa? <input type="checkbox" id="ivaIncl"></label>
+                  <label>IVA (%) <input type="number" id="ivaPct" value="22" min="0" max="100" step="0.1" style="width:90px"></label>
+                  <label>Costi fissi (€) <input type="number" id="fixedCost" value="0" step="1" style="width:140px"></label>
+                  <label>Aliquota imposta utile (%) <input type="number" id="taxPct" value="0" min="0" max="100" step="0.1" style="width:90px"></label>
+                </div>
+              </td>
+            </tr>
+            <tr><td colspan="4" style="text-align:right">Imponibile dopo costi fissi</td><td id="afterFixed" style="font-weight:700">0 €</td></tr>
+            <tr><td colspan="4" style="text-align:right">Utile netto (dopo imposte)</td><td id="totalProfit" style="font-weight:900">0 €</td></tr>
+          </tfoot>
+        </table>
+      </div>
     </section>
+
+    <section class="half card" id="cards">
+      <!-- Mobile product cards will be injected here -->
+    </section>
+
     <section class="half">
       <div class="card" style="padding:12px">
-        <h3 style="margin-top:0">Regole lampo</h3>
-        <ul>
-          <li>Ogni prodotto ha <span class="muted">costo</span>, <span class="muted">domanda di riferimento</span> e <span class="muted">elasticità</span>.</li>
-          <li>La domanda decresce con il prezzo: <span class="muted">D(p) ≈ D₀ · e^{-ε · (p−p₀)/p₀}</span>.</li>
-          <li>L'utile prodotto è <b>(p_netto − costo) × D(p)</b> con opzionale IVA inclusa su prezzo.</li>
-          <li>Utile netto finale: <b>(Σ utili − costi fissi) × (1 − tax%)</b>.</li>
+        <h3 style="margin-top:0">Legenda & Come si gioca</h3>
+        <ul class="meta">
+          <li><b>Scopo:</b> sposta gli slider dei <b>prezzi</b> per massimizzare l’<b>utile netto</b>.</li>
+          <li><b>ε</b> elasticità (sensibilità prezzo), <b>D₀</b> domanda di riferimento, <b>p₀</b> prezzo di riferimento, <b>p*</b> ottimo stimato = <code>costo + p₀/ε</code>.</li>
+          <li><b>Barra domanda:</b> più piena = più unità vendute (relativa al massimo attuale).</li>
+          <li><b>Practice</b> = allenamento (fuori classifica). <b>Season</b> = seed settimanale condivisibile.</li>
         </ul>
-        <div class="note">
-          <b>Ghost advisor:</b> evidenzia in <span class="opt">oro</span> i prezzi <b>vicini all'ottimo</b> stimato: <code>p* = costo + p₀/ε</code> (vincolato tra min/max).
-        </div>
-        <div class="footer">Made with ❤️, offline-first PWA. Nessun backend.</div>
+        <div class="note meta">D(p)=D₀·e<sup>−ε(p−p₀)/p₀</sup> — Utile prodotto: (p<sub>netto</sub>−costo)×D(p). Se “Prezzi IVA inclusa?” è attivo, il margine usa il prezzo <u>netto</u> (al netto IVA).</div>
       </div>
       <div class="card" style="padding:12px;margin-top:12px">
-        <div class="muted">Parametri stagione (seed): <span id="seedEcho" class="pill">—</span></div>
-        <div class="muted">Ghost (miglior tuo): <span id="ghostEcho" class="pill">—</span></div>
-        <div class="muted">Modalità: <span id="modeEcho" class="pill">Season</span></div>
-      </div>
-      <div class="card" style="padding:12px;margin-top:12px">
-        <h3 style="margin:0 0 8px">Classifica locale — Top 5 (Season)</h3>
-        <ul id="leader" class="leader" style="list-style:none;margin:0;padding:0"></ul>
+        <div class="meta">Seed stagione: <span id="seedEcho" class="pill">—</span></div>
+        <div class="meta">Ghost (miglior tuo): <span id="ghostEcho" class="pill">—</span></div>
+        <h3 style="margin:8px 0">Classifica locale — Top 5 (Season)</h3>
+        <ul id="leader" class="meta" style="list-style:none;margin:0;padding:0"></ul>
       </div>
     </section>
   </div>
 </main>
 
 <script>
-// ---------- Utilities ----------
+// Utilities
 function mulberry32(a){return function(){var t = a += 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; } }
-function seedFromString(s){
-  let h=1779033703^s.length;
-  for (let i=0;i<s.length;i++){h = Math.imul(h ^ s.charCodeAt(i), 3432918353); h = (h<<13) | (h>>>19);}
-  return h>>>0;
-}
+function seedFromString(s){let h=1779033703^s.length;for (let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=(h<<13)|(h>>>19);}return h>>>0;}
 function clamp(x,a,b){return Math.min(b,Math.max(a,x));}
 function euro(n){return (Math.round(n*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'})}
-function fmt(n){return (Math.round(n*100)/100).toLocaleString('it-IT')}
-function weekKey(d){
-  const dt = d? new Date(d): new Date();
-  const tmp = new Date(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate()));
-  const dayNum = (tmp.getUTCDay() + 6) % 7;
-  tmp.setUTCDate(tmp.getUTCDate() - dayNum + 3);
-  const firstThu = new Date(Date.UTC(tmp.getUTCFullYear(),0,4));
-  const week = 1 + Math.round(((tmp - firstThu)/86400000 - 3 + ((firstThu.getUTCDay()+6)%7))/7);
-  return tmp.getUTCFullYear()+"-W"+String(week).padStart(2,'0');
-}
+function weekKey(d){const dt=d?new Date(d):new Date();const tmp=new Date(Date.UTC(dt.getFullYear(),dt.getMonth(),dt.getDate()));const dayNum=(tmp.getUTCDay()+6)%7;tmp.setUTCDate(tmp.getUTCDate()-dayNum+3);const firstThu=new Date(Date.UTC(tmp.getUTCFullYear(),0,4));const week=1+Math.round(((tmp-firstThu)/86400000-3+((firstThu.getUTCDay()+6)%7))/7);return tmp.getUTCFullYear()+"-W"+String(week).padStart(2,'0');}
 
-// ---------- Game State ----------
+// Elements
 const tbody = document.getElementById('tbody');
+const cardsEl = document.getElementById('cards');
 const totalProfitEl = document.getElementById('totalProfit');
 const totalGrossEl = document.getElementById('totalGross');
 const afterFixedEl = document.getElementById('afterFixed');
@@ -187,35 +167,28 @@ const seedEcho = document.getElementById('seedEcho');
 const ghostEcho = document.getElementById('ghostEcho');
 const modeEcho = document.getElementById('modeEcho');
 const leaderEl = document.getElementById('leader');
-
 const ivaInclEl = document.getElementById('ivaIncl');
 const ivaPctEl = document.getElementById('ivaPct');
 const fixedCostEl = document.getElementById('fixedCost');
 const taxPctEl = document.getElementById('taxPct');
 
-let products = []; // {name,cost,refPrice,refDemand,elasticity,price,minP,maxP,optPrice}
+let products = [];
 let timer=null, timeLeft=60, running=false;
-let mode = "season"; // or "practice"
-let currentSeed = null;
-let season = weekKey();
+let mode="season", currentSeed=null, season=weekKey();
 
-// ---------- Season setup ----------
 function setupSeason(seedStr){
-  season = weekKey();
-  seasonLabel.textContent = season;
-  const s = seedStr || season;
-  currentSeed = s;
-  seedEcho.textContent = s;
+  season = weekKey(); seasonLabel.textContent = season;
+  const s = seedStr || season; currentSeed = s; seedEcho.textContent = s;
   const rng = mulberry32(seedFromString(s));
   const names = ["Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Gamma","Orion","Vega","Nova"];
   products = [];
   for(let i=0;i<5;i++){
     const name = names[Math.floor(rng()*names.length)] + " " + (1+Math.floor(rng()*9));
-    const cost = Math.round( (5 + rng()*45) * 100)/100; // €5–€50
-    const refMargin = 0.25 + rng()*0.45; // 25–70%
+    const cost = Math.round( (5 + rng()*45) * 100)/100;
+    const refMargin = 0.25 + rng()*0.45;
     const refPrice = Math.round( cost * (1+refMargin) * 100)/100;
-    const refDemand = Math.floor(20 + rng()*180); // 20–200
-    const elasticity = 0.4 + rng()*2.0; // 0.4–2.4
+    const refDemand = Math.floor(20 + rng()*180);
+    const elasticity = 0.4 + rng()*2.0;
     const minP = Math.max(0.5, cost*0.7);
     const maxP = cost*3.0;
     const startPrice = Math.round( refPrice * (0.9 + rng()*0.2) * 100)/100;
@@ -223,6 +196,7 @@ function setupSeason(seedStr){
     products.push({name, cost, refPrice, refDemand, elasticity, price:startPrice, minP, maxP, optPrice:opt});
   }
   renderTable();
+  renderCards();
   updateTotals();
   loadBest();
   renderLeader();
@@ -233,14 +207,11 @@ function netPriceFromUI(raw){
   const incl = ivaInclEl.checked;
   return incl ? (raw / (1+ivaPct)) : raw;
 }
-
 function demandFor(p, price){
-  // D(p) = D0 * exp( -epsilon * (price - p0)/p0 ), floored >= 0
   const rel = (price - p.refPrice)/p.refPrice;
   const d = p.refDemand * Math.exp(-p.elasticity * rel);
   return Math.max(0, Math.floor(d));
 }
-
 function profitFor(p){
   const unitNetPrice = netPriceFromUI(p.price);
   const u = Math.max(0, unitNetPrice - p.cost);
@@ -253,209 +224,183 @@ function renderTable(){
   products.forEach((p, idx)=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${p.name}
-        <div class="muted">ε=${p.elasticity.toFixed(2)} · D₀=${p.refDemand} @ p₀=${euro(p.refPrice)} · <span class="opt">p*≈${euro(p.optPrice)}</span></div>
-      </td>
+      <td>${p.name}<div class="meta">ε=${p.elasticity.toFixed(2)} · D₀=${p.refDemand} @ p₀=${euro(p.refPrice)} · <span class="opt">p*≈${euro(p.optPrice)}</span></div></td>
       <td>${euro(p.cost)}</td>
       <td>
-        <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
+        <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap">
           <button data-i="${idx}" data-d="-1">−</button>
           <input type="range" min="${p.minP}" max="${p.maxP}" step="0.1" value="${p.price}" data-i="${idx}" class="slider">
           <button data-i="${idx}" data-d="+1">+</button>
           <span id="price_${idx}">${euro(p.price)}</span>
         </div>
       </td>
-      <td><span id="dem_${idx}">0</span> <span class="muted">u</span></td>
+      <td>
+        <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap">
+          <span id="dem_${idx}" style="min-width:56px;text-align:right">0</span>
+          <div class="bar" style="width:140px"><i id="bar_${idx}"></i></div>
+        </div>
+        <div class="meta" id="demRef_${idx}" style="text-align:right"></div>
+      </td>
       <td><span id="prof_${idx}">0 €</span></td>
     `;
     tbody.appendChild(tr);
   });
+  bindControls('#tbl');
+}
 
-  tbody.querySelectorAll('.slider').forEach(sl=>{
+function renderCards(){
+  cardsEl.innerHTML = "";
+  const wrap = document.createElement('div');
+  products.forEach((p, idx)=>{
+    const el = document.createElement('div');
+    el.className = "pcard";
+    el.innerHTML = `
+      <div class="row"><div class="left">${p.name}</div><div class="right">Cost ${euro(p.cost)}</div></div>
+      <div class="meta">ε=${p.elasticity.toFixed(2)} · D₀=${p.refDemand} @ p₀=${euro(p.refPrice)} · <span class="opt">p*≈${euro(p.optPrice)}</span></div>
+      <div class="sliderrow">
+        <button data-i="${idx}" data-d="-1">−</button>
+        <input type="range" min="${p.minP}" max="${p.maxP}" step="0.1" value="${p.price}" data-i="${idx}" class="slider">
+        <button data-i="${idx}" data-d="+1">+</button>
+        <span id="mprice_${idx}">${euro(p.price)}</span>
+      </div>
+      <div class="demrow">
+        <span id="mdem_${idx}" style="min-width:56px;text-align:right">0</span>
+        <div class="bar" style="width:100%"><i id="mbar_${idx}"></i></div>
+      </div>
+      <div class="row"><div class="meta">Rif D₀=${p.refDemand.toLocaleString('it-IT')}</div><div><b id="mprof_${idx}">0 €</b></div></div>
+    `;
+    wrap.appendChild(el);
+  });
+  cardsEl.appendChild(wrap);
+  bindControls('#cards');
+}
+
+function bindControls(scope){
+  document.querySelectorAll(scope+' input.slider').forEach(sl=>{
     sl.addEventListener('input', (e)=>{
       const i = +e.target.dataset.i;
       products[i].price = parseFloat(e.target.value);
-      document.getElementById('price_'+i).textContent = euro(products[i].price);
+      const ids = ["price_","mprice_"];
+      ids.forEach(prefix=>{const lab=document.getElementById(prefix+i); if(lab) lab.textContent = euro(products[i].price);});
       updateTotals();
     });
   });
-  tbody.querySelectorAll('button[data-d]').forEach(btn=>{
+  document.querySelectorAll(scope+' button[data-d]').forEach(btn=>{
     btn.addEventListener('click', (e)=>{
       const i = +e.target.dataset.i;
       const dir = e.target.dataset.d === "+1" ? 1 : -1;
       const step = 0.1;
       products[i].price = clamp( Math.round((products[i].price + dir*step)*10)/10, products[i].minP, products[i].maxP );
-      const slider = tbody.querySelector('input.slider[data-i="'+i+'"]');
-      slider.value = products[i].price;
-      document.getElementById('price_'+i).textContent = euro(products[i].price);
+      const sels = document.querySelectorAll('input.slider[data-i="'+i+'"]');
+      sels.forEach(sl=>sl.value = products[i].price);
+      const ids = ["price_","mprice_"];
+      ids.forEach(prefix=>{const lab=document.getElementById(prefix+i); if(lab) lab.textContent = euro(products[i].price);});
       updateTotals();
     });
   });
 }
 
+function updateDemandBars(){
+  const qs = products.map(p=>demandFor(p,p.price));
+  const maxQ = Math.max(1, ...qs);
+  products.forEach((p,i)=>{
+    const q = qs[i];
+    const w = Math.round((q/maxQ)*100);
+    const el1 = document.getElementById('bar_'+i); if(el1) el1.style.width = w + '%';
+    const el2 = document.getElementById('mbar_'+i); if(el2) el2.style.width = w + '%';
+    const d1 = document.getElementById('dem_'+i); if(d1) d1.textContent = q.toLocaleString('it-IT');
+    const d2 = document.getElementById('mdem_'+i); if(d2) d2.textContent = q.toLocaleString('it-IT');
+    const ref1 = document.getElementById('demRef_'+i); if(ref1) ref1.textContent = `Rif: D₀=${p.refDemand.toLocaleString('it-IT')}`;
+  });
+}
+
 function highlightAdvisor(){
-  // highlight rows where price is within ±5% of optPrice
+  // Add/remove near class on both table rows and mobile cards
   products.forEach((p,i)=>{
     const near = Math.abs(p.price - p.optPrice) <= 0.05 * p.optPrice;
-    const row = tbody.children[i];
-    row.classList.toggle('near', near);
+    const row = tbody.children[i]; if(row) row.classList.toggle('near', near);
+    const mcard = cardsEl.querySelectorAll('.pcard')[i]; if(mcard) mcard.classList.toggle('near', near);
   });
 }
 
 function updateTotals(){
   let totGross = 0;
   products.forEach((p,i)=>{
-    const q = demandFor(p, p.price);
     const pr = profitFor(p);
     totGross += pr;
-    document.getElementById('dem_'+i).textContent = q.toLocaleString('it-IT');
-    document.getElementById('prof_'+i).textContent = euro(pr);
+    const el1 = document.getElementById('prof_'+i); if(el1) el1.textContent = euro(pr);
+    const el2 = document.getElementById('mprof_'+i); if(el2) el2.textContent = euro(pr);
   });
-
-  const fixed = parseFloat(fixedCostEl.value||"0");
+  const fixed = parseFloat(fixedCostEl?.value||"0");
   const afterFixed = Math.max(0, totGross - fixed);
-  const taxPct = Math.max(0, parseFloat(taxPctEl.value||"0")/100);
+  const taxPct = Math.max(0, parseFloat(taxPctEl?.value||"0")/100);
   const net = afterFixed * (1 - taxPct);
 
-  totalGrossEl.textContent = euro(totGross);
-  afterFixedEl.textContent = euro(afterFixed);
-  totalProfitEl.textContent = euro(net);
+  if(totalGrossEl) totalGrossEl.textContent = euro(totGross);
+  if(afterFixedEl) afterFixedEl.textContent = euro(afterFixed);
+  if(totalProfitEl) totalProfitEl.textContent = euro(net);
   scoreEl.textContent = euro(net);
 
+  updateDemandBars();
   highlightAdvisor();
 }
 
-function tick(){
-  if(!running)return;
-  timeLeft -= 1;
-  timeLeftEl.textContent = timeLeft;
-  if(timeLeft<=0){ endRun(); }
-  else setTimeout(tick, 1000);
-}
-
-function startRun(){
-  if(running) return;
-  running = true;
-  timeLeft = 60;
-  timeLeftEl.textContent = timeLeft;
-  document.querySelectorAll('input,button[data-d]').forEach(el=>el.disabled=false);
-  setTimeout(tick, 1000);
-}
-
-function parseEuroLabel(s){
-  // expects "1.234,56 €" → 1234.56
-  return parseFloat(s.replace(/[^0-9,.-]/g,'').replace('.','').replace(',','.')) || 0;
-}
+function tick(){ if(!running) return; timeLeft -= 1; timeLeftEl.textContent = timeLeft; if(timeLeft<=0){ endRun(); } else setTimeout(tick, 1000); }
+function startRun(){ if(running) return; running=true; timeLeft=60; timeLeftEl.textContent=timeLeft; document.querySelectorAll('input,button[data-d]').forEach(el=>el.disabled=false); setTimeout(tick,1000); }
+function parseEuroLabel(s){ return parseFloat(s.replace(/[^0-9,.-]/g,'').replace('.','').replace(',','.')) || 0; }
 
 function endRun(){
-  running = false;
-  document.querySelectorAll('input,button[data-d]').forEach(el=>el.disabled=true);
-  // save best and leaderboard for this seed if higher
+  running=false; document.querySelectorAll('input,button[data-d]').forEach(el=>el.disabled=true);
   const score = parseEuroLabel(scoreEl.textContent);
   const keyBest = "mr.best."+currentSeed;
   const prev = parseFloat(localStorage.getItem(keyBest) || "0");
-  if(!isNaN(score) && score>prev){
-    localStorage.setItem(keyBest, String(score));
-  }
-  // leaderboard (season only)
+  if(!isNaN(score) && score>prev){ localStorage.setItem(keyBest, String(score)); }
   if(mode==="season"){
     const keyLead = "mr.leader."+currentSeed;
     const arr = JSON.parse(localStorage.getItem(keyLead) || "[]");
     arr.push({score:score, ts: Date.now()});
     arr.sort((a,b)=>b.score - a.score);
-    const top5 = arr.slice(0,5);
-    localStorage.setItem(keyLead, JSON.stringify(top5));
+    localStorage.setItem(keyLead, JSON.stringify(arr.slice(0,5)));
   }
-  loadBest();
-  renderLeader();
+  loadBest(); renderLeader();
 }
 
-function loadBest(){
-  const key = "mr.best."+currentSeed;
-  const best = parseFloat(localStorage.getItem(key) || "0");
-  bestEl.textContent = euro(best);
-  ghostEcho.textContent = euro(best);
-}
-
+function loadBest(){ const best = parseFloat(localStorage.getItem("mr.best."+currentSeed) || "0"); bestEl.textContent = euro(best); ghostEcho.textContent = euro(best); }
 function renderLeader(){
-  const keyLead = "mr.leader."+currentSeed;
-  const arr = JSON.parse(localStorage.getItem(keyLead) || "[]");
-  leaderEl.innerHTML = "";
-  if(arr.length===0){
-    leaderEl.innerHTML = '<li><span class="muted">Nessun punteggio salvato ancora.</span><span>—</span></li>';
-    return;
-  }
-  arr.forEach((r, i)=>{
-    const li = document.createElement('li');
+  const arr = JSON.parse(localStorage.getItem("mr.leader."+currentSeed) || "[]");
+  leaderEl.innerHTML = arr.length? "" : '<li class="meta">Nessun punteggio salvato ancora.</li>';
+  arr.forEach((r,i)=>{
     const d = new Date(r.ts);
     const dt = d.toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-    li.innerHTML = `<span>#${i+1} — ${dt}</span><span><b>${euro(r.score)}</b></span>`;
+    const li = document.createElement('li');
+    li.textContent = `#${i+1} — ${dt} — ${euro(r.score)}`;
     leaderEl.appendChild(li);
   });
 }
 
-// ---------- Controls ----------
-document.getElementById('startBtn').addEventListener('click', ()=>{
-  mode = "season"; modeEcho.textContent = "Season";
-  setupSeason(weekKey());
-  startRun();
-});
-
-document.getElementById('retryBtn').addEventListener('click', ()=>{
-  setupSeason(currentSeed);
-  startRun();
-});
-
-document.getElementById('practiceBtn').addEventListener('click', ()=>{
-  mode = "practice"; modeEcho.textContent = "Practice";
-  const rnd = Math.floor(Math.random()*1e9).toString(36);
-  setupSeason("PRAC-"+rnd);
-  startRun();
-});
-
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  if(confirm("Cancellare tutti i best/leaderboard salvati?")){
-    Object.keys(localStorage).filter(k=>k.startsWith("mr.best.")||k.startsWith("mr.leader.")).forEach(k=>localStorage.removeItem(k));
-    loadBest(); renderLeader();
-  }
-});
-
+// Controls
+document.getElementById('startBtn').addEventListener('click', ()=>{ mode="season"; modeEcho.textContent="Season"; setupSeason(weekKey()); startRun(); });
+document.getElementById('retryBtn').addEventListener('click', ()=>{ setupSeason(currentSeed); startRun(); });
+document.getElementById('practiceBtn').addEventListener('click', ()=>{ mode="practice"; modeEcho.textContent="Practice"; const rnd=Math.floor(Math.random()*1e9).toString(36); setupSeason("PRAC-"+rnd); startRun(); });
+document.getElementById('resetBtn').addEventListener('click', ()=>{ if(confirm("Cancellare tutti i best/leaderboard salvati?")){ Object.keys(localStorage).filter(k=>k.startsWith("mr.best.")||k.startsWith("mr.leader.")).forEach(k=>localStorage.removeItem(k)); loadBest(); renderLeader(); }});
 document.getElementById('shareBtn').addEventListener('click', async ()=>{
-  const url = new URL(location.href);
-  url.searchParams.set('seed', currentSeed);
+  const url = new URL(location.href); url.searchParams.set('seed', currentSeed);
   const text = `Il mio UTILE NETTO in Margin Rush (${mode}) — Season ${season}: ${scoreEl.textContent}. Prova la stessa partita: ${url.toString()}`;
-  try {
-    await navigator.clipboard.writeText(text);
-    alert("Copiato negli appunti! Incolla dove vuoi per sfidare altri.");
-  } catch(e){
-    prompt("Copia questo testo e condividilo:", text);
-  }
+  try{ await navigator.clipboard.writeText(text); alert("Copiato negli appunti! Incolla dove vuoi per sfidare altri."); }catch(e){ prompt("Copia questo testo e condividilo:", text); }
 });
+['ivaIncl','ivaPct','fixedCost','taxPct'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', updateTotals); });
 
-[ivaInclEl,ivaPctEl,fixedCostEl,taxPctEl].forEach(el=>{
-  el.addEventListener('input', updateTotals);
-});
-
-// ---------- Init ----------
+// Init
 (function init(){
   const url = new URL(location.href);
   const s = url.searchParams.get('seed');
-  if(s){
-    mode = s.startsWith("PRAC-")? "practice" : "season";
-    modeEcho.textContent = mode[0].toUpperCase()+mode.slice(1);
-    setupSeason(s);
-  }else{
-    setupSeason(weekKey());
-  }
+  if(s){ mode = s.startsWith("PRAC-")? "practice" : "season"; modeEcho.textContent = mode[0].toUpperCase()+mode.slice(1); setupSeason(s); }
+  else { setupSeason(weekKey()); }
   document.querySelectorAll('input,button[data-d]').forEach(el=>el.disabled=true);
 })();
 
-// ---------- PWA ----------
-if('serviceWorker' in navigator){
-  window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('service-worker.js');
-  });
-}
+// PWA
+if('serviceWorker' in navigator){ window.addEventListener('load', ()=>{ navigator.serviceWorker.register('service-worker.js'); }); }
 </script>
 </body>
 </html>
