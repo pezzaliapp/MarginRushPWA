@@ -17,7 +17,7 @@ code{background:#eee;padding:2px 5px;border-radius:4px}
 pre{background:#eee;padding:10px;border-radius:6px;overflow:auto}
 ul,ol{margin-bottom:1em}
 
-/* --- Pulsante fisso --- */
+/* --- Pulsanti fissi --- */
 #app-link{
   position:fixed;
   top:12px;
@@ -32,13 +32,31 @@ ul,ol{margin-bottom:1em}
   box-shadow:0 2px 6px rgba(0,0,0,0.25);
   z-index:1000;
 }
+#lang-toggle{
+  position:fixed;
+  top:12px;
+  left:12px;
+  background:#1d2d60;
+  color:#fff;
+  padding:8px 14px;
+  border-radius:8px;
+  font-weight:600;
+  font-size:0.9rem;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,0.25);
+  z-index:1000;
+}
 #app-link:hover{background:#1d2d60}
+#lang-toggle:hover{background:#0b1220}
 </style>
 </head>
 <body>
 
 <a id="app-link" href="index.html">Apri la App</a>
+<div id="lang-toggle">EN</div>
 
+<!-- ================= ITALIANO ================= -->
+<div id="content-it">
 <h1>Margin Rush — v4.9 Pro</h1>
 <p><strong>Simulatore interattivo di pricing e redditività</strong><br>
 Autore: Alessandro Pezzali · Licenza: MIT (2025)</p>
@@ -52,88 +70,41 @@ Autore: Alessandro Pezzali · Licenza: MIT (2025)</p>
 <h2>🎯 Perché è utile</h2>
 <ul>
 <li><b>Per venditori e manager</b> → allena a capire come i costi e i margini reagiscono alle scelte di prezzo.</li>
-<li><b>Per studenti di economia e marketing</b> → trasforma formule astratte (margine, break-even, sicurezza) in scenari concreti.</li>
-<li><b>Per imprenditori e startupper</b> → simula in pochi minuti quello che nella realtà richiederebbe mesi di vendite.</li>
-</ul>
-<p>Margin Rush non è un calcolatore sterile: è un ambiente competitivo, con <b>3 concorrenti virtuali</b> che cambiano strategia giorno per giorno.</p>
-
-<h2>⚙️ Come funziona la simulazione</h2>
-<ul>
-<li>Il <b>mercato</b> è composto da clienti giornalieri (M).</li>
-<li>L’<b>utilità percepita</b> di ogni offerta dipende da Prezzo, Qualità (Q), Brand (B), Servizio (S), Stagionalità.</li>
-<li>La quota è calcolata con un modello logit.</li>
+<li><b>Per studenti</b> → trasforma formule astratte (margine, break-even, sicurezza) in scenari concreti.</li>
+<li><b>Per imprenditori</b> → simula in pochi minuti ciò che nella realtà richiederebbe mesi di vendite.</li>
 </ul>
 
-<h3>I tre concorrenti</h3>
-<ul>
-<li><b>Comp A (Price-war)</b> → abbassa i prezzi per guadagnare quota.</li>
-<li><b>Comp B (Premium)</b> → investe in qualità e brand mantenendo prezzi alti.</li>
-<li><b>Comp C (Bandit AI)</b> → strategia adattiva ε-greedy.</li>
-</ul>
+<h2>⚙️ Come funziona</h2>
+<p>Mercato logit, 3 competitor (Price-war, Premium, Bandit AI). Ogni giorno le quote cambiano in base a Prezzo, Q, B, S e stagionalità.</p>
 
-<h2>📘 Manuale d’uso passo–passo</h2>
+<h2>📘 Manuale d’uso</h2>
 <ol>
-<li>Avvia l’app (index.html o PWA installata).</li>
-<li>Imposta <b>Prezzo</b>, <b>Q</b>, <b>B</b>, <b>S</b>, <b>Capienza</b>.</li>
-<li>Definisci i <b>costi variabili</b> e i <b>costi fissi</b>.</li>
-<li>Scegli il <b>canale di vendita</b> (Online, P.IVA, Dipendente).</li>
-<li>Avanza di un giorno: i competitor reagiscono, i clienti si redistribuiscono.</li>
-<li>Analizza il report: unità, quota, utile, margini, grafici, log.</li>
-<li>Dopo 10 giorni → valuta l’utile cumulato.</li>
+<li>Imposta Prezzo, Qualità (Q), Brand (B), Servizio (S), Capienza.</li>
+<li>Configura costi variabili e fissi.</li>
+<li>Scegli il canale di vendita (Online, P.IVA, Dipendente).</li>
+<li>Avanza giorno per giorno e osserva i risultati.</li>
+<li>Dopo 10 giorni → confronta utile cumulato e quota.</li>
 </ol>
 
-<h2>🧩 Legenda simboli e sigle</h2>
+<h2>🧩 Legenda simboli</h2>
 <ul>
 <li><b>Q</b> = Qualità</li>
 <li><b>B</b> = Brand</li>
 <li><b>S</b> = Servizio</li>
 <li><b>MC/u</b> = Margine di Contribuzione per unità</li>
-<li><b>MC tot</b> = Margine di Contribuzione totale</li>
-<li><b>BE</b> = Break-even (unità minime per non perdere)</li>
+<li><b>BE</b> = Break-even</li>
 <li><b>MoS</b> = Margine di Sicurezza</li>
-<li><b>Copertura</b> = % del prezzo disponibile per costi fissi</li>
 <li><b>Advisor</b> = prezzo ottimale suggerito</li>
-<li><b>Clienti spostati (Δ)</b> = clienti guadagnati/persi per Prezzo, Q, B, S</li>
 </ul>
 
-<h2>📊 Indicatori di redditività</h2>
-
-<h3>1. Margine di Contribuzione (MC)</h3>
-<p><i>Divulgativo</i>: indica quanto ogni pezzo venduto contribuisce a coprire i costi fissi.</p>
+<h2>📊 Indicatori</h2>
 <pre>MC/u = Prezzo Netto – Costi Variabili
-MC tot = MC/u × Quantità</pre>
-<p><i>Esempio</i>: Prezzo netto 50€, costi variabili 30€ → MC/u = 20€. Vendendo 100 pezzi → MC tot = 2.000€.</p>
-
-<h3>2. Break-even (BE)</h3>
-<p><i>Divulgativo</i>: il punto in cui le vendite coprono i costi fissi.</p>
-<pre>BE = Costi Fissi ÷ (MC/u × (1 – Tax%))</pre>
-<p><i>Esempio</i>: Fissi 1.000€/g, MC/u 20€, tax 24% → BE ≈ 66 unità.</p>
-
-<h3>3. Margine di Sicurezza (MoS)</h3>
-<p><i>Divulgativo</i>: misura quanto sei sopra il pareggio.</p>
-<pre>MoS = (Vendite Effettive – Vendite BE) ÷ Vendite Effettive</pre>
-<p><i>Esempio</i>: vendi 100 unità, BE=66 → MoS=34%.</p>
-
-<h3>4. Indice di Copertura</h3>
-<p><i>Divulgativo</i>: quota del prezzo che rimane disponibile per coprire i fissi.</p>
-<pre>Copertura = MC/u ÷ Prezzo Netto</pre>
-<p><i>Esempio</i>: Prezzo netto 50€, MC/u 20€ → Copertura=40%.</p>
-
-<h2>🛠️ Aspetti tecnici</h2>
-<ul>
-<li>Motore logit per la domanda.</li>
-<li>Strategie competitor: price-war, premium, bandit AI.</li>
-<li>Persistenza con localStorage.</li>
-<li>Grafici BE (ricavi vs costi totali) e MC (ricavi vs costi variabili).</li>
-<li>PWA offline con service worker e manifest.</li>
-</ul>
+BE = Costi Fissi ÷ (MC/u × (1 – Tax%))
+MoS = (Vendite Effettive – Vendite BE) ÷ Vendite Effettive
+Copertura = MC/u ÷ Prezzo Netto</pre>
 
 <h2>🚀 Installazione</h2>
-<ol>
-<li>Scarica i file e apri <code>index.html</code>.</li>
-<li>Su smartphone → “Aggiungi a schermata Home”.</li>
-<li>L’app funziona offline; i dati restano sul dispositivo.</li>
-</ol>
+<p>Apri <code>index.html</code> in un browser moderno o installa la PWA su smartphone.</p>
 
 <h2>👤 Autore</h2>
 <p><b>Alessandro Pezzali</b><br>
@@ -141,7 +112,87 @@ MC tot = MC/u × Quantità</pre>
 <a href="https://www.pezzaliapp.com">pezzaliAPP.com</a></p>
 
 <h2>📄 Licenza</h2>
-<p>Rilasciato sotto <b>MIT License</b> (2025).</p>
+<p>MIT License (2025)</p>
+</div>
 
+<!-- ================= ENGLISH ================= -->
+<div id="content-en" style="display:none">
+<h1>Margin Rush — v4.9 Pro</h1>
+<p><strong>Interactive simulator of pricing and profitability</strong><br>
+Author: Alessandro Pezzali · License: MIT (2025)</p>
+
+<h2>📖 Introduction</h2>
+<p>Many marketing and sales decisions come down to a simple but crucial question: 
+<b>“At this price, is my product really profitable?”</b></p>
+<p><b>Margin Rush</b> is a Progressive Web App (PWA) designed to explore this question interactively.
+It is both a <i>business game</i> and a <i>financial analysis lab</i>: while playing you learn to interpret the key numbers that determine the survival of a product in the market.</p>
+
+<h2>🎯 Why it’s useful</h2>
+<ul>
+<li><b>For salespeople and managers</b> → trains to see how costs and margins react to price choices.</li>
+<li><b>For students</b> → turns abstract formulas (contribution margin, break-even, safety margin) into real scenarios.</li>
+<li><b>For entrepreneurs</b> → simulates in minutes what would take months in real life.</li>
+</ul>
+
+<h2>⚙️ How it works</h2>
+<p>Logit market, 3 competitors (Price-war, Premium, Bandit AI). Every day market shares shift depending on Price, Q, B, S and seasonality.</p>
+
+<h2>📘 User guide</h2>
+<ol>
+<li>Set Price, Quality (Q), Brand (B), Service (S), Capacity.</li>
+<li>Configure variable and fixed costs.</li>
+<li>Select sales channel (Online, Freelancer, Employee).</li>
+<li>Advance day by day and observe results.</li>
+<li>After 10 days → compare cumulative profit and share.</li>
+</ol>
+
+<h2>🧩 Legend</h2>
+<ul>
+<li><b>Q</b> = Quality</li>
+<li><b>B</b> = Brand</li>
+<li><b>S</b> = Service</li>
+<li><b>MC/u</b> = Contribution Margin per unit</li>
+<li><b>BE</b> = Break-even</li>
+<li><b>MoS</b> = Margin of Safety</li>
+<li><b>Advisor</b> = suggested optimal price</li>
+</ul>
+
+<h2>📊 Indicators</h2>
+<pre>MC/u = Net Price – Variable Costs
+BE = Fixed Costs ÷ (MC/u × (1 – Tax%))
+MoS = (Actual Sales – BE Sales) ÷ Actual Sales
+Coverage = MC/u ÷ Net Price</pre>
+
+<h2>🚀 Installation</h2>
+<p>Open <code>index.html</code> in a modern browser or install the PWA on your smartphone.</p>
+
+<h2>👤 Author</h2>
+<p><b>Alessandro Pezzali</b><br>
+<a href="https://github.com/pezzaliapp">github.com/pezzaliapp</a> · 
+<a href="https://www.pezzaliapp.com">pezzaliAPP.com</a></p>
+
+<h2>📄 License</h2>
+<p>MIT License (2025)</p>
+</div>
+
+<script>
+const toggle=document.getElementById('lang-toggle');
+const it=document.getElementById('content-it');
+const en=document.getElementById('content-en');
+let current='it';
+toggle.addEventListener('click',()=>{
+  if(current==='it'){
+    it.style.display='none';
+    en.style.display='block';
+    toggle.textContent='IT';
+    current='en';
+  }else{
+    en.style.display='none';
+    it.style.display='block';
+    toggle.textContent='EN';
+    current='it';
+  }
+});
+</script>
 </body>
 </html>
