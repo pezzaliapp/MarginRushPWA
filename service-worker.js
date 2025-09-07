@@ -1,5 +1,5 @@
 // Simple offline cache-first
-const CACHE = 'marginrush-v1';
+const CACHE = 'marginrush-v2';
 const ASSETS = [
   './',
   'index.html',

@@ -18,11 +18,12 @@
     --accent2:#87a7ff;
     --bad:#ff7a88;
     --grid:#1c2640;
+    --gold:#ffd166;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif}
   header{position:sticky;top:0;background:linear-gradient(180deg, rgba(11,18,32,.95), rgba(11,18,32,.75));backdrop-filter: blur(6px);z-index:10}
-  .wrap{max-width:980px;margin:0 auto;padding:16px}
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
   h1{font-size:1.25rem;margin:0 0 6px}
   .sub{color:var(--muted);font-size:.9rem}
   .topbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px}
@@ -39,15 +40,20 @@
   th,td{padding:10px;border-bottom:1px solid var(--grid);text-align:right}
   th:nth-child(1), td:nth-child(1){text-align:left}
   tr:last-child td{border-bottom:none}
-  input[type=range]{width:130px}
+  input[type=range]{width:140px}
   .muted{color:var(--muted);font-size:.9rem}
   .footer{color:var(--muted);font-size:.85rem;margin-top:12px}
   .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#122042;border:1px solid var(--grid);color:var(--muted)}
   .ghost{color:#9ad3a1}
   .flex{display:flex;gap:12px;flex-wrap:wrap}
-  .half{flex:1 1 420px}
+  .half{flex:1 1 480px}
   .note{background:#0f1730;border:1px dashed var(--grid);border-radius:10px;padding:10px;color:var(--muted)}
-  .strike{color:#ffb3bc}
+  .opt{color:var(--gold);font-weight:700}
+  .near{outline:2px solid var(--gold);}
+  .controls{display:grid;grid-template-columns: repeat(2,minmax(220px,1fr));gap:8px;margin-top:8px}
+  .controls label{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--grid);border-radius:10px;padding:8px;background:#0f1730}
+  .leader li{display:flex;justify-content:space-between;border-bottom:1px solid var(--grid);padding:6px 0}
+  .leader li:last-child{border-bottom:none}
 </style>
 </head>
 <body>
@@ -88,8 +94,34 @@
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="4" style="text-align:right;font-weight:700">Totale</td>
-            <td id="totalProfit" style="font-weight:700">0 €</td>
+            <td colspan="4" style="text-align:right;font-weight:700">Totale lordo</td>
+            <td id="totalGross" style="font-weight:700">0 €</td>
+          </tr>
+          <tr>
+            <td colspan="5" style="padding:0;border-bottom:none">
+              <div class="controls" style="padding:8px">
+                <label>Prezzi IVA inclusa?
+                  <input type="checkbox" id="ivaIncl">
+                </label>
+                <label>IVA (%) 
+                  <input type="number" id="ivaPct" value="22" min="0" max="100" step="0.1" style="width:90px;margin-left:8px">
+                </label>
+                <label>Costi fissi (€)
+                  <input type="number" id="fixedCost" value="0" step="1" style="width:120px;margin-left:8px">
+                </label>
+                <label>Aliquota imposta utile (%)
+                  <input type="number" id="taxPct" value="0" min="0" max="100" step="0.1" style="width:90px;margin-left:8px">
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4" style="text-align:right">Imponibile dopo costi fissi</td>
+            <td id="afterFixed">0 €</td>
+          </tr>
+          <tr>
+            <td colspan="4" style="text-align:right">Utile netto (dopo imposte)</td>
+            <td id="totalProfit" style="font-weight:900">0 €</td>
           </tr>
         </tfoot>
       </table>
@@ -100,11 +132,11 @@
         <ul>
           <li>Ogni prodotto ha <span class="muted">costo</span>, <span class="muted">domanda di riferimento</span> e <span class="muted">elasticità</span>.</li>
           <li>La domanda decresce con il prezzo: <span class="muted">D(p) ≈ D₀ · e^{-ε · (p−p₀)/p₀}</span>.</li>
-          <li>L'utile per prodotto è <b>(p − costo) × D(p)</b>.</li>
-          <li>Hai <b>60s</b> per regolare i prezzi. Salva il best della Season.</li>
+          <li>L'utile prodotto è <b>(p_netto − costo) × D(p)</b> con opzionale IVA inclusa su prezzo.</li>
+          <li>Utile netto finale: <b>(Σ utili − costi fissi) × (1 − tax%)</b>.</li>
         </ul>
         <div class="note">
-          <b>Tip</b>: se l'elasticità è alta, piccoli aumenti di prezzo abbattono la domanda.
+          <b>Ghost advisor:</b> evidenzia in <span class="opt">oro</span> i prezzi <b>vicini all'ottimo</b> stimato: <code>p* = costo + p₀/ε</code> (vincolato tra min/max).
         </div>
         <div class="footer">Made with ❤️, offline-first PWA. Nessun backend.</div>
       </div>
@@ -112,6 +144,10 @@
         <div class="muted">Parametri stagione (seed): <span id="seedEcho" class="pill">—</span></div>
         <div class="muted">Ghost (miglior tuo): <span id="ghostEcho" class="pill">—</span></div>
         <div class="muted">Modalità: <span id="modeEcho" class="pill">Season</span></div>
+      </div>
+      <div class="card" style="padding:12px;margin-top:12px">
+        <h3 style="margin:0 0 8px">Classifica locale — Top 5 (Season)</h3>
+        <ul id="leader" class="leader" style="list-style:none;margin:0;padding:0"></ul>
       </div>
     </section>
   </div>
@@ -130,7 +166,6 @@ function euro(n){return (Math.round(n*100)/100).toLocaleString('it-IT',{style:'c
 function fmt(n){return (Math.round(n*100)/100).toLocaleString('it-IT')}
 function weekKey(d){
   const dt = d? new Date(d): new Date();
-  // ISO week
   const tmp = new Date(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate()));
   const dayNum = (tmp.getUTCDay() + 6) % 7;
   tmp.setUTCDate(tmp.getUTCDate() - dayNum + 3);
@@ -142,6 +177,8 @@ function weekKey(d){
 // ---------- Game State ----------
 const tbody = document.getElementById('tbody');
 const totalProfitEl = document.getElementById('totalProfit');
+const totalGrossEl = document.getElementById('totalGross');
+const afterFixedEl = document.getElementById('afterFixed');
 const timeLeftEl = document.getElementById('timeLeft');
 const scoreEl = document.getElementById('score');
 const bestEl = document.getElementById('best');
@@ -149,8 +186,14 @@ const seasonLabel = document.getElementById('seasonLabel');
 const seedEcho = document.getElementById('seedEcho');
 const ghostEcho = document.getElementById('ghostEcho');
 const modeEcho = document.getElementById('modeEcho');
+const leaderEl = document.getElementById('leader');
 
-let products = []; // {name,cost,refPrice,refDemand,elasticity,price}
+const ivaInclEl = document.getElementById('ivaIncl');
+const ivaPctEl = document.getElementById('ivaPct');
+const fixedCostEl = document.getElementById('fixedCost');
+const taxPctEl = document.getElementById('taxPct');
+
+let products = []; // {name,cost,refPrice,refDemand,elasticity,price,minP,maxP,optPrice}
 let timer=null, timeLeft=60, running=false;
 let mode = "season"; // or "practice"
 let currentSeed = null;
@@ -172,15 +215,23 @@ function setupSeason(seedStr){
     const refMargin = 0.25 + rng()*0.45; // 25–70%
     const refPrice = Math.round( cost * (1+refMargin) * 100)/100;
     const refDemand = Math.floor(20 + rng()*180); // 20–200
-    const elasticity = 0.4 + rng()*1.6; // 0.4–2.0
+    const elasticity = 0.4 + rng()*2.0; // 0.4–2.4
     const minP = Math.max(0.5, cost*0.7);
     const maxP = cost*3.0;
     const startPrice = Math.round( refPrice * (0.9 + rng()*0.2) * 100)/100;
-    products.push({name, cost, refPrice, refDemand, elasticity, price:startPrice, minP, maxP});
+    const opt = clamp(cost + refPrice/elasticity, minP, maxP);
+    products.push({name, cost, refPrice, refDemand, elasticity, price:startPrice, minP, maxP, optPrice:opt});
   }
   renderTable();
   updateTotals();
   loadBest();
+  renderLeader();
+}
+
+function netPriceFromUI(raw){
+  const ivaPct = parseFloat(ivaPctEl.value||"0")/100;
+  const incl = ivaInclEl.checked;
+  return incl ? (raw / (1+ivaPct)) : raw;
 }
 
 function demandFor(p, price){
@@ -191,7 +242,8 @@ function demandFor(p, price){
 }
 
 function profitFor(p){
-  const u = Math.max(0, p.price - p.cost);
+  const unitNetPrice = netPriceFromUI(p.price);
+  const u = Math.max(0, unitNetPrice - p.cost);
   const q = demandFor(p, p.price);
   return u * q;
 }
@@ -201,7 +253,9 @@ function renderTable(){
   products.forEach((p, idx)=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${p.name}<div class="muted">ε=${p.elasticity.toFixed(2)} · D₀=${p.refDemand} @ p₀=${euro(p.refPrice)}</div></td>
+      <td>${p.name}
+        <div class="muted">ε=${p.elasticity.toFixed(2)} · D₀=${p.refDemand} @ p₀=${euro(p.refPrice)} · <span class="opt">p*≈${euro(p.optPrice)}</span></div>
+      </td>
       <td>${euro(p.cost)}</td>
       <td>
         <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
@@ -239,17 +293,36 @@ function renderTable(){
   });
 }
 
+function highlightAdvisor(){
+  // highlight rows where price is within ±5% of optPrice
+  products.forEach((p,i)=>{
+    const near = Math.abs(p.price - p.optPrice) <= 0.05 * p.optPrice;
+    const row = tbody.children[i];
+    row.classList.toggle('near', near);
+  });
+}
+
 function updateTotals(){
-  let tot = 0;
+  let totGross = 0;
   products.forEach((p,i)=>{
     const q = demandFor(p, p.price);
     const pr = profitFor(p);
-    tot += pr;
+    totGross += pr;
     document.getElementById('dem_'+i).textContent = q.toLocaleString('it-IT');
     document.getElementById('prof_'+i).textContent = euro(pr);
   });
-  totalProfitEl.textContent = euro(tot);
-  scoreEl.textContent = euro(tot);
+
+  const fixed = parseFloat(fixedCostEl.value||"0");
+  const afterFixed = Math.max(0, totGross - fixed);
+  const taxPct = Math.max(0, parseFloat(taxPctEl.value||"0")/100);
+  const net = afterFixed * (1 - taxPct);
+
+  totalGrossEl.textContent = euro(totGross);
+  afterFixedEl.textContent = euro(afterFixed);
+  totalProfitEl.textContent = euro(net);
+  scoreEl.textContent = euro(net);
+
+  highlightAdvisor();
 }
 
 function tick(){
@@ -269,17 +342,32 @@ function startRun(){
   setTimeout(tick, 1000);
 }
 
+function parseEuroLabel(s){
+  // expects "1.234,56 €" → 1234.56
+  return parseFloat(s.replace(/[^0-9,.-]/g,'').replace('.','').replace(',','.')) || 0;
+}
+
 function endRun(){
   running = false;
   document.querySelectorAll('input,button[data-d]').forEach(el=>el.disabled=true);
-  // save best for this seed if higher
-  const score = parseFloat(scoreEl.textContent.replace(/[^0-9,.-]/g,'').replace('.','').replace(',','.'));
-  const key = "mr.best."+currentSeed;
-  const prev = parseFloat(localStorage.getItem(key) || "0");
+  // save best and leaderboard for this seed if higher
+  const score = parseEuroLabel(scoreEl.textContent);
+  const keyBest = "mr.best."+currentSeed;
+  const prev = parseFloat(localStorage.getItem(keyBest) || "0");
   if(!isNaN(score) && score>prev){
-    localStorage.setItem(key, String(score));
+    localStorage.setItem(keyBest, String(score));
+  }
+  // leaderboard (season only)
+  if(mode==="season"){
+    const keyLead = "mr.leader."+currentSeed;
+    const arr = JSON.parse(localStorage.getItem(keyLead) || "[]");
+    arr.push({score:score, ts: Date.now()});
+    arr.sort((a,b)=>b.score - a.score);
+    const top5 = arr.slice(0,5);
+    localStorage.setItem(keyLead, JSON.stringify(top5));
   }
   loadBest();
+  renderLeader();
 }
 
 function loadBest(){
@@ -287,6 +375,23 @@ function loadBest(){
   const best = parseFloat(localStorage.getItem(key) || "0");
   bestEl.textContent = euro(best);
   ghostEcho.textContent = euro(best);
+}
+
+function renderLeader(){
+  const keyLead = "mr.leader."+currentSeed;
+  const arr = JSON.parse(localStorage.getItem(keyLead) || "[]");
+  leaderEl.innerHTML = "";
+  if(arr.length===0){
+    leaderEl.innerHTML = '<li><span class="muted">Nessun punteggio salvato ancora.</span><span>—</span></li>';
+    return;
+  }
+  arr.forEach((r, i)=>{
+    const li = document.createElement('li');
+    const d = new Date(r.ts);
+    const dt = d.toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    li.innerHTML = `<span>#${i+1} — ${dt}</span><span><b>${euro(r.score)}</b></span>`;
+    leaderEl.appendChild(li);
+  });
 }
 
 // ---------- Controls ----------
@@ -309,16 +414,16 @@ document.getElementById('practiceBtn').addEventListener('click', ()=>{
 });
 
 document.getElementById('resetBtn').addEventListener('click', ()=>{
-  if(confirm("Cancellare tutti i best salvati?")){
-    Object.keys(localStorage).filter(k=>k.startsWith("mr.best.")).forEach(k=>localStorage.removeItem(k));
-    loadBest();
+  if(confirm("Cancellare tutti i best/leaderboard salvati?")){
+    Object.keys(localStorage).filter(k=>k.startsWith("mr.best.")||k.startsWith("mr.leader.")).forEach(k=>localStorage.removeItem(k));
+    loadBest(); renderLeader();
   }
 });
 
 document.getElementById('shareBtn').addEventListener('click', async ()=>{
   const url = new URL(location.href);
   url.searchParams.set('seed', currentSeed);
-  const text = `Il mio utile in Margin Rush (${mode}) — Season ${season}: ${scoreEl.textContent}. Prova la stessa partita: ${url.toString()}`;
+  const text = `Il mio UTILE NETTO in Margin Rush (${mode}) — Season ${season}: ${scoreEl.textContent}. Prova la stessa partita: ${url.toString()}`;
   try {
     await navigator.clipboard.writeText(text);
     alert("Copiato negli appunti! Incolla dove vuoi per sfidare altri.");
@@ -327,9 +432,12 @@ document.getElementById('shareBtn').addEventListener('click', async ()=>{
   }
 });
 
+[ivaInclEl,ivaPctEl,fixedCostEl,taxPctEl].forEach(el=>{
+  el.addEventListener('input', updateTotals);
+});
+
 // ---------- Init ----------
 (function init(){
-  // load by seed query ?seed=...
   const url = new URL(location.href);
   const s = url.searchParams.get('seed');
   if(s){

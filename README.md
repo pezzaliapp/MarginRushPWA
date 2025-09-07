@@ -1,25 +1,9 @@
-# Margin Rush — micro-tycoon da 60 secondi (PWA)
+# Margin Rush — v2
 
-**Obiettivo:** massimizzare l’**utile netto** regolando i prezzi di 5 prodotti in **60s**.
+Novità:
+- **IVA e imposte**: scegli se i prezzi sono *IVA inclusa* e imposta l’**IVA %**. L’utile per prodotto usa il **prezzo netto** (al netto IVA). L’utile netto finale è *(Σ utili − costi fissi) × (1 − tax%)*.
+- **Costi fissi** configurabili.
+- **Classifica locale Top‑5** per ogni seed di Season.
+- **Ghost advisor**: evidenzia in oro le righe in cui il prezzo è vicino all’**ottimo** stimato `p* = costo + p₀/ε` (vincoli min/max).
 
-- Ogni prodotto ha **costo**, **domanda di riferimento** \(D₀\), **prezzo di riferimento** \(p₀\) ed **elasticità** \(ε\).
-- La domanda stimata decresce esponenzialmente all’aumentare del prezzo:  
-  \[ D(p) = D_0 \cdot e^{-\varepsilon \cdot \frac{(p - p_0)}{p_0}} \]
-- L’utile per prodotto è \((p - \text{costo}) \times D(p)\).
-
-## Modalità
-- **Season**: parametri settimanali deterministici tramite seed `YYYY-Www`. Confronta il tuo **best** locale.
-- **Practice**: seed casuale (`PRAC-*`), per allenarti senza intaccare la Season.
-
-## Condivisione
-Il pulsante **Condividi** copia un testo con il seed corrente (es. `?seed=2025-W36`) per sfidare amici/colleghi sulla **stessa partita**.
-
-## PWA
-- Offline-first con **service worker**
-- **start_url** locale per GitHub Pages
-- Salvataggio best in `localStorage` come `mr.best.<seed>`
-
-## Deploy rapido
-1. Copia l’intera cartella in una repo GitHub (es. `MarginRushPWA/`).
-2. Abilita GitHub Pages (branch `main`, root).
-3. Apri l’URL: la PWA è installabile da mobile/desktop.
+Resto invariato: Season settimanale deterministica (`YYYY-Www`), Practice libera, share via seed, PWA offline-first.
