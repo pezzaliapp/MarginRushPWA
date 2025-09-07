@@ -1,20 +1,126 @@
-
 <!doctype html>
 <html lang="it">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Margin Rush Pro</title>
+<title>Margin Rush — Micro Tycoon</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b1220">
 <link rel="icon" href="icon-192.png">
+<style>
+  :root{
+    --bg:#0b1220; --card:#111a2e; --ink:#e7eefc; --muted:#b6c3e6;
+    --accent:#6be675; --accent2:#87a7ff; --bad:#ff7a88; --grid:#1c2640;
+    --gold:#ffd166; --bar:#1c2f66; --barFill:#6be675;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  /* Wider container so nothing is cramped on laptop */
+  .wrap{max-width:1320px;margin:0 auto;padding:16px}
+  header{position:sticky;top:0;background:linear-gradient(180deg, rgba(11,18,32,.95), rgba(11,18,32,.75));backdrop-filter: blur(6px);z-index:10}
+  h1{font-size:1.25rem;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:.95rem}
+  .topbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .badge{padding:6px 10px;border:1px solid var(--grid);border-radius:10px;color:var(--muted);white-space:nowrap}
+  .timer{font-weight:700;color:var(--accent)}
+  .score{font-weight:700;color:var(--accent2)}
+  .buttons{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  button{background:#192342;color:var(--ink);border:1px solid var(--grid);padding:8px 12px;border-radius:10px;cursor:pointer}
+  button.primary{background:var(--accent2);color:#0a0f20;border-color:transparent;font-weight:700}
+  button.danger{background:#ff5b6b;color:#0a0f20;border-color:transparent;font-weight:700}
+  main{padding:12px 16px}
+  .card{background:var(--card);border:1px solid var(--grid);border-radius:14px;overflow:visible} /* no clipping */
+  .flex{display:flex;gap:16px;flex-wrap:wrap}
+  .half{flex:1 1 620px}
+  .meta{color:var(--muted);font-size:.95rem}
+  /* Table: enable horizontal scroll and min-width */
+  .tablewrap{overflow-x:auto}
+  table{width:100%;min-width:920px;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid var(--grid);text-align:right;vertical-align:middle}
+  th:nth-child(1), td:nth-child(1){text-align:left;max-width:380px}
+  tr:last-child td{border-bottom:none}
+  input[type=range]{width:200px}
+  .note{background:#0f1730;border:1px dashed var(--grid);border-radius:10px;padding:10px;color:var(--muted)}
+  .opt{color:var(--gold);font-weight:700}
+  .leader li{display:flex;justify-content:space-between;border-bottom:1px solid var(--grid);padding:6px 0}
+  .leader li:last-child{border-bottom:none}
+  .bar{height:10px;background:var(--bar);border-radius:999px;overflow:hidden}
+  .bar>i{display:block;height:100%;width:0;background:var(--barFill)}
+  /* Laptop zoom-safe: reduce font size slightly at 90% width */
+  @media (max-width:1180px){
+    html{font-size:15px}
+    input[type=range]{width:180px}
+  }
+  @media (max-width:1024px){
+    html{font-size:14px}
+    input[type=range]{width:160px}
+  }
+</style>
 </head>
 <body>
-<h1>Margin Rush Pro</h1>
-<p>Build completa v3 Pro con modello logit, quantità reali e pannello IVA mobile.</p>
-<script>
-// Placeholder: la logica è quella già fornita nella descrizione.
-console.log("Margin Rush Pro loaded");
-</script>
+<header>
+  <div class="wrap">
+    <h1>Margin Rush <span style="padding:2px 8px;border:1px solid var(--grid);border-radius:999px;background:#122042;color:var(--muted)">micro-tycoon</span></h1>
+    <div class="sub">Massimizza l'<b>utile netto</b> regolando i prezzi in <b>60 secondi</b>. Season condivisibile e Practice.</div>
+    <div class="topbar">
+      <div class="badge">Season: <span id="seasonLabel">—</span></div>
+      <div class="badge">Modalità: <span id="modeEcho">Season</span></div>
+      <div class="badge">Tempo: <span class="timer" id="timeLeft">60</span>s</div>
+      <div class="badge">Utile netto: <span class="score" id="score">0</span> €</div>
+      <div class="badge">Best stagione: <span id="best">0</span> €</div>
+      <div class="buttons">
+        <button class="primary">Start</button>
+        <button>Retry</button>
+        <button>Practice</button>
+        <button>Condividi</button>
+        <button class="danger">Reset dati</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="flex">
+    <section class="half card">
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Prodotto</th><th>Cost (€)</th><th>Prezzo (€)</th><th>Domanda</th><th>Utile</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Alpha 1<div class="meta">ε=1.23 · D₀=120 @ p₀=30 € · <span class="opt">p*≈40 €</span></div></td>
+              <td>25,00 €</td>
+              <td><input type="range"><span>40,00 €</span></td>
+              <td><div class="bar" style="width:160px"><i style="width:60%"></i></div></td>
+              <td>540,00 €</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="4" style="text-align:right;font-weight:700">Totale lordo</td><td style="font-weight:700">0 €</td></tr>
+            <tr><td colspan="5" style="padding:0;border-bottom:none">
+              <div style="display:grid;grid-template-columns: repeat(2,minmax(260px,1fr));gap:10px;padding:10px">
+                <label class="meta">Prezzi IVA inclusa? <input type="checkbox"></label>
+                <label class="meta">IVA (%) <input type="number" value="22" style="width:90px"></label>
+                <label class="meta">Costi fissi (€) <input type="number" value="0" style="width:140px"></label>
+                <label class="meta">Aliquota imposta utile (%) <input type="number" value="0" style="width:90px"></label>
+              </div>
+            </td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+    <section class="half card" style="padding:12px">
+      <h3 style="margin-top:0">Legenda & Come si gioca</h3>
+      <ul class="meta">
+        <li><b>Scopo:</b> sposta gli slider dei prezzi per massimizzare l’utile netto.</li>
+        <li><b>Barra domanda:</b> più piena = più unità vendute.</li>
+      </ul>
+      <div class="note">D(p)=D₀·e<sup>−ε(p−p₀)/p₀</sup>. Se “Prezzi IVA inclusa?” è attivo, l’utile usa il prezzo <u>netto</u>.</div>
+    </section>
+  </div>
+</main>
 </body>
 </html>

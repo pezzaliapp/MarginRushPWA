@@ -1,6 +1,6 @@
 {
-  "name": "Margin Rush Pro",
-  "short_name": "MR Pro",
+  "name": "Margin Rush",
+  "short_name": "MarginRush",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0b1220",
