@@ -1,45 +1,52 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<title>Margin Rush — v4.1 Market Duel (Bandit AI)</title>
-<meta name="theme-color" content="#0b1220">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1" />
+<title>Margin Rush — v4.2 Market Duel (Bandit AI)</title>
+<meta name="theme-color" content="#0b1220" />
 <style>
-  :root{--bg:#0b1220;--card:#0f1930;--ink:#eaf0ff;--muted:#b9c7eb;--grid:#1f2d4f;--accent:#87a7ff;--good:#6be675;--bad:#ff7a88;}
-  *{box-sizing:border-box} html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-  header{position:sticky;top:0;z-index:30;background:linear-gradient(180deg, rgba(11,18,32,.96), rgba(11,18,32,.82));backdrop-filter: blur(6px)}
-  .wrap{max-width:1200px;margin:0 auto;padding:14px}
-  h1{margin:0;font-size:1.25rem}.pill{display:inline-block;padding:2px 8px;border:1px solid var(--grid);border-radius:999px;background:#132046;color:#cfe}
-  .top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}
-  .badge{padding:6px 10px;border:1px solid var(--grid);border-radius:10px;color:#c8d4f6;background:#0c1630}
-  button{background:#1a2647;color:var(--ink);border:1px solid var(--grid);padding:10px 14px;border-radius:12px;cursor:pointer}
-  button.primary{background:var(--accent);color:#0a1025;border:none;font-weight:700}
-  button.danger{background:#ff5b6b;color:#0a1025;border:none;font-weight:700}
-  main{padding:14px}
-  .grid{display:grid;grid-template-columns:1.15fr 1fr;gap:14px;align-items:start}
-  .card{background:var(--card);border:1px solid var(--grid);border-radius:14px;overflow:hidden}
-  .card h3{margin:0;padding:10px;border-bottom:1px solid var(--grid)}
-  .section{padding:10px}
-  table{width:100%;border-collapse:collapse}
-  th,td{padding:10px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric: tabular-nums}
-  th:first-child, td:first-child{text-align:left}
-  .kpi{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:8px}
-  .kpi .box{padding:10px;border:1px solid var(--grid);border-radius:12px;background:#0c1530}
-  .gain{color:var(--good)} .loss{color:#ffb0ba} .note{color:var(--muted);font-size:.92rem}
-  @media (max-width:1100px){.grid{grid-template-columns:1fr}.kpi{grid-template-columns:repeat(2,1fr)}}
-  @media (max-width:760px){html{font-size:15px} th,td{padding:8px} .badge{padding:5px 8px} button{padding:9px 12px}}
+:root{--bg:#0b1220;--card:#0f1930;--ink:#eaf0ff;--muted:#b9c7eb;--grid:#1f2d4f;--accent:#87a7ff;--good:#6be675;--bad:#ff7a88;--warn:#ffd166;}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{position:sticky;top:0;z-index:30;background:linear-gradient(180deg,rgba(11,18,32,.96),rgba(11,18,32,.82));backdrop-filter:blur(6px)}
+.wrap{max-width:1200px;margin:0 auto;padding:14px}
+h1{margin:0;font-size:1.25rem}.pill{display:inline-block;padding:2px 8px;border:1px solid var(--grid);border-radius:999px;background:#132046;color:#cfe}
+.top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.badge{padding:6px 10px;border:1px solid var(--grid);border-radius:10px;background:#0c1630;color:#c8d4f6;white-space:nowrap}
+button{background:#1a2647;color:var(--ink);border:1px solid var(--grid);padding:10px 14px;border-radius:12px;cursor:pointer}
+button.primary{background:var(--accent);color:#0a1025;border:none;font-weight:700}
+button.danger{background:#ff5b6b;color:#0a1025;border:none;font-weight:700}
+main{padding:14px}
+.grid{display:grid;grid-template-columns:1.15fr 1fr;gap:14px;align-items:start}
+.card{background:var(--card);border:1px solid var(--grid);border-radius:14px;overflow:hidden}
+.card h3{margin:0;padding:10px;border-bottom:1px solid var(--grid)}
+.section{padding:10px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:8px}
+.kpi .box{padding:10px;border:1px solid var(--grid);border-radius:12px;background:#0c1530}
+.note{color:#a9b6db;font-size:.92rem}
+.gain{color:var(--good)} .loss{color:#ffb0ba}
+.log{max-height:260px;overflow:auto;border-top:1px solid var(--grid);background:#0c1630}
+.log-item{display:flex;gap:8px;align-items:center;border-bottom:1px dashed #1e2a4e;padding:8px 10px}
+.dot{width:8px;height:8px;border-radius:999px;background:var(--warn)}
+.log-item .who{min-width:160px;color:#cfe}
+.log-item .what{color:#dfe6ff}
+@media (max-width:1100px){.grid{grid-template-columns:1fr}.kpi{grid-template-columns:repeat(2,1fr)} .log-item .who{min-width:auto}}
+@media (max-width:760px){html{font-size:15px} th,td{padding:8px} .badge{padding:5px 8px} button{padding:9px 12px}}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <h1>Margin Rush <span class="pill">v4.1 — Market Duel • Bandit AI</span></h1>
+    <h1>Margin Rush <span class="pill">v4.2 — Market Duel • Bandit AI</span></h1>
     <div class="top">
       <div class="badge">Giorno: <b id="day">1</b>/10</div>
-      <div class="badge">Cassa: <b id="cash">0 €</b></div>
+      <div class="badge">Cassa: <b id="cash">€5.000,00</b></div>
       <div class="badge">Quota oggi: <b id="share">0%</b></div>
-      <div class="badge">Utile cumulato: <b id="cumprofit">0 €</b></div>
+      <div class="badge">Utile cumulato: <b id="cumprofit">€0,00</b></div>
       <button id="advance" class="primary">Avanza giorno</button>
       <button id="reset" class="danger">Nuova partita</button>
     </div>
@@ -57,32 +64,38 @@
           <div class="box">β sensibilità: <b id="betaEcho">0.080</b></div>
           <div class="box">Capienza: <b id="capEcho">1000</b></div>
         </div>
-        <div class="note" style="margin-top:6px">Scelta domanda = logit su Prezzo e Appeal (Q,B,S). <b>Comp C</b> usa <b>bandit ε-greedy</b> per apprendere mosse che massimizzano la sua quota.</div>
+        <div class="note" style="margin-top:6px">
+          La domanda sceglie con logit in base a <b>Prezzo</b> e appeal <b>Q</b>/<b>B</b>/<b>S</b>.
+          <br/>Vedi sotto le <b>caratteristiche</b> di ogni offerta e il <b>log delle mosse</b> di giornata.
+        </div>
         <table id="tbl">
-          <thead><tr><th>Offerta</th><th>Prezzo</th><th>Q</th><th>B</th><th>S</th><th>Quota</th><th>Unità</th><th>Δ vs ieri</th></tr></thead>
+          <thead>
+            <tr><th>Offerta</th><th>Prezzo</th><th>Q</th><th>B</th><th>S</th><th>Quota</th><th>Unità</th><th>Δ vs ieri</th></tr>
+          </thead>
           <tbody></tbody>
         </table>
       </div>
+      <div class="log" id="log"></div>
     </div>
 
     <div class="card">
       <h3>Leve & Pianificazione</h3>
       <div class="section">
-        <div class="note">Imposta <b>Prezzo</b> e gli <b>Investimenti</b>. Q e B durano 3 giorni; S è permanente.</div>
+        <div class="note">Imposta <b>Prezzo</b> e gli <b>Investimenti</b>. Q e B durano 3 giorni (buff), S è permanente.</div>
         <table>
-          <tr><td style="text-align:left">Prezzo nostro</td><td><input id="price" type="range" min="5" max="120" step="0.5"></td><td width="90"><b id="priceEcho">0 €</b></td></tr>
-          <tr><td style="text-align:left">Investi in Qualità (Q)</td><td><input id="invQ" type="range" min="0" max="3" step="1"></td><td><b id="invQEcho">0</b></td></tr>
-          <tr><td style="text-align:left">Investi in Brand (B)</td><td><input id="invB" type="range" min="0" max="3" step="1"></td><td><b id="invBEcho">0</b></td></tr>
-          <tr><td style="text-align:left">Investi in Servizio (S)</td><td><input id="invS" type="range" min="0" max="2" step="1"></td><td><b id="invSEcho">0</b></td></tr>
-          <tr><td style="text-align:left">Capienza (ordini/g)</td><td><input id="cap" type="range" min="300" max="3000" step="50"></td><td><b id="capVal">1000</b></td></tr>
+          <tr><td style="text-align:left">Prezzo nostro</td><td><input id="price" type="range" min="5" max="120" step="0.5" /></td><td width="90"><b id="priceEcho">€49,00</b></td></tr>
+          <tr><td style="text-align:left">Investi in Qualità (Q)</td><td><input id="invQ" type="range" min="0" max="3" step="1" /></td><td><b id="invQEcho">0</b></td></tr>
+          <tr><td style="text-align:left">Investi in Brand (B)</td><td><input id="invB" type="range" min="0" max="3" step="1" /></td><td><b id="invBEcho">0</b></td></tr>
+          <tr><td style="text-align:left">Investi in Servizio (S)</td><td><input id="invS" type="range" min="0" max="2" step="1" /></td><td><b id="invSEcho">0</b></td></tr>
+          <tr><td style="text-align:left">Capienza (ordini/g)</td><td><input id="cap" type="range" min="300" max="3000" step="50" /></td><td><b id="capVal">1000</b></td></tr>
         </table>
-        <div class="note" style="margin-top:6px">Costi: Q=€300/step (3gg), B=€250/step (3gg), S=€200/step (permanente), Capienza=€0.2/punto. Fissi: €500/g. Costo unitario: €8 + €2·Q.</div>
-        <hr style="border-color:var(--grid)">
+        <div class="note" style="margin-top:6px">Costi: Q=€300/step (3gg), B=€250/step (3gg), S=€200/step (permanente), Capienza=€0,2/punto. Fissi: €500/g. Costo unitario: €8 + €2·Q. IVA opzionale.</div>
+        <hr style="border-color:var(--grid)" />
         <div class="kpi">
-          <div class="box">IVA incl.? <input type="checkbox" id="iva" checked></div>
-          <div class="box">IVA % <input type="number" id="ivaPct" value="22" min="0" max="100" step="0.1" style="width:70px"></div>
-          <div class="box">β <input type="number" id="beta" value="0.08" step="0.005" style="width:80px"></div>
-          <div class="box">Stag. % <input type="number" id="season" value="0" step="1" style="width:70px"></div>
+          <div class="box">IVA incl.? <input type="checkbox" id="iva" checked /></div>
+          <div class="box">IVA % <input type="number" id="ivaPct" value="22" min="0" max="100" step="0.1" style="width:70px" /></div>
+          <div class="box">β <input type="number" id="beta" value="0.08" step="0.005" style="width:80px" /></div>
+          <div class="box">Stag. % <input type="number" id="season" value="0" step="1" style="width:70px" /></div>
         </div>
       </div>
     </div>
@@ -94,7 +107,7 @@
       <div class="kpi">
         <div class="box">Unità nostre: <b id="qMe">0</b></div>
         <div class="box">Quota nostra: <b id="sMe">0%</b></div>
-        <div class="box">Utile netto giorno: <b id="pMe">0 €</b></div>
+        <div class="box">Utile netto giorno: <b id="pMe">€0,00</b></div>
         <div class="box">Clienti spostati (Δ vs comp): <b id="moved">0</b></div>
       </div>
       <div class="note" style="margin-top:8px">Breakdown Δ stimato (clienti): Prezzo <b id="bp">0</b> · Q <b id="bq">0</b> · B <b id="bb">0</b> · S <b id="bs">0</b></div>
@@ -103,145 +116,159 @@
 </main>
 
 <script>
-// ---------- Utilities
+/* ==== Util ===== */
 const euro = n => (Math.round(n*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
-const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
 
-// ---------- State
+/* ==== Stato di gioco ===== */
 let day=1, daysMax=10;
-let M=1200, beta=0.08, season=0;
+let M=1200, beta=0.08, season=0;    // mercato e sensibilità
 let ivaIncl=true, ivaPct=0.22;
 let cap=1000;
 let cash=5000, cumProfit=0;
-let our = {name:"Noi", p:49, Q:1, B:1, S:1, Qbuff:0, Bbuff:0, QbuffDays:0, BbuffDays:0};
-let comps = [
+
+const logEl=document.getElementById('log');
+function pushLog(who,what){
+  const div=document.createElement('div'); div.className='log-item';
+  div.innerHTML=`<span class="dot"></span><span class="who">${who}</span><span class="what">${what}</span>`;
+  logEl.prepend(div); while(logEl.children.length>20){ logEl.lastChild.remove(); }
+}
+
+let our={name:"Noi", p:49, Q:1, B:1, S:1, Qbuff:0, Bbuff:0, QbuffDays:0, BbuffDays:0};
+
+let comps=[
   {name:"Comp A (Price-war)", p:45, Q:1, B:1, S:1, strat:"price"},
   {name:"Comp B (Premium)",   p:70, Q:2, B:2, S:2, strat:"premium"},
   {name:"Comp C (Bandit)",    p:52, Q:1, B:1, S:1, strat:"bandit",
-   actions:[
-     {dp:-0.10, dQ:0, dB:0, dS:0, name:"Price -10%"},
-     {dp:-0.05, dQ:0, dB:0, dS:0, name:"Price -5%"},
-     {dp:0.00,  dQ:0, dB:1, dS:0, name:"+Brand"},
-     {dp:0.00,  dQ:1, dB:0, dS:0, name:"+Quality"},
-     {dp:+0.05, dQ:0, dB:0, dS:1, name:"+Service & Price +5%"}
-   ],
-   Qvals:[0,0,0,0,0], N:[0,0,0,0,0], epsilon:0.25, lastShare:0
+    actions:[
+      {dp:-0.10, dQ:0, dB:0, dS:0, name:"Price −10%"},
+      {dp:-0.05, dQ:0, dB:0, dS:0, name:"Price −5%"},
+      {dp:0.00,  dQ:0, dB:1, dS:0, name:"+Brand"},
+      {dp:0.00,  dQ:1, dB:0, dS:0, name:"+Quality"},
+      {dp:+0.05, dQ:0, dB:0, dS:1, name:"+Service & Price +5%"}
+    ],
+    Qvals:[0,0,0,0,0], N:[0,0,0,0,0], epsilon:0.25
   }
 ];
 
-// ---------- DOM
-const els = {
-  day:document.getElementById('day'), cash:document.getElementById('cash'), share:document.getElementById('share'), cum:document.getElementById('cumprofit'),
-  price:document.getElementById('price'), priceEcho:document.getElementById('priceEcho'),
-  invQ:document.getElementById('invQ'), invQEcho:document.getElementById('invQEcho'),
-  invB:document.getElementById('invB'), invBEcho:document.getElementById('invBEcho'),
-  invS:document.getElementById('invS'), invSEcho:document.getElementById('invSEcho'),
-  cap:document.getElementById('cap'), capVal:document.getElementById('capVal'), capEcho:document.getElementById('capEcho'),
-  beta:document.getElementById('beta'), betaEcho:document.getElementById('betaEcho'),
-  season:document.getElementById('season'), seasonEcho:document.getElementById('seasonEcho'),
-  iva:document.getElementById('iva'), ivaPct:document.getElementById('ivaPct'),
+/* ==== DOM ==== */
+const els={
+  day:$('#day'), cash:$('#cash'), share:$('#share'), cum:$('#cumprofit'),
+  price:$('#price'), priceEcho:$('#priceEcho'),
+  invQ:$('#invQ'), invQEcho:$('#invQEcho'),
+  invB:$('#invB'), invBEcho:$('#invBEcho'),
+  invS:$('#invS'), invSEcho:$('#invSEcho'),
+  cap:$('#cap'), capVal:$('#capVal'), capEcho:$('#capEcho'),
+  beta:$('#beta'), betaEcho:$('#betaEcho'),
+  season:$('#season'), seasonEcho:$('#seasonEcho'),
+  iva:$('#iva'), ivaPct:$('#ivaPct'),
   tbl:document.querySelector('#tbl tbody'),
-  qMe:document.getElementById('qMe'), sMe:document.getElementById('sMe'), pMe:document.getElementById('pMe'), moved:document.getElementById('moved'),
-  bp:document.getElementById('bp'), bq:document.getElementById('bq'), bb:document.getElementById('bb'), bs:document.getElementById('bs'),
-  M:document.getElementById('M'), advance:document.getElementById('advance'), reset:document.getElementById('reset')
+  qMe:$('#qMe'), sMe:$('#sMe'), pMe:$('#pMe'), moved:$('#moved'),
+  bp:$('#bp'), bq:$('#bq'), bb:$('#bb'), bs:$('#bs'),
+  M:$('#M'), advance:$('#advance'), reset:$('#reset')
 };
+function $(id){return document.getElementById(id)}
 
-// ---------- Model
+/* ==== Modello logit ===== */
 function shares(players){
   const seasonBoost = season/100;
-  const U = players.map(obj=>{
-    const base = 0.6 + (obj.B-1)*0.15 + (obj.Q-1)*0.2;
-    const price = -beta * obj.p;
-    const q = 0.25*(obj.Q-1) + 0.25*(obj.Qbuff||0);
-    const b = 0.20*(obj.B-1) + 0.20*(obj.Bbuff||0);
-    const s = 0.15*(obj.S-1);
-    const shock = seasonBoost * (0.1 + 0.2*(obj.B-1));
+  const U = players.map(o=>{
+    const base = 0.6 + (o.B-1)*0.15 + (o.Q-1)*0.2;
+    const price = -beta * o.p;
+    const q = 0.25*(o.Q-1) + 0.25*(o.Qbuff||0);
+    const b = 0.20*(o.B-1) + 0.20*(o.Bbuff||0);
+    const s = 0.15*(o.S-1);
+    const shock = seasonBoost * (0.1 + 0.2*(o.B-1));
     return base + price + q + b + s + shock;
   });
-  const mx = Math.max.apply(null, U);
-  const exps = U.map(u=>Math.exp(u-mx));
-  const sum = exps.reduce((a,b)=>a+b,0);
-  return exps.map(e=>e/sum);
+  const mx=Math.max(...U), exps=U.map(u=>Math.exp(u-mx));
+  const sum=exps.reduce((a,b)=>a+b,0); return exps.map(e=>e/sum);
 }
 const costUnit = Q => 8 + 2*Q;
-const netPrice = p => ivaIncl? p/(1+ivaPct) : p;
+const netPrice = p => ivaIncl ? p/(1+ivaPct) : p;
 
-// ---------- Bandit AI (ε-greedy)
+/* ==== Bandit AI (ε-greedy) ==== */
 function banditChoose(c){
-  const k = c.actions.length;
+  const k=c.actions.length;
   if(Math.random() < c.epsilon) return Math.floor(Math.random()*k);
-  let best=0; for(let i=1;i<k;i++){ if(c.Qvals[i]>c.Qvals[best]) best=i; } return best;
+  let best=0; for(let i=1;i<k;i++) if(c.Qvals[i]>c.Qvals[best]) best=i; return best;
 }
 function banditUpdate(c, aIdx, reward){
-  c.N[aIdx] += 1;
-  const n = c.N[aIdx];
+  c.N[aIdx]+=1; const n=c.N[aIdx];
   c.Qvals[aIdx] = c.Qvals[aIdx] + (reward - c.Qvals[aIdx]) / n;
   c.epsilon = Math.max(0.05, c.epsilon*0.98);
 }
+
+/* ==== Mosse competitor (con log) ==== */
 function compMove(c){
   if(c.strat==='price'){
     const target = Math.max(12, our.p*0.95);
-    c.p = clamp((c.p*0.6 + target*0.4), 10, 120);
+    const prev=c.p; c.p = clamp((c.p*0.6 + target*0.4), 10, 120);
+    pushLog(c.name, `prezzo ${euro(prev)} → ${euro(c.p)}`);
   }else if(c.strat==='premium'){
-    if(day%2===0 && Math.random()<0.6){ c.B = clamp(c.B+1,1,5); } else if(Math.random()<0.5){ c.Q = clamp(c.Q+1,1,5); }
-    c.p = clamp(c.p*1.01, 30, 140);
+    let what=[]; if(day%2===0 && Math.random()<0.6){ c.B = clamp(c.B+1,1,5); what.push("+Brand"); }
+    else if(Math.random()<0.5){ c.Q = clamp(c.Q+1,1,5); what.push("+Quality"); }
+    const prev=c.p; c.p = clamp(c.p*1.01, 30, 140);
+    pushLog(c.name, `${what.join(" ")} · prezzo ${euro(prev)} → ${euro(c.p)}`);
   }else if(c.strat==='bandit'){
-    const before = shares([our].concat(comps))[2]; // quota attuale
-    const idx = banditChoose(c);
-    const a = c.actions[idx];
-    // applica azione
+    // reward = Δ quota stimato dalla mossa
+    const before = shares([our].concat(comps))[2];
+    const aIdx = banditChoose(c), a=c.actions[aIdx];
+    const prev = {p:c.p,Q:c.Q,B:c.B,S:c.S};
     c.p = clamp(c.p*(1+a.dp), 10, 140);
     if(a.dQ) c.Q = clamp(c.Q + a.dQ, 1, 5);
     if(a.dB) c.B = clamp(c.B + a.dB, 1, 5);
     if(a.dS) c.S = clamp(c.S + a.dS, 1, 5);
     const after = shares([our].concat(comps))[2];
-    banditUpdate(c, idx, after - before);
+    banditUpdate(c, aIdx, after - before);
+    pushLog(c.name, `${a.name} · ${euro(prev.p)} → ${euro(c.p)} · Q${prev.Q}→${c.Q} · B${prev.B}→${c.B} · S${prev.S}→${c.S}`);
   }
 }
 
-// ---------- UI helpers
+/* ==== UI ===== */
 function renderTable(q=null,s=null){
   const rows=[our].concat(comps).map((p,i)=>{
-    const quota=(s? (s[i]*100).toFixed(1)+'%' : '—');
-    const units=(q? q[i].toLocaleString('it-IT') : '—');
-    const d=(i===0 && q? q[0] - (window.prevQ||0) : 0);
+    const name = i===0 ? "Noi" : p.name;
+    const quota = s ? (s[i]*100).toFixed(1)+'%' : '—';
+    const units = q ? q[i].toLocaleString('it-IT') : '—';
+    const delta = (i===0 && q) ? (q[0] - (window.prevQ||0)) : 0;
     return `<tr>
-      <td>${p.name}</td>
+      <td>${name}</td>
       <td>${euro(p.p)}</td>
-      <td>${p.Q + (p.Qbuff?` (+${p.Qbuff})`:'')}</td>
-      <td>${p.B + (p.Bbuff?` (+${p.Bbuff})`:'')}</td>
+      <td>${p.Q}${p.Qbuff?` (+${p.Qbuff})`:''}</td>
+      <td>${p.B}${p.Bbuff?` (+${p.Bbuff})`:''}</td>
       <td>${p.S}</td>
       <td>${quota}</td>
       <td>${units}</td>
-      <td>${i===0 && q? (d>=0?'<span class="gain">+'+d+'</span>':'<span class="loss">'+d+'</span>') : ''}</td>
+      <td>${i===0 && q ? (delta>=0?'<span class="gain">+'+delta+'</span>':'<span class="loss">'+delta+'</span>') : ''}</td>
     </tr>`;
-  }).join('');
+  }).join("");
   els.tbl.innerHTML=rows;
   if(q) window.prevQ=q[0];
 }
-
 function refreshEcho(){
-  els.priceEcho.textContent = euro(parseFloat(els.price.value));
-  els.invQEcho.textContent = els.invQ.value;
-  els.invBEcho.textContent = els.invB.value;
-  els.invSEcho.textContent = els.invS.value;
-  els.capVal.textContent = els.cap.value;
-  els.M.textContent = M;
-  els.betaEcho.textContent = (+els.beta.value).toFixed(3);
-  els.seasonEcho.textContent = (season>=0?'+':'')+season+'%';
-  els.capEcho.textContent = cap;
-  els.cash.textContent = euro(cash);
-  els.cumprofit.textContent = euro(cumProfit);
+  els.priceEcho.textContent=euro(parseFloat(els.price.value));
+  els.invQEcho.textContent=els.invQ.value;
+  els.invBEcho.textContent=els.invB.value;
+  els.invSEcho.textContent=els.invS.value;
+  els.capVal.textContent=els.cap.value;
+  els.M.textContent=M;
+  els.betaEcho.textContent=(+els.beta.value).toFixed(3);
+  els.seasonEcho.textContent=(season>=0?'+':'')+season+'%';
+  els.capEcho.textContent=cap;
+  els.cash.textContent=euro(cash);
+  els.cum.textContent=euro(cumProfit);
+  document.getElementById('cumprofit').textContent=euro(cumProfit);
 }
 
-// ---------- Investments
+/* ==== Investimenti ===== */
 let investCost=0;
 function calcInvestCost(){
   const iQ=parseInt(els.invQ.value||'0',10);
   const iB=parseInt(els.invB.value||'0',10);
   const iS=parseInt(els.invS.value||'0',10);
   const capTarget=parseInt(els.cap.value||cap,10);
-  const capDelta=Math.max(0, capTarget - cap);
+  const capDelta=Math.max(0, capTarget-cap);
   investCost = iQ*300 + iB*250 + iS*200 + capDelta*0.2;
   return {iQ,iB,iS,capDelta};
 }
@@ -249,43 +276,42 @@ function applyInvestments(){
   const {iQ,iB,iS,capDelta} = calcInvestCost();
   if(investCost>cash){ alert('Cassa insufficiente per questo piano di investimenti.'); return false; }
   cash -= investCost;
-  if(iQ>0){ our.Qbuff += iQ*0.5; our.QbuffDays = 3; }
-  if(iB>0){ our.Bbuff += iB*0.5; our.BbuffDays = 3; }
-  if(iS>0){ our.S = clamp(our.S + iS, 1, 5); }
-  if(capDelta>0){ cap += capDelta; }
+  if(iQ>0){ our.Qbuff += iQ*0.5; our.QbuffDays=3; pushLog("Noi", `Investimento Q +${iQ*0.5} (3gg) · costo ${euro(iQ*300)}`); }
+  if(iB>0){ our.Bbuff += iB*0.5; our.BbuffDays=3; pushLog("Noi", `Investimento B +${iB*0.5} (3gg) · costo ${euro(iB*250)}`); }
+  if(iS>0){ our.S = clamp(our.S+iS,1,5); pushLog("Noi", `Servizio +${iS} · costo ${euro(iS*200)}`); }
+  if(capDelta>0){ cap += capDelta; pushLog("Noi", `Capienza +${capDelta} · costo ${euro(capDelta*0.2)}`); }
   els.invQ.value=0; els.invB.value=0; els.invS.value=0; els.cap.value=cap;
-  refreshEcho();
-  return true;
+  refreshEcho(); return true;
 }
 
-// ---------- Day simulation
+/* ==== Simulazione giorno ===== */
 function simulateDay(){
   our.p = parseFloat(els.price.value);
-  // quote
   const players=[our].concat(comps);
-  const s = shares(players);
+  const s=shares(players);
   const marketToday = Math.round(M * (1 + season/100));
-  const q = s.map(x=>Math.round(x*marketToday));
-  // capienza
-  q[0] = Math.min(q[0], cap);
-  // profit
+  const q=s.map(x=>Math.round(x*marketToday));
+  // capienza nostra
+  q[0]=Math.min(q[0],cap);
+  // profitti
   const rev = netPrice(our.p)*q[0];
-  const cost = costUnit(our.Q)*q[0];
+  const cost = (8 + 2*(our.Q)) * q[0];
   const fixed = 500;
   const profit = rev - cost - fixed;
-  cash += profit;
-  cumProfit += profit;
-  // breakdown (approssimato)
+  cash += profit; cumProfit += profit;
+
+  // breakdown semplice
   const nearest = comps.reduce((a,c)=> Math.abs(c.p-our.p) < Math.abs(a.p-our.p) ? c : a, comps[0]);
-  const s_vs_price = shares([{...our,p:nearest.p}].concat(comps))[0];
-  const d_price = Math.round((s[0]-s_vs_price)*marketToday);
-  const d_q = Math.round(0.5*our.Qbuff*marketToday*0.01);
-  const d_b = Math.round(0.5*our.Bbuff*marketToday*0.008);
+  const s_vs = shares([{...our,p:nearest.p}].concat(comps))[0];
+  const d_price = Math.round((s[0]-s_vs)*marketToday);
+  const d_q = Math.round((our.Qbuff||0)*0.5*marketToday*0.01);
+  const d_b = Math.round((our.Bbuff||0)*0.5*marketToday*0.008);
   const d_s = Math.round((our.S-1)*marketToday*0.002);
-  // buffs decay
+
+  // decay buff
   if(our.QbuffDays>0){ our.QbuffDays--; if(our.QbuffDays===0) our.Qbuff=0; }
   if(our.BbuffDays>0){ our.BbuffDays--; if(our.BbuffDays===0) our.Bbuff=0; }
-  // UI
+
   renderTable(q,s);
   els.qMe.textContent=q[0].toLocaleString('it-IT');
   els.sMe.textContent=(s[0]*100).toFixed(1)+'%';
@@ -294,36 +320,35 @@ function simulateDay(){
   els.bp.textContent=(d_price>=0?'+':'')+d_price; els.bq.textContent='+'+d_q; els.bb.textContent='+'+d_b; els.bs.textContent='+'+d_s;
   els.share.textContent=(s[0]*100).toFixed(1)+'%';
   els.cash.textContent=euro(cash);
-  els.cumprofit.textContent=euro(cumProfit);
+  document.getElementById('cumprofit').textContent=euro(cumProfit);
 }
 
-// ---------- Init
-els.price.value=our.p; els.cap.value=cap;
-refreshEcho(); renderTable();
+/* ==== Init + bindings ===== */
+els.price.value=our.p; els.cap.value=cap; refreshEcho(); renderTable();
 
 ['input','change'].forEach(ev=>{
   ['price','invQ','invB','invS','cap'].forEach(id=> els[id].addEventListener(ev, refreshEcho));
-  els.beta.addEventListener(ev, ()=>{ beta=parseFloat(els.beta.value); refreshEcho(); });
-  els.season.addEventListener(ev, ()=>{ season=parseInt(els.season.value,10); refreshEcho(); });
+  els.beta.addEventListener(ev, ()=>{ beta=parseFloat(els.beta.value); els.betaEcho.textContent=beta.toFixed(3); });
+  els.season.addEventListener(ev, ()=>{ season=parseInt(els.season.value,10); els.seasonEcho.textContent=(season>=0?'+':'')+season+'%'; });
   els.iva.addEventListener(ev, ()=>{ ivaIncl=els.iva.checked; });
   els.ivaPct.addEventListener(ev, ()=>{ ivaPct=parseFloat(els.ivaPct.value)/100; });
 });
 
-// ---------- Turn button
-els.advance.addEventListener('click', ()=>{
+document.getElementById('advance').addEventListener('click', ()=>{
+  // applica i nostri investimenti
   if(!applyInvestments()) return;
-  // mosse competitor
+  // mosse competitor (loggate)
   comps.forEach(compMove);
-  // simula
+  // domanda e risultati
   simulateDay();
-  // next
-  day++; els.day.textContent=day;
-  if(day>daysMax){
-    alert('Partita finita! Utile cumulato: '+euro(cumProfit)+' — Quota ultimo giorno: '+document.getElementById('sMe').textContent);
+  // avanza giorno
+  day+=1; els.day.textContent=day;
+  if(day>10){
+    alert('Partita finita! Utile cumulato: '+document.getElementById('cumprofit').textContent+' — Quota ultimo giorno: '+document.getElementById('sMe').textContent);
     location.reload();
   }
 });
-els.reset.addEventListener('click', ()=> location.reload());
+document.getElementById('reset').addEventListener('click', ()=>location.reload());
 </script>
 </body>
 </html>
