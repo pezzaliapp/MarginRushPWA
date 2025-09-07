@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><title>README — Margin Rush v4</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#0b1220;margin:20px;max-width:900px} h1,h2,h3{color:#0b1220} code,pre{background:#f6f7fb;padding:2px 6px;border-radius:6px} .tag{display:inline-block;background:#eef1ff;color:#334; padding:2px 8px;border-radius:999px;border:1px solid #ccd}</style></head>
+<body>
+<h1>Margin Rush — <span class="tag">v4 Market Duel</span></h1>
+<p><strong>Obiettivo:</strong> battere 3 competitor su <strong>10 giorni</strong> massimizzando <strong>utile cumulato</strong> e quota. Turni <strong>manuali</strong>.</p>
+<h2>Modello</h2>
+<ul>
+<li>Domanda logit: <code>U = α − β·p + wQ·Q + wS·S + wB·B + ξ</code></li>
+<li>Quota <code>s = exp(U)/Σexp(U)</code> → Unità <code>q = M·s</code></li>
+<li>Costo unitario <code>c(Q) = 8 + 2·Q</code>, fissi 500/g, IVA opzionale.</li>
+</ul>
+<h2>Leve</h2>
+<ul>
+<li>Prezzo</li>
+<li>Qualità (Q) — buff 3 giorni, €300/step</li>
+<li>Brand (B) — buff 3 giorni, €250/step</li>
+<li>Servizio (S) — permanente, €200/step</li>
+<li>Capienza — €0.2/punto</li>
+</ul>
+<h2>Competitor</h2>
+<ul>
+<li>Price-war: segue il tuo prezzo (~−5%)</li>
+<li>Premium: prezzo alto + investe in Brand/Qualità</li>
+<li>Follower: smoothing sul tuo prezzo, Brand occasionale</li>
+</ul>
+<h2>Turno</h2>
+<ol>
+<li>Imposta prezzo e investimenti</li>
+<li>Clicca <em>Avanza giorno</em></li>
+<li>I competitor reagiscono</li>
+<li>Vedi Unità, Quota, Utile + <strong>Δ clienti vs competitor</strong> e <strong>breakdown</strong> (Prezzo, Q, B, S)</li>
+</ol>
+<h2>PWA</h2>
+<p>Offline-first. Cache: <code>mr-v4-duel</code>.</p>
+</body></html>
