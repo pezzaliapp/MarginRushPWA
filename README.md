@@ -1,43 +1,69 @@
+# Margin Rush — v4.9 Pro
 
-# Margin Rush — v4 *Market Duel*
+**Margin Rush** è una Progressive Web App (PWA) che simula la competizione in un mercato globale.  
+L’obiettivo è ottimizzare prezzo, qualità, brand e servizio per massimizzare l’utile netto e battere i concorrenti.
 
-**Obiettivo:** battere 3 competitor su **10 giorni** massimizzando **utile cumulato** e quotazione. Turni **manuali**: pianifica, **Avanza giorno**, osserva le mosse rivali e adatta la strategia.
+## ✨ Funzionalità principali
+- **Simulazione di mercato** con domanda variabile e tre competitor:
+  - *Comp A* — Price-war (guerra di prezzi)
+  - *Comp B* — Premium (alto valore percepito)
+  - *Comp C* — Bandit AI (algoritmo adattivo ε-greedy)
+- **Leve decisionali**:
+  - Prezzo di vendita (lordo o netto con IVA)
+  - Investimenti in **Qualità**, **Brand**, **Servizio**
+  - Capienza ordini/giorno
+- **Costi variabili**:
+  - Prezzo d’acquisto
+  - Overhead per unità
+  - Costo Qualità (dipende dal livello Q)
+  - Costo Garanzia (in/out garanzia, goodwill)
+  - Commissioni/fee del canale di vendita
+- **Costi fissi**:
+  - Personale, affitto, SaaS, altro
+  - Costi specifici per canale di vendita (vedi sotto)
+- **Canali di vendita**:
+  - **On-line** (fee piattaforma, pagamenti, logistica, SaaS, gestione store)
+  - **Venditore P.IVA** (compenso fisso, auto, carburante, provvigioni, telepass, altre spese)
+  - **Dipendente** (RAL, auto aziendale, trasferte, telepass, provvigioni opzionali)
+- **Indicatori finanziari**:
+  - Margine di contribuzione /u e totale
+  - Break-even (unità e ricavi)
+  - Indice di copertura (% del prezzo che resta per i fissi)
+  - Margine di sicurezza (% distanza dalle vendite a BE)
+- **Grafici**:
+  - BE Chart: ricavi vs costi totali
+  - MC Chart: ricavi vs costi variabili, area verde = margine di contribuzione
+- **Clienti spostati**: variazione quota rispetto al giorno precedente, con breakdown (Prezzo, Q, B, S)
+- **Advisor**: suggerimento automatico del prezzo più profittevole dato il mercato
+- **Log mosse competitor**: visibile giorno per giorno
+- **PWA ready**: installabile e funzionante offline
 
-## Modello di mercato
-- Clienti/giorno: `M` (con stagionalità).
-- Scelta cliente con **logit**: \(U = α - β·p + w_Q·Q + w_S·S + w_B·B + ξ_t\).
-- Quota \(s_i = e^{U_i}/\sum e^{U_j}\); **Unità** \(q_i = M·s_i\).
-- Costi: `c(Q) = 8 + 2·Q`, fissi `500/g`.
-- IVA: se attiva, il margine usa il **prezzo netto** `p/(1+IVA%)`.
+## 🚀 Installazione & utilizzo
+1. Clona o scarica la repository.
+2. Apri `index.html` in un browser moderno (Chrome, Edge, Safari).
+3. Puoi installare la PWA su desktop o mobile (`Aggiungi a schermata Home`).
+4. Imposta parametri di costo, IVA, garanzia e canale → simula fino a 10 giorni.
+5. Usa i grafici per valutare **redditività** e strategie di prezzo.
 
-## Leve del giocatore
-- **Prezzo** (slider).
-- **Qualità (Q)**: +0.5 buff per step, **dura 3 giorni**, costo `€300/step`.
-- **Brand (B)**: +0.5 buff per step, **dura 3 giorni**, costo `€250/step`.
-- **Servizio (S)**: +1 per step, **permanente**, costo `€200/step`.
-- **Capienza**: ordini/giorno (una tantum) costo `€0.2 per punto`.
+## 📊 Perché usare il Margine di Contribuzione
+Il MC è l’indicatore corretto per valutare la redditività di un prodotto.  
+Permette di capire se un prodotto **copre i costi fissi** e genera utile senza dover allocare in modo arbitrario altri costi.
 
-## Competitor (AI)
-- **Comp A — Price-war**: segue il tuo prezzo cercando di stare ~5% sotto (rispettando un minimo).
-- **Comp B — Premium**: mantiene prezzi alti e investe regolarmente in Brand/Qualità.
-- **Comp C — Follower**: fa smoothing sul tuo prezzo e investe saltuariamente in Brand.
+\[
+MC = Prezzo\ Netto - Costi\ Variabili\ Diretti
+\]
 
-## Flusso del turno
-1. Imposta prezzo e **investimenti** (costano subito).
-2. Clicca **Avanza giorno**.
-3. I competitor effettuano le proprie mosse.
-4. Il mercato si alloca → vedi **Unità, Quota, Utile**.
-5. **Report del giorno** mostra i **clienti spostati (Δ vs comp)** e un **breakdown** approssimato per **Prezzo, Q, B, S**.
+- **MC > 0** → ogni pezzo contribuisce a coprire i costi fissi.  
+- **MC < 0** → più vendi, più perdi.  
+- **Break-even**: punto in cui \( MC \times Q = Fissi \).
 
-## Condizioni di fine
-- 10 giorni. Mostriamo **utile cumulato** e la **quota** dell’ultimo giorno. (Target tipico: quota > 30%, cassa positiva).
+## 📱 Compatibilità
+- Mobile (iPhone/Android) e Desktop (Windows, macOS, Linux)
+- Responsive: controlli leggibili su schermi piccoli e grandi
 
-## PWA
-- Offline-first con Service Worker (`mr-v4-duel`).
-- Installabile su iOS/Android/Desktop.
+## 👤 Autore
+**Alessandro Pezzali**  
+www.alessandropezzali.it · [pezzaliAPP.com](https://www.pezzaliapp.com)
 
----
-
-### Note “game design”
-- Il breakdown Δ è **additivo e approssimato** (varia un fattore per volta); in futuro si può usare una **decomposizione di Shapley** per precisione.
-- Le strategie AI sono **leggere** per restare fluide su mobile: possiamo passare a un **bandit** per il competitor adattivo.
+## 📄 Licenza
+Rilasciato sotto **MIT License** (2025).
