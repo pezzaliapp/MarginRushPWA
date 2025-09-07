@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
-<title>Margin Rush — v4.8.1 Pro (Canali vendita completi, BE, Tax)</title>
+<title>Margin Rush — v4.9 Pro (MC, Copertura, Margine di Sicurezza, BE)</title>
 <meta name="theme-color" content="#0b1220"/>
 <style>
 :root{--bg:#0b1220;--card:#0f1930;--ink:#eaf0ff;--muted:#b9c7eb;--grid:#1f2d4f;--accent:#87a7ff;--good:#6be675;--bad:#ff7a88;--warn:#ffd166}
@@ -37,7 +37,7 @@ input[type="number"]{width:120px}
 <body>
 <header>
   <div class="wrap">
-    <h1>Margin Rush <span class="pill">v4.8.1 Pro — Canali vendita completi • BE • Tax</span></h1>
+    <h1>Margin Rush <span class="pill">v4.9 Pro — MC • Copertura • Margine di sicurezza • BE</span></h1>
     <span class="badge">Giorno: <b id="day">1</b>/10</span>
     <span class="badge">Cassa: <b id="cash">€5.000,00</b></span>
     <span class="badge">Quota oggi: <b id="share">0%</b></span>
@@ -188,6 +188,7 @@ input[type="number"]{width:120px}
 
         <div class="note" id="advisor">Advisor…</div>
         <canvas id="beChart" class="chart" width="600" height="220"></canvas>
+        <canvas id="mcChart" class="chart" width="600" height="220"></canvas>
       </div>
     </div>
   </div>
@@ -200,6 +201,12 @@ input[type="number"]{width:120px}
         <div class="box">Quota nostra: <b id="sMe">0%</b></div>
         <div class="box">Utile netto: <b id="pMe">€0,00</b></div>
         <div class="box">Clienti spostati: <b id="moved">0</b></div>
+      </div>
+      <div class="kpi" style="margin-top:8px">
+        <div class="box">MC/u<br><b id="kpiMcUnit">€0,00</b></div>
+        <div class="box">MC totale oggi<br><b id="kpiMcTotal">€0,00</b></div>
+        <div class="box">Indice di copertura<br><b id="kpiCover">0%</b></div>
+        <div class="box">Margine di sicurezza<br><b id="kpiMoS">—</b></div>
       </div>
       <div class="note" style="margin-top:6px">Δ clienti — Prezzo: <b id="bp">0</b> · Q: <b id="bq">0</b> · B: <b id="bb">0</b> · S: <b id="bs">0</b></div>
     </div>
@@ -273,7 +280,9 @@ const E = {
   // report
   qMe: el('qMe'), sMe: el('sMe'), pMe: el('pMe'), cash: el('cash'), cumprofit: el('cumprofit'), share: el('share'),
   moved: el('moved'), bp: el('bp'), bq: el('bq'), bb: el('bb'), bs: el('bs'),
-  advisor: el('advisor'), beChart: el('beChart'), day: el('day')
+  advisor: el('advisor'), beChart: el('beChart'), mcChart: el('mcChart'), day: el('day'),
+  // nuovi KPI MC
+  kpiMcUnit: el('kpiMcUnit'), kpiMcTotal: el('kpiMcTotal'), kpiCover: el('kpiCover'), kpiMoS: el('kpiMoS')
 };
 
 function wCostPerUnit(){
@@ -309,7 +318,6 @@ function channelPctEcho(){
   if(channel==='piva')   return ((+E.pvPct.value||0).toFixed(1))+'%';
   return ((+E.emPct.value||0).toFixed(1))+'%';
 }
-const costQ = Q => 8 + 2*Q;
 function varCostPerUnit(){
   const pNet=netP(our.p);
   return buyCost + varOver + costQ(our.Q) + wCostPerUnit() + channelVarPerUnit(pNet);
@@ -344,8 +352,8 @@ function runAdvisor(){
   E.advisor.innerHTML=`Advisor: <b>${euro(best)}</b> — utile atteso ${euro(bestProf)} (post-tax).`;
 }
 
-/* ========= Chart ========= */
-function drawChart(){
+/* ========= Chart: BE ========= */
+function drawBEChart(){
   const c=E.beChart, ctx=c.getContext('2d');
   const w=c.clientWidth, h=c.clientHeight; if(c.width!==w){c.width=w;c.height=h}
   ctx.clearRect(0,0,w,h);
@@ -358,23 +366,34 @@ function drawChart(){
   const be=bePostTax(); if(isFinite(be.units)&&be.units<=maxQ){ctx.fillStyle="#6be675";ctx.beginPath();ctx.arc(x(be.units),y(pNet*be.units),4,0,6.28);ctx.fill();ctx.fillText(`BE ${be.units}`,x(be.units)+6,y(pNet*be.units)-6);}
 }
 
+/* ========= Chart: MC ========= */
+function drawMCChart(currentUnits){
+  const c=E.mcChart, ctx=c.getContext('2d');
+  const w=c.clientWidth, h=c.clientHeight; if(c.width!==w){c.width=w;c.height=h}
+  ctx.clearRect(0,0,w,h);
+  const pad=30, maxQ=Math.max(cap,Math.round(M*(1+season/100)));
+  const pNet=netP(our.p), v=varCostPerUnit();
+  const x=q=>pad+(q/maxQ)*(w-pad*1.2), y=v0=>{const maxV=Math.max(pNet*maxQ, v*maxQ); return h-pad-(v0/maxV)*(h-pad*1.2);};
+  // assi
+  ctx.strokeStyle="#254";ctx.beginPath();ctx.moveTo(pad,y(0));ctx.lineTo(w-pad*.2,y(0));ctx.moveTo(pad,y(0));ctx.lineTo(pad,pad*.3);ctx.stroke();
+  // ricavi
+  ctx.strokeStyle="#7aa7ff";ctx.beginPath();ctx.moveTo(x(0),y(0));ctx.lineTo(x(maxQ),y(pNet*maxQ));ctx.stroke();ctx.fillStyle="#7aa7ff";ctx.fillText("Ricavi (netto)",x(maxQ)-95,y(pNet*maxQ)-6);
+  // costi variabili (solo variabili)
+  ctx.strokeStyle="#ffa658";ctx.beginPath();ctx.moveTo(x(0),y(0));ctx.lineTo(x(maxQ),y(v*maxQ));ctx.stroke();ctx.fillStyle="#ffa658";ctx.fillText("Costi variabili",x(maxQ)-100,y(v*maxQ)-6);
+  // area MC tra ricavi e costi variabili fino alle unità correnti
+  const Q = Math.max(0, Math.min(currentUnits||0, maxQ));
+  ctx.fillStyle="rgba(107,230,117,0.25)"; ctx.beginPath();
+  ctx.moveTo(x(0),y(0));
+  ctx.lineTo(x(Q),y(pNet*Q));
+  ctx.lineTo(x(Q),y(v*Q));
+  ctx.lineTo(x(0),y(0));
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle="#6be675"; ctx.fillText(`MC (area verde) fino a ${Q} u`, x(Q)-120, y(v*Q)-10);
+}
+
 /* ========= Clienti spostati ========= */
 let prev={p:our.p,Q:our.Q,B:our.B,S:our.S,share:0,units:0};
 const ourShareWith=cfg=>shares([{...our,...cfg}].concat(comps))[0];
-function estimateMoved(market){
-  const s_prev=prev.share||ourShareWith(prev), s_now=ourShareWith(our);
-  const s_p=ourShareWith({p:our.p,Q:prev.Q,B:prev.B,S:prev.S});
-  const s_q=ourShareWith({p:our.p,Q:our.Q,B:prev.B,S:prev.S});
-  const s_b=ourShareWith({p:our.p,Q:our.Q,B:our.B,S:prev.S});
-  return {
-    moved:Math.round((s_now-s_prev)*market),
-    dp:Math.round((s_p-s_prev)*market),
-    dq:Math.round((s_q-s_p)*market),
-    db:Math.round((s_b-s_q)*market),
-    ds:Math.round((s_now-s_b)*market),
-    s_now
-  };
-}
 
 /* ========= UI ========= */
 function renderTable(q=null,s=null){
@@ -382,68 +401,80 @@ function renderTable(q=null,s=null){
   document.querySelector('#tbl tbody').innerHTML=rows;
 }
 function showChannelPanels(){
-  E.chOnline.style.display   = channel==='online'   ? 'block' : 'none';
-  E.chPiva.style.display     = channel==='piva'     ? 'block' : 'none';
-  E.chEmployee.style.display = channel==='employee' ? 'block' : 'none';
+  el('ch-online').style.display   = channel==='online'   ? 'block' : 'none';
+  el('ch-piva').style.display     = channel==='piva'     ? 'block' : 'none';
+  el('ch-employee').style.display = channel==='employee' ? 'block' : 'none';
+}
+function refreshKpiSecondary(currentUnits=0){
+  const mcU = mcUnit();
+  const pNet = netP(our.p);
+  const mcTot = mcU * currentUnits;
+  const cover = pNet>0 ? (mcU/pNet*100) : 0;
+  const be = bePostTax().units;
+  const mos = currentUnits>0 && isFinite(be) ? ((currentUnits - be)/currentUnits*100) : NaN;
+  el('kpiMcUnit').textContent = euro(mcU);
+  el('kpiMcTotal').textContent = euro(mcTot);
+  el('kpiCover').textContent = (isFinite(cover)?cover:0).toFixed(1)+'%';
+  el('kpiMoS').textContent = (isFinite(mos)?mos.toFixed(1)+'%':'—');
 }
 function refreshEcho(){
   el('priceEcho').textContent=euro(our.p);
   el('betaEcho').textContent=beta.toFixed(3); el('seasonEcho').textContent=(season>=0?'+':'')+season+'%';
   el('capEcho').textContent=cap; el('capVal').textContent=cap;
   // canale & fissi
-  E.chFixedEcho.textContent=euro(channelFixedPerDay());
-  E.chVarEcho.textContent=euro(channelVarPerUnit(netP(our.p)));
-  E.chPctEcho.textContent=channelPctEcho();
+  el('chFixedEcho').textContent=euro(channelFixedPerDay());
+  el('chVarEcho').textContent=euro(channelVarPerUnit(netP(our.p)));
+  el('chPctEcho').textContent=channelPctEcho();
   // garanzia & margine
-  E.wCostPerUnit.textContent=euro(wCostPerUnit());
-  E.mcUnit.textContent=euro(mcUnit());
+  el('wCostPerUnit').textContent=euro(wCostPerUnit());
+  el('mcUnit').textContent=euro(mcUnit());
   checkMinMargin();
-  const be=bePostTax(); E.beUnits.textContent=isFinite(be.units)?be.units.toLocaleString('it-IT'):'— (margine ≤ 0)';
-  runAdvisor(); drawChart();
+  const be=bePostTax(); el('beUnits').textContent=isFinite(be.units)?be.units.toLocaleString('it-IT'):'— (margine ≤ 0)';
+  runAdvisor(); drawBEChart();
 }
 
 /* ========= Bindings ========= */
 function bindInputs(){
-  // valori di default/LS su UI
-  E.price.value=our.p; E.price.oninput=()=>{our.p=parseFloat(E.price.value); refreshEcho();};
-  E.invQ.oninput=()=>{E.invQEcho.textContent=E.invQ.value; our.Q=1+parseInt(E.invQ.value||'0',10)*0.5; refreshEcho();};
-  E.invB.oninput=()=>{E.invBEcho.textContent=E.invB.value; our.B=1+parseInt(E.invB.value||'0',10)*0.5; refreshEcho();};
-  E.invS.oninput=()=>{E.invSEcho.textContent=E.invS.value; our.S=1+parseInt(E.invS.value||'0',10); refreshEcho();};
+  // slider e basi
+  el('price').value=our.p; el('price').oninput=()=>{our.p=parseFloat(el('price').value); refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
+  el('invQ').oninput=()=>{el('invQEcho').textContent=el('invQ').value; our.Q=1+parseInt(el('invQ').value||'0',10)*0.5; refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
+  el('invB').oninput=()=>{el('invBEcho').textContent=el('invB').value; our.B=1+parseInt(el('invB').value||'0',10)*0.5; refreshEcho();};
+  el('invS').oninput=()=>{el('invSEcho').textContent=el('invS').value; our.S=1+parseInt(el('invS').value||'0',10); refreshEcho();};
+  el('cap').value=cap; el('cap').oninput=()=>{cap=parseInt(el('cap').value,10); refreshEcho();};
 
-  E.cap.value=cap; E.cap.oninput=()=>{cap=parseInt(E.cap.value,10); refreshEcho();};
-  E.beta.value=beta; E.beta.oninput=()=>{beta=parseFloat(E.beta.value)||0.08; refreshEcho();};
-  E.season.value=season; E.season.oninput=()=>{season=parseInt(E.season.value||'0',10); refreshEcho();};
-  E.iva.checked=ivaIncl; E.iva.oninput=()=>{ivaIncl=E.iva.checked; refreshEcho();};
-  E.ivaPct.value=(ivaPct*100).toFixed(1); E.ivaPct.oninput=()=>{ivaPct=(parseFloat(E.ivaPct.value)||22)/100; refreshEcho();};
+  el('beta').value=beta; el('beta').oninput=()=>{beta=parseFloat(el('beta').value)||0.08; refreshEcho();};
+  el('season').value=season; el('season').oninput=()=>{season=parseInt(el('season').value||'0',10); refreshEcho();};
+  el('iva').checked=ivaIncl; el('iva').oninput=()=>{ivaIncl=el('iva').checked; refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
+  el('ivaPct').value=(ivaPct*100).toFixed(1); el('ivaPct').oninput=()=>{ivaPct=(parseFloat(el('ivaPct').value)||22)/100; refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
 
-  E.buyCost.value=buyCost; E.buyCost.oninput=()=>{buyCost=parseFloat(E.buyCost.value)||0; save('buyCost',buyCost); refreshEcho();};
-  E.varOver.value=varOver; E.varOver.oninput=()=>{varOver=parseFloat(E.varOver.value)||0; save('varOver',varOver); refreshEcho();};
-  E.minMarginPct.value=minMargin; E.minMarginPct.oninput=()=>{minMargin=parseFloat(E.minMarginPct.value)||0; save('minMargin',minMargin); refreshEcho();};
-  E.taxPct.value=(tax*100).toFixed(1); E.taxPct.oninput=()=>{tax=(parseFloat(E.taxPct.value)||24)/100; save('tax',tax*100); refreshEcho();};
+  // costi
+  el('buyCost').value=buyCost; el('buyCost').oninput=()=>{buyCost=parseFloat(el('buyCost').value)||0; save('buyCost',buyCost); refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
+  el('varOver').value=varOver; el('varOver').oninput=()=>{varOver=parseFloat(el('varOver').value)||0; save('varOver',varOver); refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
+  el('minMarginPct').value=minMargin; el('minMarginPct').oninput=()=>{minMargin=parseFloat(el('minMarginPct').value)||0; save('minMargin',minMargin); refreshEcho();};
+  el('taxPct').value=(tax*100).toFixed(1); el('taxPct').oninput=()=>{tax=(parseFloat(el('taxPct').value)||24)/100; save('tax',tax*100); refreshEcho(); drawBEChart(); refreshKpiSecondary(lastUnits);};
 
   // fissi base
-  E.fxStaff.value=fixedBase.staff; E.fxRent.value=fixedBase.rent; E.fxSaaS.value=fixedBase.saas; E.fxOther.value=fixedBase.other;
+  el('fxStaff').value=fixedBase.staff; el('fxRent').value=fixedBase.rent; el('fxSaaS').value=fixedBase.saas; el('fxOther').value=fixedBase.other;
   ;['fxStaff','fxRent','fxSaaS','fxOther'].forEach(id=>{
-    E[id].addEventListener('input',()=>{ fixedBase={staff:+E.fxStaff.value||0,rent:+E.fxRent.value||0,saas:+E.fxSaaS.value||0,other:+E.fxOther.value||0}; save('fixedBase',fixedBase); refreshEcho(); });
+    el(id).addEventListener('input',()=>{fixedBase={staff:+el('fxStaff').value||0,rent:+el('fxRent').value||0,saas:+el('fxSaaS').value||0,other:+el('fxOther').value||0}; save('fixedBase',fixedBase); refreshEcho(); drawBEChart();});
   });
 
   // canale
-  E.channel.value=channel; E.channel.oninput=()=>{channel=E.channel.value; save('channel',channel); showChannelPanels(); refreshEcho();};
+  el('channel').value=channel; el('channel').oninput=()=>{channel=el('channel').value; save('channel',channel); showChannelPanels(); refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
 
-  // ripristina parametri da LS/default e bind salvataggio
   function restoreChToUI(){
     // Online
-    E.onFeePct.value=ch.online.feePct; E.onPayPct.value=ch.online.payPct; E.onFixedPer.value=ch.online.fixedPer; E.onLogPer.value=ch.online.logPer; E.onSaaS.value=ch.online.saasM; E.onMgmt.value=ch.online.mgmtM;
+    el('onFeePct').value=ch.online.feePct; el('onPayPct').value=ch.online.payPct; el('onFixedPer').value=ch.online.fixedPer; el('onLogPer').value=ch.online.logPer; el('onSaaS').value=ch.online.saasM; el('onMgmt').value=ch.online.mgmtM;
     // P.IVA
-    E.pvAuto.value=ch.piva.autoM; E.pvFixed.value=ch.piva.fixedM; E.pvPct.value=ch.piva.pct; E.pvTeleKm.value=ch.piva.teleKm; E.pvKm.value=ch.piva.kmM; E.pvKml.value=ch.piva.kml; E.pvFuel.value=ch.piva.fuel; E.pvOtherM.value=ch.piva.otherM;
+    el('pvAuto').value=ch.piva.autoM; el('pvFixed').value=ch.piva.fixedM; el('pvPct').value=ch.piva.pct; el('pvTeleKm').value=ch.piva.teleKm; el('pvKm').value=ch.piva.kmM; el('pvKml').value=ch.piva.kml; el('pvFuel').value=ch.piva.fuel; el('pvOtherM').value=ch.piva.otherM;
     // Dipendente
-    E.emRal.value=ch.employee.ralY; E.emAuto.value=ch.employee.autoM; E.emTele.value=ch.employee.teleM; E.emTrips.value=ch.employee.tripsM; E.emPct.value=ch.employee.pct; E.emKm.value=ch.employee.kmM; E.emKml.value=ch.employee.kml; E.emFuel.value=ch.employee.fuel;
+    el('emRal').value=ch.employee.ralY; el('emAuto').value=ch.employee.autoM; el('emTele').value=ch.employee.teleM; el('emTrips').value=ch.employee.tripsM; el('emPct').value=ch.employee.pct; el('emKm').value=ch.employee.kmM; el('emKml').value=ch.employee.kml; el('emFuel').value=ch.employee.fuel;
   }
   function currentChParams(){
     return {
-      online:{feePct:+E.onFeePct.value||0,payPct:+E.onPayPct.value||0,fixedPer:+E.onFixedPer.value||0,logPer:+E.onLogPer.value||0,saasM:+E.onSaaS.value||0,mgmtM:+E.onMgmt.value||0},
-      piva:{autoM:+E.pvAuto.value||0,fixedM:+E.pvFixed.value||0,pct:+E.pvPct.value||0,teleKm:+E.pvTeleKm.value||0,kmM:+E.pvKm.value||0,kml:+E.pvKml.value||1,fuel:+E.pvFuel.value||0,otherM:+E.pvOtherM.value||0},
-      employee:{ralY:+E.emRal.value||0,autoM:+E.emAuto.value||0,teleM:+E.emTele.value||0,tripsM:+E.emTrips.value||0,pct:+E.emPct.value||0,kmM:+E.emKm.value||0,kml:+E.emKml.value||1,fuel:+E.emFuel.value||0}
+      online:{feePct:+el('onFeePct').value||0,payPct:+el('onPayPct').value||0,fixedPer:+el('onFixedPer').value||0,logPer:+el('onLogPer').value||0,saasM:+el('onSaaS').value||0,mgmtM:+el('onMgmt').value||0},
+      piva:{autoM:+el('pvAuto').value||0,fixedM:+el('pvFixed').value||0,pct:+el('pvPct').value||0,teleKm:+el('pvTeleKm').value||0,kmM:+el('pvKm').value||0,kml:+el('pvKml').value||1,fuel:+el('pvFuel').value||0,otherM:+el('pvOtherM').value||0},
+      employee:{ralY:+el('emRal').value||0,autoM:+el('emAuto').value||0,teleM:+el('emTele').value||0,tripsM:+el('emTrips').value||0,pct:+el('emPct').value||0,kmM:+el('emKm').value||0,kml:+el('emKml').value||1,fuel:+el('emFuel').value||0}
     };
   }
   restoreChToUI();
@@ -452,15 +483,12 @@ function bindInputs(){
     'pvAuto','pvFixed','pvPct','pvTeleKm','pvKm','pvKml','pvFuel','pvOtherM',
     'emRal','emAuto','emTele','emTrips','emPct','emKm','emKml','emFuel'
   ].forEach(id=>{
-    E[id].addEventListener('input',()=>{ ch=currentChParams(); save('chParams',ch); refreshEcho(); });
+    el(id).addEventListener('input',()=>{ ch=currentChParams(); save('chParams',ch); refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits); });
   });
 }
 
 /* ========= Simulazione ========= */
-function renderTable(q=null,s=null){
-  const rows=[our].concat(comps).map((p,i)=>`<tr><td>${i?('Comp '+String.fromCharCode(64+i)):'Noi'}</td><td>${euro(p.p)}</td><td>${p.Q}</td><td>${p.B}</td><td>${p.S}</td><td>${s? (s[i]*100).toFixed(1)+'%':'—'}</td><td>${q? q[i].toLocaleString('it-IT'):'—'}</td></tr>`).join('');
-  document.querySelector('#tbl tbody').innerHTML=rows;
-}
+let lastUnits = 0; // per KPI MC & grafico MC in tempo reale
 function simulateDay(){
   // mosse competitor
   comps.forEach(c=>{
@@ -476,8 +504,9 @@ function simulateDay(){
   const s=shares([our].concat(comps));
   const market=Math.round(M*(1+season/100));
   const q=s.map(x=>Math.round(x*market)); q[0]=Math.min(q[0],cap);
+  lastUnits = q[0];
 
-  // spostati
+  // breakdown clienti spostati
   const s_prev=prev.share||ourShareWith(prev), s_now=ourShareWith(our);
   const s_p=ourShareWith({p:our.p,Q:prev.Q,B:prev.B,S:prev.S});
   const s_q=ourShareWith({p:our.p,Q:our.Q,B:prev.B,S:prev.S});
@@ -492,31 +521,34 @@ function simulateDay(){
 
   // render
   renderTable(q,s);
-  E.qMe.textContent=q[0].toLocaleString('it-IT');
-  E.sMe.textContent=(s[0]*100).toFixed(1)+'%';
-  E.pMe.textContent=euro(profit);
-  E.cash.textContent=euro(cash); E.cumprofit.textContent=euro(cumProfit);
-  E.share.textContent=(s[0]*100).toFixed(1)+'%';
-  E.moved.textContent=(moved>=0?'+':'')+moved.toLocaleString('it-IT');
-  E.bp.textContent=(dp>=0?'+':'')+dp; E.bq.textContent=(dq>=0?'+':'')+dq; E.bb.textContent=(db>=0?'+':'')+db; E.bs.textContent=(ds>=0?'+':'')+ds;
+  el('qMe').textContent=q[0].toLocaleString('it-IT');
+  el('sMe').textContent=(s[0]*100).toFixed(1)+'%';
+  el('pMe').textContent=euro(profit);
+  el('cash').textContent=euro(cash); el('cumprofit').textContent=euro(cumProfit);
+  el('share').textContent=(s[0]*100).toFixed(1)+'%';
+  el('moved').textContent=(moved>=0?'+':'')+moved.toLocaleString('it-IT');
+  el('bp').textContent=(dp>=0?'+':'')+dp; el('bq').textContent=(dq>=0?'+':'')+dq; el('bb').textContent=(db>=0?'+':'')+db; el('bs').textContent=(ds>=0?'+':'')+ds;
+
+  // KPI MC
+  refreshKpiSecondary(q[0]);
 
   // stato "ieri"
   prev={p:our.p,Q:our.Q,B:our.B,S:our.S,share:s_now,units:q[0]};
 
-  // echo & avanti
-  refreshEcho();
-  day++; E.day.textContent=day; if(day>10){alert('Fine partita — utile cumulato: '+E.cumprofit.textContent); location.reload();}
+  // grafici & echo
+  refreshEcho(); drawBEChart(); drawMCChart(q[0]);
+
+  // avanti
+  day++; el('day').textContent=day; if(day>10){alert('Fine partita — utile cumulato: '+el('cumprofit').textContent); location.reload();}
 }
 
 /* ========= Start ========= */
 function start(){
-  // assegna default visibili
-  E.priceEcho.textContent=euro(our.p);
-  E.capVal.textContent=cap; E.capEcho.textContent=cap;
-  // canale: mostra pannello corrente e carica default/LS
+  // UI init
+  el('priceEcho').textContent=euro(our.p);
+  el('capVal').textContent=cap; el('capEcho').textContent=cap;
   showChannelPanels(); bindInputs();
-  renderTable(); refreshEcho(); drawChart();
-
+  renderTable(); refreshEcho(); drawBEChart(); drawMCChart(0); refreshKpiSecondary(0);
   el('advance').onclick=simulateDay;
   el('reset').onclick=()=>location.reload();
 }
