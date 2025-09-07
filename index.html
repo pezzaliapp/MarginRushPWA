@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
-<title>Margin Rush — v4.4 Pro (Costi aziendali & Break-even)</title>
+<title>Margin Rush — v4.5 Pro (Tax, Fixed breakdown, BE chart)</title>
 <meta name="theme-color" content="#0b1220"/>
 <style>
 :root{--bg:#0b1220;--card:#0f1930;--ink:#eaf0ff;--muted:#b9c7eb;--grid:#1f2d4f;--accent:#87a7ff;--good:#6be675;--bad:#ff7a88;--warn:#ffd166;}
@@ -34,6 +34,7 @@ th:first-child,td:first-child{text-align:left}
 .log-item .who{min-width:160px;color:#cfe}
 .log-item .what{color:#dfe6ff}
 .advisor{padding:8px 10px;border:1px dashed var(--grid);border-radius:10px;background:#0b1636;margin-top:8px}
+.chart{width:100%;height:230px;background:#0b1432;border:1px solid var(--grid);border-radius:10px}
 @media (max-width:1100px){.grid{grid-template-columns:1fr}.kpi{grid-template-columns:repeat(2,1fr)} .log-item .who{min-width:auto}}
 @media (max-width:760px){html{font-size:15px} th,td{padding:7px} .badge{padding:5px 8px} button{padding:9px 12px}}
 </style>
@@ -41,7 +42,7 @@ th:first-child,td:first-child{text-align:left}
 <body>
 <header>
   <div class="wrap">
-    <h1>Margin Rush <span class="pill">v4.4 Pro — Bandit • Investimenti • IVA • Costi & Break-even</span></h1>
+    <h1>Margin Rush <span class="pill">v4.5 Pro — Tax • Fixed breakdown • BE chart</span></h1>
     <div class="top">
       <div class="badge">Giorno: <b id="day">1</b>/10</div>
       <div class="badge">Cassa: <b id="cash">€5.000,00</b></div>
@@ -82,7 +83,8 @@ th:first-child,td:first-child{text-align:left}
           <tr><td>Investi in Servizio (S)</td><td><input id="invS" type="range" min="0" max="2" step="1"/></td><td><b id="invSEcho">0</b></td></tr>
           <tr><td>Capienza ordini/g</td><td><input id="cap" type="range" min="300" max="3000" step="50"/></td><td><b id="capVal">1000</b></td></tr>
         </table>
-        <div class="note">Costi diretti: costo unitario = 8 + 2·Q. Costi investimenti: Q=€300 (3gg), B=€250 (3gg), S=€200 (permanente), Cap=€0,2/punto.</div>
+
+        <div class="note">Costi diretti: costo unitario = 8 + 2·Q. Investimenti: Q=€300 (3gg), B=€250 (3gg), S=€200 (permanente), Cap=€0,2/punto.</div>
         <hr style="border-color:#1f2d4f">
         <div class="kpi">
           <div class="box">IVA incl.? <input type="checkbox" id="iva" checked></div>
@@ -90,14 +92,26 @@ th:first-child,td:first-child{text-align:left}
           <div class="box">β <input type="number" id="beta" value="0.08" step="0.005" style="width:80px"></div>
           <div class="box">Stag. % <input type="number" id="season" value="0" step="1" style="width:70px"></div>
         </div>
-        <h4 style="margin:12px 0 6px">Costi aziendali</h4>
+
+        <h4 style="margin:12px 0 6px">Costi aziendali (fissi) — salvati sul dispositivo</h4>
         <div class="kpi">
-          <div class="box">Fissi/giorno (€)<br><input type="number" id="fixedCost" value="500" step="10" style="width:120px"></div>
-          <div class="box">Overhead var €/unità<br><input type="number" id="varOver" value="1.20" step="0.1" style="width:120px"></div>
-          <div class="box">Break-even u/giorno<br><b id="beUnits">—</b></div>
+          <div class="box">Personale €/g<br><input type="number" id="fxStaff" value="300" step="10" style="width:120px"></div>
+          <div class="box">Affitto €/g<br><input type="number" id="fxRent" value="120" step="10" style="width:120px"></div>
+          <div class="box">SaaS €/g<br><input type="number" id="fxSaaS" value="60" step="5" style="width:120px"></div>
+          <div class="box">Altro €/g<br><input type="number" id="fxOther" value="20" step="5" style="width:120px"></div>
+        </div>
+        <div class="kpi" style="margin-top:8px">
+          <div class="box">Overhead variabile €/u<br><input type="number" id="varOver" value="1.20" step="0.1" style="width:120px"></div>
+          <div class="box">Imposta utile %<br><input type="number" id="taxPct" value="24" step="0.1" style="width:120px"></div>
+          <div class="box">Break-even u/g (post-tax)<br><b id="beUnits">—</b></div>
           <div class="box">Ricavo per copertura<br><b id="beRevenue">—</b></div>
         </div>
+
         <div class="advisor" id="advisor">Advisor: in calcolo…</div>
+        <div style="margin-top:10px">
+          <canvas id="beChart" class="chart" width="600" height="230"></canvas>
+          <div class="note">Chart: Ricavi vs Costi totali al prezzo corrente. Punto di pareggio post-tax evidenziato (se presente).</div>
+        </div>
       </div>
     </div>
   </div>
@@ -120,15 +134,20 @@ th:first-child,td:first-child{text-align:left}
 function $(id){return document.getElementById(id)}
 const euro=n=>(Math.round(n*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+function saveLS(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch(e){}}
+function loadLS(key,def){try{const v=localStorage.getItem(key);return v?JSON.parse(v):def;}catch(e){return def}}
 
 /* Stato */
 let day=1,M=1200,beta=0.08,season=0,ivaIncl=true,ivaPct=0.22,cap=1000;
-let fixedCost=500, varOver=1.20;
+let fixed = loadLS('mr_fixed',{staff:300,rent:120,saas:60,other:20});
+let varOver = loadLS('mr_varOver',1.20);
+let taxPct = loadLS('mr_taxPct',24)/100; // come decimale
 let cash=5000,cumProfit=0;
+
 const logEl=$('log'); function pushLog(who,what){const d=document.createElement('div');d.className='log-item';d.innerHTML=`<span class="dot"></span><span class="who">${who}</span><span class="what">${what}</span>`;logEl.prepend(d);}
 
 /* Offerte */
-let our={name:"Noi",p:49,Q:1,B:1,S:1,Qbuff:0,Bbuff:0,QbuffDays:0,BbuffDays:0};
+let our={name:"Noi",p:49,Q:1,B:1,S:1};
 let comps=[
  {name:"Comp A (Price-war)",p:45,Q:1,B:1,S:1,strat:"price"},
  {name:"Comp B (Premium)",p:70,Q:2,B:2,S:2,strat:"premium"},
@@ -137,13 +156,13 @@ let comps=[
   Qvals:[0,0,0,0,0],N:[0,0,0,0,0],epsilon:0.25}
 ];
 
-/* Modello domanda (logit prezzo+appeal) */
+/* Modello domanda (logit) */
 function shares(players){
   const U=players.map(o=>{
     const base=0.6+(o.B-1)*0.15+(o.Q-1)*0.2;
     const price=-beta*o.p;
-    const q=0.25*(o.Q-1)+0.25*(o.Qbuff||0);
-    const b=0.20*(o.B-1)+0.20*(o.Bbuff||0);
+    const q=0.25*(o.Q-1);
+    const b=0.20*(o.B-1);
     const s=0.15*(o.S-1);
     const shock=(season/100)*(0.1+0.2*(o.B-1));
     return base+price+q+b+s+shock;
@@ -151,8 +170,8 @@ function shares(players){
   const mx=Math.max(...U); const exps=U.map(u=>Math.exp(u-mx)); const sum=exps.reduce((a,b)=>a+b,0);
   return exps.map(e=>e/sum);
 }
-const costUnit=Q=>8+2*Q;              // costo diretto
-const netP=p=>ivaIncl? p/(1+ivaPct):p; // prezzo netto (se IVA inclusa)
+const costUnit = Q => 8 + 2*Q;
+const netP = p => ivaIncl? p/(1+ivaPct) : p;
 
 /* Competitor AI */
 function banditChoose(c){if(Math.random()<c.epsilon)return Math.floor(Math.random()*c.actions.length);let b=0;for(let i=1;i<c.actions.length;i++)if(c.Qvals[i]>c.Qvals[b])b=i;return b;}
@@ -175,46 +194,79 @@ function compMove(c){
   }
 }
 
-/* Render tabella */
+/* Tabella */
 function renderTable(q=null,s=null){
   const rows=[our].concat(comps).map((p,i)=>{
     const quota=s?(s[i]*100).toFixed(1)+'%':'—', units=q?q[i].toLocaleString('it-IT'):'—';
-    return `<tr><td>${i===0?'Noi':p.name}</td><td>${euro(p.p)}</td><td>${p.Q}${p.Qbuff?` (+${p.Qbuff})`:''}</td><td>${p.B}${p.Bbuff?` (+${p.Bbuff})`:''}</td><td>${p.S}</td><td>${quota}</td><td>${units}</td></tr>`;
+    return `<tr><td>${i===0?'Noi':p.name}</td><td>${euro(p.p)}</td><td>${p.Q}</td><td>${p.B}</td><td>${p.S}</td><td>${quota}</td><td>${units}</td></tr>`;
   }).join(''); document.querySelector('#tbl tbody').innerHTML=rows;
 }
 
-/* Break-even */
-function updateBreakEven(){
-  const pNet = netP(our.p);
-  const mc = pNet - (costUnit(our.Q) + varOver); // margine di contribuzione/u
-  const eps = 1e-6;
-  const beUnits = mc>eps ? Math.ceil(fixedCost / mc) : Infinity;
-  const beRevenue = isFinite(beUnits) ? beUnits * pNet : Infinity;
-  $('beUnits').textContent = isFinite(beUnits) ? beUnits.toLocaleString('it-IT') : '— (margine ≤ 0)';
-  $('beRevenue').textContent = isFinite(beRevenue) ? euro(beRevenue) : '—';
+/* Fixed costs, BE post-tax */
+function fixedTotal(){ return (+fxStaff.value||0)+(+fxRent.value||0)+(+fxSaaS.value||0)+(+fxOther.value||0); }
+function bePostTax(){
+  const pNet=netP(our.p), mc = pNet - (costUnit(our.Q) + (+varOverInp.value||0));
+  const tau = (+taxPctInp.value||0)/100;
+  if(mc<=0) return {units:Infinity, revenue:Infinity};
+  const u = Math.ceil( fixedTotal() / (mc*(1 - tau)) );
+  return {units:u, revenue: u * pNet};
+}
+
+/* Chart */
+function drawChart(){
+  const c=$('beChart'), ctx=c.getContext('2d');
+  const w=c.clientWidth, h=c.clientHeight; if(c.width!==w){c.width=w;c.height=h;}
+  ctx.clearRect(0,0,w,h);
+  const pad=36; const maxQ=Math.max( cap, Math.round(M*(1+season/100)) );
+  const pNet=netP(our.p), vCost=costUnit(our.Q)+(+varOverInp.value||0), F=fixedTotal(), tau=(+taxPctInp.value||0)/100;
+
+  function x(q){return pad + (q/maxQ)*(w-pad*1.2);}
+  function y(v){const maxV=Math.max(pNet*maxQ, (vCost*maxQ+F)/(1-tau)); return h-pad - (v/maxV)*(h-pad*1.2);}
+
+  // assi
+  ctx.strokeStyle="#254"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(pad, y(0)); ctx.lineTo(w-pad*0.2, y(0)); ctx.moveTo(pad, y(0)); ctx.lineTo(pad, pad*0.2); ctx.stroke();
+
+  // Ricavi
+  ctx.strokeStyle="#7aa7ff"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x(0), y(0)); ctx.lineTo(x(maxQ), y(pNet*maxQ)); ctx.stroke(); ctx.fillStyle="#7aa7ff"; ctx.fillText("Ricavi", x(maxQ)-50, y(pNet*maxQ)-6);
+
+  // Costi totali post-tax equivalenti: (VC+F)/(1-tau)
+  const totAtQ = q => (vCost*q + F) / (1 - tau);
+  ctx.strokeStyle="#ff7a88"; ctx.beginPath(); ctx.moveTo(x(0), y(totAtQ(0))); ctx.lineTo(x(maxQ), y(totAtQ(maxQ))); ctx.stroke(); ctx.fillStyle="#ff7a88"; ctx.fillText("Costi totali", x(maxQ)-80, y(totAtQ(maxQ))-6);
+
+  // Break-even
+  const be = bePostTax(); 
+  if(isFinite(be.units) && be.units<=maxQ){
+    ctx.fillStyle="#6be675"; ctx.beginPath(); ctx.arc(x(be.units), y(pNet*be.units), 4, 0, Math.PI*2); ctx.fill();
+    ctx.fillText(`BE: ${be.units} u`, x(be.units)+6, y(pNet*be.units)-6);
+  }
 }
 
 /* Advisor prezzo (competitor fermi 1 giorno) */
 function runAdvisor(){
-  let best=our.p,bestProf=-1;
+  const v = (+varOverInp.value||0), F=fixedTotal(), tau=(+taxPctInp.value||0)/100;
+  let best=our.p, bestProf=-1;
   for(let p=10;p<=120;p+=0.5){
     const s=shares([{...our,p}].concat(comps))[0];
     const q=Math.min(Math.round(s*M*(1+season/100)),cap);
-    const prof = netP(p)*q - (costUnit(our.Q)+varOver)*q - fixedCost;
+    const profPre = netP(p)*q - (costUnit(our.Q)+v)*q - F;
+    const prof = profPre>0 ? profPre*(1 - tau) : profPre;
     if(prof>bestProf){bestProf=prof; best=p;}
   }
-  $('advisor').innerHTML=`Advisor: <b>${euro(best)}</b> (utile stimato ${euro(bestProf)}).`;
+  $('advisor').innerHTML=`Advisor: <b>${euro(best)}</b> — utile atteso ${euro(bestProf)} (post-tax).`;
 }
 
-/* Simulazione giornata */
+/* Simulazione giorno (post-tax) */
 function simulateDay(){
+  const F=fixedTotal(), v=+varOverInp.value||0, tau=(+taxPctInp.value||0)/100;
   const s=shares([our].concat(comps));
   const marketToday=Math.round(M*(1+season/100));
   const q=s.map(x=>Math.round(x*marketToday));
   q[0]=Math.min(q[0],cap);
   const rev=netP(our.p)*q[0];
-  const cost=(costUnit(our.Q)+varOver)*q[0];
-  const profit=rev - cost - fixedCost;
+  const cost=(costUnit(our.Q)+v)*q[0];
+  let profitPre = rev - cost - F;
+  let profit = profitPre>0 ? profitPre*(1 - tau) : profitPre;
+
   cash+=profit; cumProfit+=profit;
   renderTable(q,s);
   $('qMe').textContent=q[0].toLocaleString('it-IT'); $('sMe').textContent=(s[0]*100).toFixed(1)+'%';
@@ -222,19 +274,35 @@ function simulateDay(){
   $('share').textContent=(s[0]*100).toFixed(1)+'%';
 }
 
-/* Echo + bindings */
+/* DOM refs */
+const fxStaff=$('fxStaff'), fxRent=$('fxRent'), fxSaaS=$('fxSaaS'), fxOther=$('fxOther');
+const varOverInp=$('varOver'), taxPctInp=$('taxPct');
+
+/* Echo + persist + chart */
 function refreshEcho(){
   $('priceEcho').textContent=euro(our.p);
   $('betaEcho').textContent=beta.toFixed(3);
   $('seasonEcho').textContent=(season>=0?'+':'')+season+'%';
-  $('capEcho').textContent=cap;
-  $('capVal').textContent=cap;
-  $('cash').textContent=euro(cash);
-  $('cumprofit').textContent=euro(cumProfit);
-  updateBreakEven(); runAdvisor();
+  $('capEcho').textContent=cap; $('capVal').textContent=cap;
+  $('cash').textContent=euro(cash); $('cumprofit').textContent=euro(cumProfit);
+
+  // save & derived
+  fixed={staff:+fxStaff.value||0, rent:+fxRent.value||0, saas:+fxSaaS.value||0, other:+fxOther.value||0};
+  varOver=+varOverInp.value||0; taxPct=(+taxPctInp.value||0)/100;
+  saveLS('mr_fixed',fixed); saveLS('mr_varOver',varOver); saveLS('mr_taxPct',(+taxPctInp.value||0));
+
+  const be = bePostTax();
+  $('beUnits').textContent = isFinite(be.units) ? be.units.toLocaleString('it-IT') : '— (margine ≤ 0)';
+  $('beRevenue').textContent = isFinite(be.revenue) ? euro(be.revenue) : '—';
+
+  runAdvisor(); drawChart();
 }
 
-/* INIT */
+/* Init inputs from LS */
+fxStaff.value=fixed.staff; fxRent.value=fixed.rent; fxSaaS.value=fixed.saas; fxOther.value=fixed.other;
+varOverInp.value=varOver.toFixed(2); taxPctInp.value=(taxPct*100).toFixed(1);
+
+/* Bindings */
 $('price').value=our.p; $('cap').value=cap;
 $('price').oninput=()=>{ our.p=parseFloat($('price').value); refreshEcho(); };
 $('invQ').oninput=()=>{ $('invQEcho').textContent=$('invQ').value; };
@@ -245,21 +313,20 @@ $('beta').oninput=()=>{ beta=parseFloat($('beta').value)||0.08; refreshEcho(); }
 $('season').oninput=()=>{ season=parseInt($('season').value||'0',10); refreshEcho(); };
 $('iva').oninput=()=>{ ivaIncl=$('iva').checked; refreshEcho(); };
 $('ivaPct').oninput=()=>{ ivaPct=parseFloat($('ivaPct').value)/100; refreshEcho(); };
-$('fixedCost').oninput=()=>{ fixedCost=parseFloat($('fixedCost').value)||0; refreshEcho(); };
-$('varOver').oninput=()=>{ varOver=parseFloat($('varOver').value)||0; refreshEcho(); };
+[fxStaff,fxRent,fxSaaS,fxOther,varOverInp,taxPctInp].forEach(el=>el.addEventListener('input',refreshEcho));
 
 $('advance').onclick=()=>{
-  // investimenti (semplice: applico direttamente i buff e i costi vivi)
+  // investimenti semplici (applico subito; puoi reintrodurre buff a durata se ti serve)
   const iQ=parseInt($('invQ').value||'0',10), iB=parseInt($('invB').value||'0',10), iS=parseInt($('invS').value||'0',10);
   let invest = iQ*300 + iB*250 + iS*200;
   if(invest>0 && invest>cash){ alert('Cassa insufficiente per gli investimenti.'); return; }
-  if(iQ>0){ our.Q += iQ*0.5; invest-=0; $('invQ').value=0; $('invQEcho').textContent=0; pushLog('Noi',`Quality +${iQ*0.5}`); }
+  if(iQ>0){ our.Q += iQ*0.5; $('invQ').value=0; $('invQEcho').textContent=0; pushLog('Noi',`Quality +${iQ*0.5}`); }
   if(iB>0){ our.B += iB*0.5; $('invB').value=0; $('invBEcho').textContent=0; pushLog('Noi',`Brand +${iB*0.5}`); }
   if(iS>0){ our.S += iS; $('invS').value=0; $('invSEcho').textContent=0; pushLog('Noi',`Service +${iS}`); }
   if(invest>0){ cash-= (iQ*300 + iB*250 + iS*200); }
 
-  comps.forEach(compMove);       // mosse competitor (log)
-  simulateDay();                 // domanda e utile
+  comps.forEach(compMove);
+  simulateDay();
   day++; $('day').textContent=day;
   if(day>10){ alert('Fine partita — utile cumulato: '+$('cumprofit').textContent); location.reload(); }
   refreshEcho();
@@ -267,7 +334,8 @@ $('advance').onclick=()=>{
 
 $('reset').onclick=()=>location.reload();
 
-renderTable(); refreshEcho(); runAdvisor();
+/* Start */
+renderTable(); refreshEcho(); runAdvisor(); drawChart();
 </script>
 </body>
 </html>
