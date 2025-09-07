@@ -1,13 +1,35 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
-<title>Margin Rush — v4.9 Pro (MC • Copertura • Margine di sicurezza • BE)</title>
-<meta name="theme-color" content="#0b1220"/>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
+  <title>Margin Rush — v4.9 Pro (MC • Copertura • Margine di sicurezza • BE)</title>
+
+  <!-- Colore barra status e tema -->
+  <meta name="theme-color" content="#0b1220"/>
+
+  <!-- Manifest e icone PWA -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Foglio di stile -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- il resto della tua app -->
+
+  <!-- Registrazione del Service Worker -->
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log('✅ Service Worker registrato'))
+      .catch(err => console.error('❌ SW errore', err));
+  }
+  </script>
+</body>
+</html>
 <header>
   <div class="wrap">
     <h1>Margin Rush <span class="pill">v4.9 Pro — MC • Copertura • Margine di sicurezza • BE</span></h1>
