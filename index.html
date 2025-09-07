@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
-<title>Margin Rush — v4.8 Pro (Canali vendita completi, BE, Tax)</title>
+<title>Margin Rush — v4.8.1 Pro (Canali vendita completi, BE, Tax)</title>
 <meta name="theme-color" content="#0b1220"/>
 <style>
 :root{--bg:#0b1220;--card:#0f1930;--ink:#eaf0ff;--muted:#b9c7eb;--grid:#1f2d4f;--accent:#87a7ff;--good:#6be675;--bad:#ff7a88;--warn:#ffd166}
@@ -37,7 +37,7 @@ input[type="number"]{width:120px}
 <body>
 <header>
   <div class="wrap">
-    <h1>Margin Rush <span class="pill">v4.8 Pro — Canali vendita completi • BE • Tax</span></h1>
+    <h1>Margin Rush <span class="pill">v4.8.1 Pro — Canali vendita completi • BE • Tax</span></h1>
     <span class="badge">Giorno: <b id="day">1</b>/10</span>
     <span class="badge">Cassa: <b id="cash">€5.000,00</b></span>
     <span class="badge">Quota oggi: <b id="share">0%</b></span>
@@ -156,7 +156,7 @@ input[type="number"]{width:120px}
           <!-- P.IVA -->
           <div id="ch-piva" style="display:none">
             <div class="kpi">
-              <div class="box">Auto €/mese<br><input type="number" id="pvAuto" value="400" step="10"></div>
+              <div class="box">Auto a noleggio €/mese<br><input type="number" id="pvAuto" value="400" step="10"></div>
               <div class="box">Compenso fisso €/mese<br><input type="number" id="pvFixed" value="2000" step="50"></div>
               <div class="box">Provvigione %<br><input type="number" id="pvPct" value="10" step="0.5"></div>
               <div class="box">Telepass €/km<br><input type="number" id="pvTeleKm" value="0.07" step="0.01"></div>
@@ -207,14 +207,14 @@ input[type="number"]{width:120px}
 </main>
 
 <script>
-/* ===== Utils & DOM ===== */
-const $=id=>document.getElementById(id);
-const euro=n=>(Math.round(n*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
+/* ========= Utils ========= */
+const el = id => document.getElementById(id);
+const euro = n => (Math.round(n*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
 const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}};
 
-/* ===== Stato ===== */
+/* ========= Stato ========= */
 let day=1,M=1200,beta=0.08,season=0,ivaIncl=true,ivaPct=0.22,cap=1000;
 let cash=5000,cumProfit=0;
 let buyCost=load('buyCost',20), varOver=load('varOver',1.2), minMargin=load('minMargin',15), tax=load('tax',24)/100;
@@ -226,7 +226,7 @@ let ch=load('chParams',{
   employee:{ralY:50000,autoM:450,teleM:30,tripsM:250,pct:0,kmM:0,kml:18,fuel:1.7}
 });
 
-/* ===== Offerte & domanda ===== */
+/* ========= Offerte & domanda ========= */
 let our={name:"Noi",p:49,Q:1,B:1,S:1};
 let comps=[
  {name:"Comp A (Price-war)",p:45,Q:1,B:1,S:1,strat:"price"},
@@ -235,7 +235,7 @@ let comps=[
   actions:[{dp:-.1,name:"Price −10%"},{dp:-.05,name:"Price −5%"},{dQ:1,name:"+Q"},{dB:1,name:"+B"},{dS:1,dp:+.05,name:"+S & +5%"}],
   Qvals:[0,0,0,0,0],N:[0,0,0,0,0],epsilon:0.25}
 ];
-const logEl=$('log'); const log=(t)=>{const d=document.createElement('div');d.className='log-item';d.textContent=t;logEl.prepend(d)};
+const logEl=el('log'); const log=(t)=>{const d=document.createElement('div');d.className='log-item';d.textContent=t;logEl.prepend(d)};
 
 function shares(players){
   const U=players.map(o=>{
@@ -250,67 +250,86 @@ function shares(players){
 const costQ=Q=>8+2*Q;
 const netP=p=>ivaIncl? p/(1+ivaPct):p;
 
-/* ===== Garanzia & costi variabili ===== */
-const wCostPerUnit=()=>((+wRateIn.value||0)/100*(+wCostIn.value||0))+((+wRateOut.value||0)/100*(+wCostOut.value||0));
+/* ========= Garanzia & costi ========= */
+const E = {
+  // base UI
+  price: el('price'), priceEcho: el('priceEcho'), invQ: el('invQ'), invQEcho: el('invQEcho'),
+  invB: el('invB'), invBEcho: el('invBEcho'), invS: el('invS'), invSEcho: el('invSEcho'),
+  cap: el('cap'), capVal: el('capVal'), capEcho: el('capEcho'),
+  iva: el('iva'), ivaPct: el('ivaPct'), beta: el('beta'), season: el('season'),
+  buyCost: el('buyCost'), varOver: el('varOver'), minMarginPct: el('minMarginPct'),
+  minMarginWarn: el('minMarginWarn'), taxPct: el('taxPct'),
+  fxStaff: el('fxStaff'), fxRent: el('fxRent'), fxSaaS: el('fxSaaS'), fxOther: el('fxOther'),
+  // garanzia
+  wTier: el('wTier'), wRateIn: el('wRateIn'), wCostIn: el('wCostIn'), wRateOut: el('wRateOut'), wCostOut: el('wCostOut'),
+  wCostPerUnit: el('wCostPerUnit'), mcUnit: el('mcUnit'), beUnits: el('beUnits'),
+  // channel
+  channel: el('channel'),
+  chFixedEcho: el('chFixedEcho'), chVarEcho: el('chVarEcho'), chPctEcho: el('chPctEcho'),
+  chOnline: el('ch-online'), chPiva: el('ch-piva'), chEmployee: el('ch-employee'),
+  onFeePct: el('onFeePct'), onPayPct: el('onPayPct'), onFixedPer: el('onFixedPer'), onLogPer: el('onLogPer'), onSaaS: el('onSaaS'), onMgmt: el('onMgmt'),
+  pvAuto: el('pvAuto'), pvFixed: el('pvFixed'), pvPct: el('pvPct'), pvTeleKm: el('pvTeleKm'), pvKm: el('pvKm'), pvKml: el('pvKml'), pvFuel: el('pvFuel'), pvOtherM: el('pvOtherM'),
+  emRal: el('emRal'), emAuto: el('emAuto'), emTele: el('emTele'), emTrips: el('emTrips'), emPct: el('emPct'), emKm: el('emKm'), emKml: el('emKml'), emFuel: el('emFuel'),
+  // report
+  qMe: el('qMe'), sMe: el('sMe'), pMe: el('pMe'), cash: el('cash'), cumprofit: el('cumprofit'), share: el('share'),
+  moved: el('moved'), bp: el('bp'), bq: el('bq'), bb: el('bb'), bs: el('bs'),
+  advisor: el('advisor'), beChart: el('beChart'), day: el('day')
+};
 
+function wCostPerUnit(){
+  const rin=(+E.wRateIn.value||0)/100, rout=(+E.wRateOut.value||0)/100;
+  return rin*(+E.wCostIn.value||0) + rout*(+E.wCostOut.value||0);
+}
 function channelFixedPerDay(){
   if(channel==='online'){
-    return ((+onSaaS.value||0)+(+onMgmt.value||0))/30;
+    return ((+E.onSaaS.value||0)+(+E.onMgmt.value||0))/30;
   }else if(channel==='piva'){
-    const km=+pvKm.value||0, kml=+pvKml.value||1, fuel=+pvFuel.value||0, teleKm=+pvTeleKm.value||0, otherM=+pvOtherM.value||0;
+    const km=+E.pvKm.value||0, kml=+E.pvKml.value||1, fuel=+E.pvFuel.value||0, teleKm=+E.pvTeleKm.value||0, otherM=+E.pvOtherM.value||0;
     const fuelM = km/kml*fuel;
     const teleM = km*teleKm;
-    return ((+pvAuto.value||0)+(+pvFixed.value||0)+fuelM+teleM+otherM)/30;
+    return ((+E.pvAuto.value||0)+(+E.pvFixed.value||0)+fuelM+teleM+otherM)/30;
   }else{
-    const ralD = (+emRal.value||0)/12/30;
-    const fuelM = (+emKm.value||0)/(+emKml.value||1)*(+emFuel.value||0);
-    return ralD + ((+emAuto.value||0)+(+emTele.value||0)+(+emTrips.value||0)+fuelM)/30;
+    const ralD=(+E.emRal.value||0)/12/30;
+    const fuelM=(+E.emKm.value||0)/(+E.emKml.value||1)*(+E.emFuel.value||0);
+    return ralD + ((+E.emAuto.value||0)+(+E.emTele.value||0)+(+E.emTrips.value||0)+fuelM)/30;
   }
 }
 function channelVarPerUnit(pNet){
   if(channel==='online'){
-    const pct=((+onFeePct.value||0)+(+onPayPct.value||0))/100;
-    return pNet*pct + (+onFixedPer.value||0) + (+onLogPer.value||0);
+    const pct=((+E.onFeePct.value||0)+(+E.onPayPct.value||0))/100;
+    return pNet*pct + (+E.onFixedPer.value||0) + (+E.onLogPer.value||0);
   }else if(channel==='piva'){
-    const pct=(+pvPct.value||0)/100;
-    return pNet*pct; // il resto è fisso
+    return pNet*((+E.pvPct.value||0)/100);
   }else{
-    const pct=(+emPct.value||0)/100;
-    return pNet*pct; // opzionabile
+    return pNet*((+E.emPct.value||0)/100);
   }
 }
 function channelPctEcho(){
-  if(channel==='online') return ((+onFeePct.value||0)+(+onPayPct.value||0)).toFixed(1)+'%';
-  if(channel==='piva')   return ((+pvPct.value||0)).toFixed(1)+'%';
-  return ((+emPct.value||0)).toFixed(1)+'%';
+  if(channel==='online') return (((+E.onFeePct.value||0)+(+E.onPayPct.value||0)).toFixed(1))+'%';
+  if(channel==='piva')   return ((+E.pvPct.value||0).toFixed(1))+'%';
+  return ((+E.emPct.value||0).toFixed(1))+'%';
 }
-
+const costQ = Q => 8 + 2*Q;
 function varCostPerUnit(){
   const pNet=netP(our.p);
   return buyCost + varOver + costQ(our.Q) + wCostPerUnit() + channelVarPerUnit(pNet);
 }
 function mcUnit(){ return Math.max(0, netP(our.p) - varCostPerUnit()); }
+function fixedBasePerDay(){ return (+E.fxStaff.value||0)+(+E.fxRent.value||0)+(+E.fxSaaS.value||0)+(+E.fxOther.value||0); }
+function fixedTotalPerDay(){ return fixedBasePerDay() + channelFixedPerDay(); }
 
-function fixedBasePerDay(){
-  return (+fxStaff.value||0)+(+fxRent.value||0)+(+fxSaaS.value||0)+(+fxOther.value||0);
-}
-function fixedTotalPerDay(){
-  return fixedBasePerDay() + channelFixedPerDay();
-}
-
-/* ===== BE, advisor, margine ===== */
+/* ========= BE, advisor, margine ========= */
 function bePostTax(){
-  const mc=mcUnit(), F=fixedTotalPerDay();
+  const mc = mcUnit(), F = fixedTotalPerDay();
   if(mc<=0) return {units:Infinity,revenue:Infinity};
-  const u=Math.ceil(F/(mc*(1-tax)));
-  return {units:u,revenue: u*netP(our.p)};
+  const u = Math.ceil(F/(mc*(1-tax)));
+  return {units:u,revenue:u*netP(our.p)};
 }
 function checkMinMargin(){
   const pNet=netP(our.p);
   const gm = pNet>0 ? (pNet - varCostPerUnit())/pNet*100 : -Infinity;
-  $('minMarginWarn').innerHTML = gm < (+minMarginPct.value||0) ? '<span class="warn">Sotto margine min.</span>' : '<span class="gain">OK</span>';
+  E.minMarginWarn.innerHTML = gm < (+E.minMarginPct.value||0) ? '<span class="warn">Sotto margine min.</span>' : '<span class="gain">OK</span>';
 }
-
 function runAdvisor(){
   const F=fixedTotalPerDay(); let best=our.p, bestProf=-1;
   for(let p=10;p<=120;p+=.5){
@@ -318,16 +337,16 @@ function runAdvisor(){
     const q=Math.min(Math.round(s*M*(1+season/100)),cap);
     const pNet=netP(p);
     const vc = buyCost + varOver + costQ(our.Q) + wCostPerUnit() + channelVarPerUnit(pNet);
-    const pre = Math.max(0, pNet-vc)*q - F;
+    const pre = Math.max(0,pNet-vc)*q - F;
     const post = pre>0 ? pre*(1-tax) : pre;
     if(post>bestProf){bestProf=post;best=p;}
   }
-  $('advisor').innerHTML=`Advisor: <b>${euro(best)}</b> — utile atteso ${euro(bestProf)} (post-tax).`;
+  E.advisor.innerHTML=`Advisor: <b>${euro(best)}</b> — utile atteso ${euro(bestProf)} (post-tax).`;
 }
 
-/* ===== Chart ===== */
+/* ========= Chart ========= */
 function drawChart(){
-  const c=$('beChart'), ctx=c.getContext('2d');
+  const c=E.beChart, ctx=c.getContext('2d');
   const w=c.clientWidth, h=c.clientHeight; if(c.width!==w){c.width=w;c.height=h}
   ctx.clearRect(0,0,w,h);
   const pad=30, maxQ=Math.max(cap,Math.round(M*(1+season/100)));
@@ -339,7 +358,7 @@ function drawChart(){
   const be=bePostTax(); if(isFinite(be.units)&&be.units<=maxQ){ctx.fillStyle="#6be675";ctx.beginPath();ctx.arc(x(be.units),y(pNet*be.units),4,0,6.28);ctx.fill();ctx.fillText(`BE ${be.units}`,x(be.units)+6,y(pNet*be.units)-6);}
 }
 
-/* ===== Clienti spostati ===== */
+/* ========= Clienti spostati ========= */
 let prev={p:our.p,Q:our.Q,B:our.B,S:our.S,share:0,units:0};
 const ourShareWith=cfg=>shares([{...our,...cfg}].concat(comps))[0];
 function estimateMoved(market){
@@ -357,96 +376,100 @@ function estimateMoved(market){
   };
 }
 
-/* ===== UI helpers ===== */
+/* ========= UI ========= */
 function renderTable(q=null,s=null){
-  const rows=[our].concat(comps).map((p,i)=>`<tr><td>${i?'Comp '+String.fromCharCode(64+i):'Noi'}</td><td>${euro(p.p)}</td><td>${p.Q}</td><td>${p.B}</td><td>${p.S}</td><td>${s? (s[i]*100).toFixed(1)+'%':'—'}</td><td>${q? q[i].toLocaleString('it-IT'):'—'}</td></tr>`).join('');
+  const rows=[our].concat(comps).map((p,i)=>`<tr><td>${i?('Comp '+String.fromCharCode(64+i)):'Noi'}</td><td>${euro(p.p)}</td><td>${p.Q}</td><td>${p.B}</td><td>${p.S}</td><td>${s? (s[i]*100).toFixed(1)+'%':'—'}</td><td>${q? q[i].toLocaleString('it-IT'):'—'}</td></tr>`).join('');
   document.querySelector('#tbl tbody').innerHTML=rows;
 }
+function showChannelPanels(){
+  E.chOnline.style.display   = channel==='online'   ? 'block' : 'none';
+  E.chPiva.style.display     = channel==='piva'     ? 'block' : 'none';
+  E.chEmployee.style.display = channel==='employee' ? 'block' : 'none';
+}
 function refreshEcho(){
-  $('priceEcho').textContent=euro(our.p);
-  $('betaEcho').textContent=beta.toFixed(3); $('seasonEcho').textContent=(season>=0?'+':'')+season+'%';
-  $('capEcho').textContent=cap; $('capVal').textContent=cap;
-  // canale e fissi echo
-  $('chFixedEcho').textContent=euro(channelFixedPerDay());
-  $('chVarEcho').textContent=euro(channelVarPerUnit(netP(our.p)));
-  $('chPctEcho').textContent=channelPctEcho();
+  el('priceEcho').textContent=euro(our.p);
+  el('betaEcho').textContent=beta.toFixed(3); el('seasonEcho').textContent=(season>=0?'+':'')+season+'%';
+  el('capEcho').textContent=cap; el('capVal').textContent=cap;
+  // canale & fissi
+  E.chFixedEcho.textContent=euro(channelFixedPerDay());
+  E.chVarEcho.textContent=euro(channelVarPerUnit(netP(our.p)));
+  E.chPctEcho.textContent=channelPctEcho();
   // garanzia & margine
-  $('wCostPerUnit').textContent=euro(wCostPerUnit());
-  $('mcUnit').textContent=euro(mcUnit());
+  E.wCostPerUnit.textContent=euro(wCostPerUnit());
+  E.mcUnit.textContent=euro(mcUnit());
   checkMinMargin();
-  const be=bePostTax(); $('beUnits').textContent=isFinite(be.units)?be.units.toLocaleString('it-IT'):'— (margine ≤ 0)';
+  const be=bePostTax(); E.beUnits.textContent=isFinite(be.units)?be.units.toLocaleString('it-IT'):'— (margine ≤ 0)';
   runAdvisor(); drawChart();
 }
 
-function showChannelPanels(){
-  $('ch-online').style.display = channel==='online' ? 'block':'none';
-  $('ch-piva').style.display   = channel==='piva'   ? 'block':'none';
-  $('ch-employee').style.display=channel==='employee'?'block':'none';
+/* ========= Bindings ========= */
+function bindInputs(){
+  // valori di default/LS su UI
+  E.price.value=our.p; E.price.oninput=()=>{our.p=parseFloat(E.price.value); refreshEcho();};
+  E.invQ.oninput=()=>{E.invQEcho.textContent=E.invQ.value; our.Q=1+parseInt(E.invQ.value||'0',10)*0.5; refreshEcho();};
+  E.invB.oninput=()=>{E.invBEcho.textContent=E.invB.value; our.B=1+parseInt(E.invB.value||'0',10)*0.5; refreshEcho();};
+  E.invS.oninput=()=>{E.invSEcho.textContent=E.invS.value; our.S=1+parseInt(E.invS.value||'0',10); refreshEcho();};
+
+  E.cap.value=cap; E.cap.oninput=()=>{cap=parseInt(E.cap.value,10); refreshEcho();};
+  E.beta.value=beta; E.beta.oninput=()=>{beta=parseFloat(E.beta.value)||0.08; refreshEcho();};
+  E.season.value=season; E.season.oninput=()=>{season=parseInt(E.season.value||'0',10); refreshEcho();};
+  E.iva.checked=ivaIncl; E.iva.oninput=()=>{ivaIncl=E.iva.checked; refreshEcho();};
+  E.ivaPct.value=(ivaPct*100).toFixed(1); E.ivaPct.oninput=()=>{ivaPct=(parseFloat(E.ivaPct.value)||22)/100; refreshEcho();};
+
+  E.buyCost.value=buyCost; E.buyCost.oninput=()=>{buyCost=parseFloat(E.buyCost.value)||0; save('buyCost',buyCost); refreshEcho();};
+  E.varOver.value=varOver; E.varOver.oninput=()=>{varOver=parseFloat(E.varOver.value)||0; save('varOver',varOver); refreshEcho();};
+  E.minMarginPct.value=minMargin; E.minMarginPct.oninput=()=>{minMargin=parseFloat(E.minMarginPct.value)||0; save('minMargin',minMargin); refreshEcho();};
+  E.taxPct.value=(tax*100).toFixed(1); E.taxPct.oninput=()=>{tax=(parseFloat(E.taxPct.value)||24)/100; save('tax',tax*100); refreshEcho();};
+
+  // fissi base
+  E.fxStaff.value=fixedBase.staff; E.fxRent.value=fixedBase.rent; E.fxSaaS.value=fixedBase.saas; E.fxOther.value=fixedBase.other;
+  ;['fxStaff','fxRent','fxSaaS','fxOther'].forEach(id=>{
+    E[id].addEventListener('input',()=>{ fixedBase={staff:+E.fxStaff.value||0,rent:+E.fxRent.value||0,saas:+E.fxSaaS.value||0,other:+E.fxOther.value||0}; save('fixedBase',fixedBase); refreshEcho(); });
+  });
+
+  // canale
+  E.channel.value=channel; E.channel.oninput=()=>{channel=E.channel.value; save('channel',channel); showChannelPanels(); refreshEcho();};
+
+  // ripristina parametri da LS/default e bind salvataggio
+  function restoreChToUI(){
+    // Online
+    E.onFeePct.value=ch.online.feePct; E.onPayPct.value=ch.online.payPct; E.onFixedPer.value=ch.online.fixedPer; E.onLogPer.value=ch.online.logPer; E.onSaaS.value=ch.online.saasM; E.onMgmt.value=ch.online.mgmtM;
+    // P.IVA
+    E.pvAuto.value=ch.piva.autoM; E.pvFixed.value=ch.piva.fixedM; E.pvPct.value=ch.piva.pct; E.pvTeleKm.value=ch.piva.teleKm; E.pvKm.value=ch.piva.kmM; E.pvKml.value=ch.piva.kml; E.pvFuel.value=ch.piva.fuel; E.pvOtherM.value=ch.piva.otherM;
+    // Dipendente
+    E.emRal.value=ch.employee.ralY; E.emAuto.value=ch.employee.autoM; E.emTele.value=ch.employee.teleM; E.emTrips.value=ch.employee.tripsM; E.emPct.value=ch.employee.pct; E.emKm.value=ch.employee.kmM; E.emKml.value=ch.employee.kml; E.emFuel.value=ch.employee.fuel;
+  }
+  function currentChParams(){
+    return {
+      online:{feePct:+E.onFeePct.value||0,payPct:+E.onPayPct.value||0,fixedPer:+E.onFixedPer.value||0,logPer:+E.onLogPer.value||0,saasM:+E.onSaaS.value||0,mgmtM:+E.onMgmt.value||0},
+      piva:{autoM:+E.pvAuto.value||0,fixedM:+E.pvFixed.value||0,pct:+E.pvPct.value||0,teleKm:+E.pvTeleKm.value||0,kmM:+E.pvKm.value||0,kml:+E.pvKml.value||1,fuel:+E.pvFuel.value||0,otherM:+E.pvOtherM.value||0},
+      employee:{ralY:+E.emRal.value||0,autoM:+E.emAuto.value||0,teleM:+E.emTele.value||0,tripsM:+E.emTrips.value||0,pct:+E.emPct.value||0,kmM:+E.emKm.value||0,kml:+E.emKml.value||1,fuel:+E.emFuel.value||0}
+    };
+  }
+  restoreChToUI();
+  [
+    'onFeePct','onPayPct','onFixedPer','onLogPer','onSaaS','onMgmt',
+    'pvAuto','pvFixed','pvPct','pvTeleKm','pvKm','pvKml','pvFuel','pvOtherM',
+    'emRal','emAuto','emTele','emTrips','emPct','emKm','emKml','emFuel'
+  ].forEach(id=>{
+    E[id].addEventListener('input',()=>{ ch=currentChParams(); save('chParams',ch); refreshEcho(); });
+  });
 }
 
-/* ===== Bindings ===== */
-$('price').value=our.p; $('price').oninput=()=>{our.p=parseFloat(price.value); refreshEcho();};
-$('invQ').oninput=()=>{our.Q=1+parseInt(invQ.value||'0',10)*0.5; $('invQEcho').textContent=invQ.value; refreshEcho();};
-$('invB').oninput=()=>{our.B=1+parseInt(invB.value||'0',10)*0.5; $('invBEcho').textContent=invB.value; refreshEcho();};
-$('invS').oninput=()=>{our.S=1+parseInt(invS.value||'0',10); $('invSEcho').textContent=invS.value; refreshEcho();};
-$('cap').value=cap; $('cap').oninput=()=>{cap=parseInt(cap.value,10); refreshEcho();};
-$('beta').oninput=()=>{beta=parseFloat(beta.value)||0.08; refreshEcho();};
-$('season').oninput=()=>{season=parseInt(season.value||'0',10); refreshEcho();};
-$('iva').oninput=()=>{ivaIncl=iva.checked; refreshEcho();};
-$('ivaPct').oninput=()=>{ivaPct=parseFloat(ivaPct.value)/100; refreshEcho();};
-
-$('buyCost').value=buyCost; $('buyCost').oninput=()=>{buyCost=parseFloat(buyCost.value)||0; save('buyCost',buyCost); refreshEcho();};
-$('varOver').value=varOver; $('varOver').oninput=()=>{varOver=parseFloat(varOver.value)||0; save('varOver',varOver); refreshEcho();};
-$('minMarginPct').value=minMargin; $('minMarginPct').oninput=()=>{minMargin=parseFloat(minMarginPct.value)||0; save('minMargin',minMargin); refreshEcho();};
-$('taxPct').value=(tax*100).toFixed(1); $('taxPct').oninput=()=>{tax=(parseFloat(taxPct.value)||0)/100; save('tax',tax*100); refreshEcho();};
-
-// fissi base
-['fxStaff','fxRent','fxSaaS','fxOther'].forEach(id=>$(id).oninput=()=>{save('fixedBase',{staff:+fxStaff.value||0,rent:+fxRent.value||0,saas:+fxSaaS.value||0,other:+fxOther.value||0}); refreshEcho();});
-fxStaff.value=fixedBase.staff; fxRent.value=fixedBase.rent; fxSaaS.value=fixedBase.saas; fxOther.value=fixedBase.other;
-
-// garanzia
-['wTier','wRateIn','wCostIn','wRateOut','wCostOut'].forEach(id=>$(id).addEventListener('input',refreshEcho));
-
-// canale
-$('channel').value=channel; $('channel').oninput=()=>{channel=channel.value; save('channel',channel); showChannelPanels(); refreshEcho();};
-
-// online inputs
-['onFeePct','onPayPct','onFixedPer','onLogPer','onSaaS','onMgmt'].forEach(id=>$(id).addEventListener('input',()=>{save('chParams',currentChParams()); refreshEcho();}));
-// piva inputs
-['pvAuto','pvFixed','pvPct','pvTeleKm','pvKm','pvKml','pvFuel','pvOtherM'].forEach(id=>$(id).addEventListener('input',()=>{save('chParams',currentChParams()); refreshEcho();}));
-// employee inputs
-['emRal','emAuto','emTele','emTrips','emPct','emKm','emKml','emFuel'].forEach(id=>$(id).addEventListener('input',()=>{save('chParams',currentChParams()); refreshEcho();}));
-
-function currentChParams(){
-  return {
-    online:{feePct:+onFeePct.value||0,payPct:+onPayPct.value||0,fixedPer:+onFixedPer.value||0,logPer:+onLogPer.value||0,saasM:+onSaaS.value||0,mgmtM:+onMgmt.value||0},
-    piva:{autoM:+pvAuto.value||0,fixedM:+pvFixed.value||0,pct:+pvPct.value||0,teleKm:+pvTeleKm.value||0,kmM:+pvKm.value||0,kml:+pvKml.value||1,fuel:+pvFuel.value||0,otherM:+pvOtherM.value||0},
-    employee:{ralY:+emRal.value||0,autoM:+emAuto.value||0,teleM:+emTele.value||0,tripsM:+emTrips.value||0,pct:+emPct.value||0,kmM:+emKm.value||0,kml:+emKml.value||1,fuel:+emFuel.value||0}
-  };
+/* ========= Simulazione ========= */
+function renderTable(q=null,s=null){
+  const rows=[our].concat(comps).map((p,i)=>`<tr><td>${i?('Comp '+String.fromCharCode(64+i)):'Noi'}</td><td>${euro(p.p)}</td><td>${p.Q}</td><td>${p.B}</td><td>${p.S}</td><td>${s? (s[i]*100).toFixed(1)+'%':'—'}</td><td>${q? q[i].toLocaleString('it-IT'):'—'}</td></tr>`).join('');
+  document.querySelector('#tbl tbody').innerHTML=rows;
 }
-
-// ripristina UI canale da LS
-(function restoreCh(){
-  // assegna valori caricati
-  onFeePct.value=ch.online.feePct; onPayPct.value=ch.online.payPct; onFixedPer.value=ch.online.fixedPer; onLogPer.value=ch.online.logPer; onSaaS.value=ch.online.saasM; onMgmt.value=ch.online.mgmtM;
-  pvAuto.value=ch.piva.autoM; pvFixed.value=ch.piva.fixedM; pvPct.value=ch.piva.pct; pvTeleKm.value=ch.piva.teleKm; pvKm.value=ch.piva.kmM; pvKml.value=ch.piva.kml; pvFuel.value=ch.piva.fuel; pvOtherM.value=ch.piva.otherM;
-  emRal.value=ch.employee.ralY; emAuto.value=ch.employee.autoM; emTele.value=ch.employee.teleM; emTrips.value=ch.employee.tripsM; emPct.value=ch.employee.pct; emKm.value=ch.employee.kmM; emKml.value=ch.employee.kml; emFuel.value=ch.employee.fuel;
-  showChannelPanels();
-})();
-
-/* ===== Simulazione ===== */
 function simulateDay(){
   // mosse competitor
   comps.forEach(c=>{
     if(c.strat==='price'){const t=Math.max(12,our.p*.95);const prev=c.p;c.p=clamp(c.p*.6+t*.4,10,120);log(`Price-war: ${euro(prev)} → ${euro(c.p)}`);}
     else if(c.strat==='premium'){if(Math.random()<.5)c.Q=Math.min(5,c.Q+1);else c.B=Math.min(5,c.B+1);const prev=c.p;c.p=clamp(c.p*1.01,30,140);log(`Premium: investe · prezzo ${euro(prev)} → ${euro(c.p)}`);}
-    else{ // bandit semplice su prezzo
-      const idx = Math.random()<c.epsilon ? Math.floor(Math.random()*c.actions.length) : c.Qvals.indexOf(Math.max(...c.Qvals));
-      const a=c.actions[idx]; const prev={p:c.p,Q:c.Q,B:c.B,S:c.S};
-      if(a.dp) c.p=clamp(c.p*(1+a.dp),10,140); if(a.dQ) c.Q=Math.min(5,c.Q+1); if(a.dB) c.B=Math.min(5,c.B+1); if(a.dS) c.S=Math.min(5,c.S+1);
-      log(`Bandit: ${a.name} (P ${euro(prev.p)}→${euro(c.p)})`);
-      const before=shares([our].concat(comps))[3]; const after=shares([our].concat(comps))[3]; c.N[idx]++; c.Qvals[idx]+=((after-before)-c.Qvals[idx])/c.N[idx]; c.epsilon=Math.max(0.05,c.epsilon*0.98);
-    }
+    else{const idx = Math.random()<c.epsilon ? Math.floor(Math.random()*c.actions.length) : c.Qvals.indexOf(Math.max(...c.Qvals)); const a=c.actions[idx]; const prev=c.p;
+         if(a.dp) c.p=clamp(c.p*(1+a.dp),10,140); if(a.dQ) c.Q=Math.min(5,c.Q+1); if(a.dB) c.B=Math.min(5,c.B+1); if(a.dS) c.S=Math.min(5,c.S+1);
+         log(`Bandit: ${a.name} (P ${euro(prev)}→${euro(c.p)})`);
+         const before=shares([our].concat(comps))[3]; const after=shares([our].concat(comps))[3]; c.N[idx]++; c.Qvals[idx]+=((after-before)-c.Qvals[idx])/c.N[idx]; c.epsilon=Math.max(0.05,c.epsilon*0.98);}
   });
 
   // domanda
@@ -455,7 +478,12 @@ function simulateDay(){
   const q=s.map(x=>Math.round(x*market)); q[0]=Math.min(q[0],cap);
 
   // spostati
-  const {moved,dp,dq,db,ds,s_now}=estimateMoved(market);
+  const s_prev=prev.share||ourShareWith(prev), s_now=ourShareWith(our);
+  const s_p=ourShareWith({p:our.p,Q:prev.Q,B:prev.B,S:prev.S});
+  const s_q=ourShareWith({p:our.p,Q:our.Q,B:prev.B,S:prev.S});
+  const s_b=ourShareWith({p:our.p,Q:our.Q,B:our.B,S:prev.S});
+  const moved=Math.round((s_now-s_prev)*market);
+  const dp=Math.round((s_p-s_prev)*market), dq=Math.round((s_q-s_p)*market), db=Math.round((s_b-s_q)*market), ds=Math.round((s_now-s_b)*market);
 
   // utile
   const pNet=netP(our.p), F=fixedTotalPerDay(), vc=varCostPerUnit();
@@ -464,32 +492,35 @@ function simulateDay(){
 
   // render
   renderTable(q,s);
-  $('qMe').textContent=q[0].toLocaleString('it-IT');
-  $('sMe').textContent=(s[0]*100).toFixed(1)+'%';
-  $('pMe').textContent=euro(profit);
-  $('cash').textContent=euro(cash); $('cumprofit').textContent=euro(cumProfit);
-  $('share').textContent=(s[0]*100).toFixed(1)+'%';
-  $('moved').textContent=(moved>=0?'+':'')+moved.toLocaleString('it-IT');
-  $('bp').textContent=(dp>=0?'+':'')+dp; $('bq').textContent=(dq>=0?'+':'')+dq; $('bb').textContent=(db>=0?'+':'')+db; $('bs').textContent=(ds>=0?'+':'')+ds;
+  E.qMe.textContent=q[0].toLocaleString('it-IT');
+  E.sMe.textContent=(s[0]*100).toFixed(1)+'%';
+  E.pMe.textContent=euro(profit);
+  E.cash.textContent=euro(cash); E.cumprofit.textContent=euro(cumProfit);
+  E.share.textContent=(s[0]*100).toFixed(1)+'%';
+  E.moved.textContent=(moved>=0?'+':'')+moved.toLocaleString('it-IT');
+  E.bp.textContent=(dp>=0?'+':'')+dp; E.bq.textContent=(dq>=0?'+':'')+dq; E.bb.textContent=(db>=0?'+':'')+db; E.bs.textContent=(ds>=0?'+':'')+ds;
 
   // stato "ieri"
   prev={p:our.p,Q:our.Q,B:our.B,S:our.S,share:s_now,units:q[0]};
 
-  // echo
+  // echo & avanti
   refreshEcho();
-  day++; $('day').textContent=day; if(day>10){alert('Fine partita — utile cumulato: '+$('cumprofit').textContent); location.reload();}
+  day++; E.day.textContent=day; if(day>10){alert('Fine partita — utile cumulato: '+E.cumprofit.textContent); location.reload();}
 }
 
-/* ===== Pulsanti ===== */
-$('advance').onclick=simulateDay;
-$('reset').onclick=()=>location.reload();
-
-/* ===== Start ===== */
-(function init(){
-  $('priceEcho').textContent=euro(our.p);
-  $('capVal').textContent=cap; $('capEcho').textContent=cap;
+/* ========= Start ========= */
+function start(){
+  // assegna default visibili
+  E.priceEcho.textContent=euro(our.p);
+  E.capVal.textContent=cap; E.capEcho.textContent=cap;
+  // canale: mostra pannello corrente e carica default/LS
+  showChannelPanels(); bindInputs();
   renderTable(); refreshEcho(); drawChart();
-})();
+
+  el('advance').onclick=simulateDay;
+  el('reset').onclick=()=>location.reload();
+}
+start();
 </script>
 </body>
 </html>
