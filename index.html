@@ -1,79 +1,81 @@
+
 <!doctype html>
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Margin Rush — Micro Tycoon</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<title>Margin Rush Pro — Market Tycoon</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b1220">
 <link rel="icon" href="icon-192.png">
 <style>
   :root{
-    --bg:#0b1220; --card:#111a2e; --ink:#e7eefc; --muted:#b6c3e6;
-    --accent:#6be675; --accent2:#87a7ff; --bad:#ff7a88; --grid:#1c2640;
+    --bg:#0b1220; --card:#10192e; --ink:#e7eefc; --muted:#b6c3e6;
+    --accent:#6be675; --accent2:#87a7ff; --bad:#ff7a88; --grid:#1e2947;
     --gold:#ffd166; --bar:#1c2f66; --barFill:#6be675;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-  /* Wider container so nothing is cramped on laptop */
-  .wrap{max-width:1320px;margin:0 auto;padding:16px}
-  header{position:sticky;top:0;background:linear-gradient(180deg, rgba(11,18,32,.95), rgba(11,18,32,.75));backdrop-filter: blur(6px);z-index:10}
-  h1{font-size:1.25rem;margin:0 0 6px}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  header{position:sticky;top:0;background:linear-gradient(180deg, rgba(11,18,32,.96), rgba(11,18,32,.82));backdrop-filter: blur(6px);z-index:30}
+  .wrap{max-width:1120px;margin:0 auto;padding:14px}
+  h1{font-size:1.2rem;margin:0 0 6px}
   .sub{color:var(--muted);font-size:.95rem}
-  .topbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}
   .badge{padding:6px 10px;border:1px solid var(--grid);border-radius:10px;color:var(--muted);white-space:nowrap}
-  .timer{font-weight:700;color:var(--accent)}
   .score{font-weight:700;color:var(--accent2)}
   .buttons{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   button{background:#192342;color:var(--ink);border:1px solid var(--grid);padding:8px 12px;border-radius:10px;cursor:pointer}
   button.primary{background:var(--accent2);color:#0a0f20;border-color:transparent;font-weight:700}
   button.danger{background:#ff5b6b;color:#0a0f20;border-color:transparent;font-weight:700}
-  main{padding:12px 16px}
-  .card{background:var(--card);border:1px solid var(--grid);border-radius:14px;overflow:visible} /* no clipping */
-  .flex{display:flex;gap:16px;flex-wrap:wrap}
-  .half{flex:1 1 620px}
-  .meta{color:var(--muted);font-size:.95rem}
-  /* Table: enable horizontal scroll and min-width */
+  main{padding:12px 14px}
+  .card{background:var(--card);border:1px solid var(--grid);border-radius:14px;overflow:hidden}
+  .meta{color:var(--muted);font-size:.9rem}
+  .flex{display:flex;gap:12px;flex-wrap:wrap}
+  .half{flex:1 1 520px}
+  .gridHead,.row{display:grid;grid-template-columns: 1.6fr .9fr 1.5fr 1fr 1fr 1fr; gap:8px; align-items:center}
+  .gridHead{padding:8px 10px;border-bottom:1px solid var(--grid);color:var(--muted)}
+  .row{padding:8px 10px;border-bottom:1px solid var(--grid)}
+  .row:last-child{border-bottom:none}
+  .name{font-weight:600}
+  input[type=range]{width:100%}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#122042;border:1px solid var(--grid);color:var(--muted)}
+  .footer{color:var(--muted);font-size:.85rem;margin-top:12px}
+  .stickyFab{position:fixed;right:12px;bottom:12px;z-index:40}
+  .fab{background:#122042;border:1px solid var(--grid);padding:10px 14px;border-radius:999px}
+  /* Bottom sheet */
+  .sheet{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--grid);border-radius:16px 16px 0 0;transform:translateY(100%);transition:.25s ease;z-index:50}
+  .sheet.show{transform:translateY(0)}
+  .sheet .grab{height:28px;display:grid;place-items:center}
+  .sheet .grab i{width:60px;height:5px;border-radius:999px;background:#2a3558}
+  .sheet .inner{padding:12px}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .controls label{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--grid);border-radius:10px;padding:8px;background:#0f1730;gap:8px}
   .tablewrap{overflow-x:auto}
-  table{width:100%;min-width:920px;border-collapse:collapse}
-  th,td{padding:10px;border-bottom:1px solid var(--grid);text-align:right;vertical-align:middle}
-  th:nth-child(1), td:nth-child(1){text-align:left;max-width:380px}
-  tr:last-child td{border-bottom:none}
-  input[type=range]{width:200px}
-  .note{background:#0f1730;border:1px dashed var(--grid);border-radius:10px;padding:10px;color:var(--muted)}
-  .opt{color:var(--gold);font-weight:700}
-  .leader li{display:flex;justify-content:space-between;border-bottom:1px solid var(--grid);padding:6px 0}
-  .leader li:last-child{border-bottom:none}
-  .bar{height:10px;background:var(--bar);border-radius:999px;overflow:hidden}
-  .bar>i{display:block;height:100%;width:0;background:var(--barFill)}
-  /* Laptop zoom-safe: reduce font size slightly at 90% width */
-  @media (max-width:1180px){
-    html{font-size:15px}
-    input[type=range]{width:180px}
+  @media (max-width:860px){
+    .gridHead,.row{grid-template-columns: 1.2fr .8fr 1.2fr .9fr .9fr 1fr}
   }
-  @media (max-width:1024px){
-    html{font-size:14px}
-    input[type=range]{width:160px}
+  @media (max-width:760px){
+    .gridHead{display:none}
+    .row{grid-template-columns: 1fr 1fr; grid-auto-rows:auto}
+    .row .cell{grid-column: span 2}
+    .row .cell.cost,.row .cell.comp,.row .cell.price,.row .cell.units,.row .cell.profit{display:flex;justify-content:space-between;gap:8px}
+    .stickyFab{bottom:10px}
   }
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <h1>Margin Rush <span style="padding:2px 8px;border:1px solid var(--grid);border-radius:999px;background:#122042;color:var(--muted)">micro-tycoon</span></h1>
-    <div class="sub">Massimizza l'<b>utile netto</b> regolando i prezzi in <b>60 secondi</b>. Season condivisibile e Practice.</div>
+    <h1>Margin Rush <span class="pill">Pro</span></h1>
+    <div class="sub">Domanda con <b>concorrenza</b> (logit), <b>stagionalità</b> e <b>quantità reali</b>. Pannello IVA mobile incluso.</div>
     <div class="topbar">
-      <div class="badge">Season: <span id="seasonLabel">—</span></div>
-      <div class="badge">Modalità: <span id="modeEcho">Season</span></div>
-      <div class="badge">Tempo: <span class="timer" id="timeLeft">60</span>s</div>
-      <div class="badge">Utile netto: <span class="score" id="score">0</span> €</div>
-      <div class="badge">Best stagione: <span id="best">0</span> €</div>
+      <div class="badge">Seed: <span id="seedEcho">—</span></div>
+      <div class="badge">Periodo: <span id="periodEcho">oggi</span></div>
+      <div class="badge">Utile netto atteso: <span class="score" id="score">0</span> €</div>
       <div class="buttons">
-        <button class="primary">Start</button>
-        <button>Retry</button>
-        <button>Practice</button>
-        <button>Condividi</button>
-        <button class="danger">Reset dati</button>
+        <button id="simulateWeek" class="primary">Simula 7 giorni</button>
+        <button id="shareBtn">Condividi</button>
+        <button id="resetBtn" class="danger">Reset dati</button>
       </div>
     </div>
   </div>
@@ -81,46 +83,237 @@
 
 <main class="wrap">
   <div class="flex">
-    <section class="half card">
+    <section class="half card" style="padding:10px">
+      <div class="meta" style="margin:4px 8px">Ogni riga mostra <b>Unità stimate</b> e <b>Utile</b> con concorrenza. Le quote reagiscono al prezzo.</div>
       <div class="tablewrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Prodotto</th><th>Cost (€)</th><th>Prezzo (€)</th><th>Domanda</th><th>Utile</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Alpha 1<div class="meta">ε=1.23 · D₀=120 @ p₀=30 € · <span class="opt">p*≈40 €</span></div></td>
-              <td>25,00 €</td>
-              <td><input type="range"><span>40,00 €</span></td>
-              <td><div class="bar" style="width:160px"><i style="width:60%"></i></div></td>
-              <td>540,00 €</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr><td colspan="4" style="text-align:right;font-weight:700">Totale lordo</td><td style="font-weight:700">0 €</td></tr>
-            <tr><td colspan="5" style="padding:0;border-bottom:none">
-              <div style="display:grid;grid-template-columns: repeat(2,minmax(260px,1fr));gap:10px;padding:10px">
-                <label class="meta">Prezzi IVA inclusa? <input type="checkbox"></label>
-                <label class="meta">IVA (%) <input type="number" value="22" style="width:90px"></label>
-                <label class="meta">Costi fissi (€) <input type="number" value="0" style="width:140px"></label>
-                <label class="meta">Aliquota imposta utile (%) <input type="number" value="0" style="width:90px"></label>
-              </div>
-            </td></tr>
-          </tfoot>
-        </table>
+        <div class="gridHead">
+          <div>Prodotto</div><div>Cost</div><div>Prezzo (slider)</div><div>Comp</div><div>Unità</div><div>Utile</div>
+        </div>
+        <div id="rows"></div>
+      </div>
+      <div class="meta" style="display:flex;justify-content:flex-end;padding:8px 10px;border-top:1px solid var(--grid)">
+        Totale lordo: <b style="margin-left:8px" id="totalGross">0 €</b>
       </div>
     </section>
+
     <section class="half card" style="padding:12px">
-      <h3 style="margin-top:0">Legenda & Come si gioca</h3>
-      <ul class="meta">
-        <li><b>Scopo:</b> sposta gli slider dei prezzi per massimizzare l’utile netto.</li>
-        <li><b>Barra domanda:</b> più piena = più unità vendute.</li>
-      </ul>
-      <div class="note">D(p)=D₀·e<sup>−ε(p−p₀)/p₀</sup>. Se “Prezzi IVA inclusa?” è attivo, l’utile usa il prezzo <u>netto</u>.</div>
+      <h3 style="margin-top:0">Mercato & Finanza</h3>
+      <div class="meta" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <label>Dimensione mercato (clienti/giorno)
+          <input type="range" id="marketSize" min="100" max="5000" step="50" value="1200">
+        </label>
+        <div><b><span id="marketSizeEcho">1200</span> clienti</b></div>
+        <label>Stagionalità (−20%..+40%)
+          <input type="range" id="seasonality" min="-20" max="40" step="1" value="10">
+        </label>
+        <div><b><span id="seasonEcho">+10%</span></b></div>
+        <label>Sensibilità al prezzo β
+          <input type="range" id="beta" min="0.02" max="0.18" step="0.005" value="0.08">
+        </label>
+        <div><b>β=<span id="betaEcho">0.08</span></b></div>
+      </div>
+      <hr style="border-color:var(--grid)">
+      <div class="meta" style="display:grid;grid-template-columns: repeat(2,minmax(220px,1fr));gap:8px">
+        <label>Prezzi IVA inclusa? <input type="checkbox" id="ivaIncl" checked></label>
+        <label>IVA (%) <input type="number" id="ivaPct" value="22" min="0" max="100" step="0.1" style="width:90px"></label>
+        <label>Costi fissi al periodo (€) <input type="number" id="fixedCost" value="0" step="1" style="width:140px"></label>
+        <label>Aliquota imposta utile (%) <input type="number" id="taxPct" value="0" min="0" max="100" step="0.1" style="width:90px"></label>
+      </div>
+      <div class="meta" style="margin-top:8px">
+        Imponibile dopo costi fissi: <b><span id="afterFixed">0 €</span></b><br>
+        Utile netto atteso: <b><span id="totalProfit">0 €</span></b>
+      </div>
+      <div class="footer">
+        Modello MNL: <i>Uᵢ = αᵢ − β·pᵢ + γᵢ(season)</i>, quota <i>sᵢ = e^{Uᵢ}/Σ e^{Uⱼ}</i>, <i>qᵢ = M·sᵢ</i>. Il prezzo competitor è mostrato per riga (seed). L’utile usa prezzo <u>netto</u> se “Prezzi IVA inclusa?” è spuntato.
+      </div>
     </section>
   </div>
 </main>
+
+<!-- Mobile sticky FAB -->
+<div class="stickyFab"><button class="fab" id="openSheet">⚙️ Parametri</button></div>
+<div class="sheet" id="sheet">
+  <div class="grab"><i></i></div>
+  <div class="inner">
+    <h3 style="margin:0 0 8px">Parametri (mobile)</h3>
+    <div class="controls">
+      <label>Prezzi IVA inclusa? <input type="checkbox" id="ivaIncl_m" checked></label>
+      <label>IVA (%) <input type="number" id="ivaPct_m" value="22" min="0" max="100" step="0.1"></label>
+      <label>Costi fissi (€) <input type="number" id="fixedCost_m" value="0" step="1"></label>
+      <label>Aliquota imposta (%) <input type="number" id="taxPct_m" value="0" min="0" max="100" step="0.1"></label>
+    </div>
+    <div class="meta" style="margin-top:8px">
+      Imponibile: <b><span id="afterFixed_m">0 €</span></b> — Utile netto: <b><span id="totalProfit_m">0 €</span></b>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px"><button id="closeSheet">Chiudi</button></div>
+  </div>
+</div>
+
+<script>
+function mulberry32(a){return function(){var t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}}
+function seedFromString(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=(h<<13)|(h>>>19);}return h>>>0;}
+function euro(n){return (Math.round(n*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'})}
+
+const rowsEl=document.getElementById('rows');
+const marketSizeEl=document.getElementById('marketSize'); const marketSizeEcho=document.getElementById('marketSizeEcho');
+const seasonEl=document.getElementById('seasonality'); const seasonEcho=document.getElementById('seasonEcho');
+const betaEl=document.getElementById('beta'); const betaEcho=document.getElementById('betaEcho');
+const ivaInclEl=document.getElementById('ivaIncl'); const ivaPctEl=document.getElementById('ivaPct');
+const fixedCostEl=document.getElementById('fixedCost'); const taxPctEl=document.getElementById('taxPct');
+const afterFixedEl=document.getElementById('afterFixed'); const totalProfitEl=document.getElementById('totalProfit'); const totalGrossEl=document.getElementById('totalGross'); const scoreEl=document.getElementById('score');
+const simulateWeek=document.getElementById('simulateWeek'); const shareBtn=document.getElementById('shareBtn'); const resetBtn=document.getElementById('resetBtn');
+const periodEcho=document.getElementById('periodEcho'); const seedEcho=document.getElementById('seedEcho');
+const openSheet=document.getElementById('openSheet'); const sheet=document.getElementById('sheet'); const closeSheet=document.getElementById('closeSheet');
+const ivaIncl_m=document.getElementById('ivaIncl_m'); const ivaPct_m=document.getElementById('ivaPct_m'); const fixedCost_m=document.getElementById('fixedCost_m'); const taxPct_m=document.getElementById('taxPct_m'); const afterFixed_m=document.getElementById('afterFixed_m'); const totalProfit_m=document.getElementById('totalProfit_m');
+
+let products=[];
+let currentSeed="S-"+(new Date().getFullYear())+"-W"+String(1+Math.floor((Date.now()-new Date(new Date().getFullYear(),0,1))/604800000)).padStart(2,'0');
+
+function setup(){
+  const rng=mulberry32(seedFromString(currentSeed));
+  const names=["Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Gamma","Orion","Vega","Nova"];
+  products=[];
+  for(let i=0;i<5;i++){
+    const name=names[Math.floor(rng()*names.length)]+" "+(1+Math.floor(rng()*9));
+    const cost=+(5+rng()*45).toFixed(2);
+    const basePrice=+(cost*(1.1+rng()*1.3)).toFixed(2);
+    const comp=+(basePrice*(0.9+rng()*0.25)).toFixed(2);
+    const alpha=0.6 + rng()*1.4;
+    const seasonAmp=rng()*0.35;
+    const seasonPhase=rng()*Math.PI*2;
+    products.push({name,cost,price:basePrice,comp,alpha,seasonAmp,seasonPhase});
+  }
+  seedEcho.textContent=currentSeed;
+  renderRows();
+  update();
+}
+
+function renderRows(){
+  rowsEl.innerHTML="";
+  products.forEach((p,i)=>{
+    const row=document.createElement('div'); row.className="row"; row.innerHTML=`
+      <div class="cell name">${p.name}<div class="meta">α=${p.alpha.toFixed(2)} · comp ${euro(p.comp)}</div></div>
+      <div class="cell cost">Cost <b>${euro(p.cost)}</b></div>
+      <div class="cell price" style="display:flex;gap:8px;align-items:center">
+        <button data-i="${i}" data-d="-1">−</button>
+        <input type="range" min="${(p.cost*0.7).toFixed(2)}" max="${(p.cost*3.0).toFixed(2)}" step="0.1" value="${p.price}" class="slider" data-i="${i}">
+        <button data-i="${i}" data-d="+1">+</button>
+        <span id="price_${i}">${euro(p.price)}</span>
+      </div>
+      <div class="cell comp">Comp <b>${euro(p.comp)}</b></div>
+      <div class="cell units"><b id="q_${i}">0</b> u/g</div>
+      <div class="cell profit"><b id="prof_${i}">0 €</b></div>
+    `;
+    rowsEl.appendChild(row);
+  });
+  document.querySelectorAll('input.slider').forEach(sl=>{
+    sl.addEventListener('input',(e)=>{
+      const i=+e.target.dataset.i; products[i].price=parseFloat(e.target.value); document.getElementById('price_'+i).textContent=euro(products[i].price); update();
+    });
+  });
+  document.querySelectorAll('button[data-d]').forEach(b=>{
+    b.addEventListener('click',(e)=>{
+      const i=+e.target.dataset.i; const dir = e.target.dataset.d==="+1"?1:-1; const step=0.1;
+      const sl=document.querySelector('input.slider[data-i="'+i+'"]');
+      products[i].price = Math.max(parseFloat(sl.min), Math.min(parseFloat(sl.max), +(products[i].price + dir*step).toFixed(2)));
+      sl.value=products[i].price; document.getElementById('price_'+i).textContent=euro(products[i].price); update();
+    });
+  });
+}
+
+function getIvaIncl(){ return ivaInclEl.checked || ivaIncl_m.checked; }
+function getIvaPct(){ return (parseFloat(ivaPctEl.value || ivaPct_m.value || "0")||0)/100; }
+function getFixed(){ return parseFloat(fixedCostEl.value || fixedCost_m.value || "0") || 0; }
+function getTax(){ return (parseFloat(taxPctEl.value || taxPct_m.value || "0")||0)/100; }
+function syncDesktopToMobile(){ ivaIncl_m.checked=ivaInclEl.checked; ivaPct_m.value=ivaPctEl.value; fixedCost_m.value=fixedCostEl.value; taxPct_m.value=taxPctEl.value; }
+function syncMobileToDesktop(){ ivaInclEl.checked=ivaIncl_m.checked; ivaPctEl.value=ivaPct_m.value; fixedCostEl.value=fixedCost_m.value; taxPctEl.value=taxPct_m.value; }
+
+function netPrice(raw){ const incl=getIvaIncl(); const iva=getIvaPct(); return incl? raw/(1+iva) : raw; }
+
+function unitsFor(p, market, beta, season){
+  const utils = products.map(x => x.alpha - beta*x.price + (x.seasonAmp*season));
+  const maxU = Math.max.apply(null, utils);
+  const exps = utils.map(u => Math.exp(u - maxU));
+  const sum = exps.reduce((a,b)=>a+b,0);
+  const shares = exps.map(e => e/sum);
+  const i = products.indexOf(p);
+  return market * shares[i];
+}
+
+function update(){
+  const M = parseInt(marketSizeEl.value,10);
+  const seasonPct = parseInt(seasonEl.value,10)/100;
+  const beta = parseFloat(betaEl.value);
+  marketSizeEcho.textContent = M;
+  seasonEcho.textContent = (seasonPct>=0?"+":"")+(seasonPct*100).toFixed(0)+"%";
+  betaEcho.textContent = beta.toFixed(3);
+
+  let gross=0;
+  products.forEach((p,i)=>{
+    const market = Math.max(0, Math.round(M * (1 + seasonPct)));
+    const q = Math.max(0, Math.round(unitsFor(p, market, beta, seasonPct)));
+    const pnet = netPrice(p.price);
+    const profit = Math.max(0, (pnet - p.cost) * q);
+    gross += profit;
+    document.getElementById('q_'+i).textContent = q.toLocaleString('it-IT');
+    document.getElementById('prof_'+i).textContent = euro(profit);
+  });
+  totalGrossEl.textContent = euro(gross);
+  const after = Math.max(0, gross - getFixed());
+  afterFixedEl.textContent = euro(after);
+  const net = after * (1 - getTax());
+  totalProfitEl.textContent = euro(net);
+  scoreEl.textContent = euro(net);
+  afterFixed_m.textContent = euro(after);
+  totalProfit_m.textContent = euro(net);
+}
+
+function simulateWeekRun(){
+  const baseSeason = parseInt(seasonEl.value,10)/100;
+  const M = parseInt(marketSizeEl.value,10);
+  const beta = parseFloat(betaEl.value);
+  let total=0;
+  for(let d=0; d<7; d++){
+    const daySeason = baseSeason + (Math.sin(d*0.7)*0.05);
+    let gross=0;
+    products.forEach(p=>{
+      const market = Math.max(0, Math.round(M * (1 + daySeason)));
+      const q = Math.max(0, Math.round(unitsFor(p, market, beta, daySeason)));
+      const pnet = netPrice(p.price);
+      gross += Math.max(0, (pnet - p.cost) * q);
+    });
+    const after = Math.max(0, gross - getFixed());
+    const net = after*(1-getTax());
+    total += net;
+  }
+  alert("Utile netto atteso in 7 giorni: "+euro(total));
+}
+
+simulateWeek.addEventListener('click', simulateWeekRun);
+shareBtn.addEventListener('click', async ()=>{
+  const url = new URL(location.href); url.searchParams.set('seed', currentSeed);
+  const text = `Margin Rush Pro — utile atteso: ${scoreEl.textContent}. Prova questa istanza: ${url.toString()}`;
+  try{ await navigator.clipboard.writeText(text); alert("Copiato negli appunti!"); }catch(e){ prompt("Copia e condividi:", text); }
+});
+resetBtn.addEventListener('click', ()=>{ if(confirm("Reset parametri locali?")){ localStorage.clear(); location.reload(); }});
+
+['input','change'].forEach(ev=>{
+  [marketSizeEl,seasonEl,betaEl,ivaInclEl,ivaPctEl,fixedCostEl,taxPctEl].forEach(el=> el.addEventListener(ev, update));
+});
+
+openSheet.addEventListener('click', ()=>{ syncDesktopToMobile(); sheet.classList.add('show'); });
+closeSheet.addEventListener('click', ()=>{ sheet.classList.remove('show'); syncMobileToDesktop(); update(); });
+[ivaIncl_m,ivaPct_m,fixedCost_m,taxPct_m].forEach(el=> el.addEventListener('input', ()=>{ update(); }));
+
+(function(){
+  const url = new URL(location.href);
+  const s = url.searchParams.get('seed');
+  if(s){ currentSeed=s; }
+  setup();
+  update();
+})();
+
+if('serviceWorker' in navigator){ window.addEventListener('load', ()=>{ navigator.serviceWorker.register('service-worker.js'); }); }
+</script>
 </body>
 </html>
