@@ -1,69 +1,147 @@
 # Margin Rush — v4.9 Pro
+**Simulatore interattivo di pricing e redditività**  
+Autore: Alessandro Pezzali · Licenza: MIT (2025)
 
-**Margin Rush** è una Progressive Web App (PWA) che simula la competizione in un mercato globale.  
-L’obiettivo è ottimizzare prezzo, qualità, brand e servizio per massimizzare l’utile netto e battere i concorrenti.
+---
 
-## ✨ Funzionalità principali
-- **Simulazione di mercato** con domanda variabile e tre competitor:
-  - *Comp A* — Price-war (guerra di prezzi)
-  - *Comp B* — Premium (alto valore percepito)
-  - *Comp C* — Bandit AI (algoritmo adattivo ε-greedy)
-- **Leve decisionali**:
-  - Prezzo di vendita (lordo o netto con IVA)
-  - Investimenti in **Qualità**, **Brand**, **Servizio**
-  - Capienza ordini/giorno
-- **Costi variabili**:
-  - Prezzo d’acquisto
-  - Overhead per unità
-  - Costo Qualità (dipende dal livello Q)
-  - Costo Garanzia (in/out garanzia, goodwill)
-  - Commissioni/fee del canale di vendita
-- **Costi fissi**:
-  - Personale, affitto, SaaS, altro
-  - Costi specifici per canale di vendita (vedi sotto)
-- **Canali di vendita**:
-  - **On-line** (fee piattaforma, pagamenti, logistica, SaaS, gestione store)
-  - **Venditore P.IVA** (compenso fisso, auto, carburante, provvigioni, telepass, altre spese)
-  - **Dipendente** (RAL, auto aziendale, trasferte, telepass, provvigioni opzionali)
-- **Indicatori finanziari**:
-  - Margine di contribuzione /u e totale
-  - Break-even (unità e ricavi)
-  - Indice di copertura (% del prezzo che resta per i fissi)
-  - Margine di sicurezza (% distanza dalle vendite a BE)
-- **Grafici**:
-  - BE Chart: ricavi vs costi totali
-  - MC Chart: ricavi vs costi variabili, area verde = margine di contribuzione
-- **Clienti spostati**: variazione quota rispetto al giorno precedente, con breakdown (Prezzo, Q, B, S)
-- **Advisor**: suggerimento automatico del prezzo più profittevole dato il mercato
-- **Log mosse competitor**: visibile giorno per giorno
-- **PWA ready**: installabile e funzionante offline
+## 📖 Introduzione
+Molte decisioni di marketing e vendita si riducono a una domanda semplice ma cruciale:  
+**“A questo prezzo, il mio prodotto conviene davvero?”**
 
-## 🚀 Installazione & utilizzo
-1. Clona o scarica la repository.
-2. Apri `index.html` in un browser moderno (Chrome, Edge, Safari).
-3. Puoi installare la PWA su desktop o mobile (`Aggiungi a schermata Home`).
-4. Imposta parametri di costo, IVA, garanzia e canale → simula fino a 10 giorni.
-5. Usa i grafici per valutare **redditività** e strategie di prezzo.
+**Margin Rush** è una Progressive Web App (PWA) che permette di esplorare questa domanda in modo interattivo.  
+È al tempo stesso un *business game* e un *laboratorio di analisi economica*: giocando impari a leggere i numeri chiave che determinano la sopravvivenza di un prodotto sul mercato.
 
-## 📊 Perché usare il Margine di Contribuzione
-Il MC è l’indicatore corretto per valutare la redditività di un prodotto.  
-Permette di capire se un prodotto **copre i costi fissi** e genera utile senza dover allocare in modo arbitrario altri costi.
+---
 
-\[
-MC = Prezzo\ Netto - Costi\ Variabili\ Diretti
-\]
+## 🎯 Perché è utile
+- **Per venditori e manager** → allena a capire come i costi e i margini reagiscono alle scelte di prezzo.  
+- **Per studenti di economia e marketing** → trasforma formule astratte (margine, break-even, sicurezza) in scenari concreti.  
+- **Per imprenditori e startupper** → simula in pochi minuti quello che nella realtà richiederebbe mesi di vendite.  
 
-- **MC > 0** → ogni pezzo contribuisce a coprire i costi fissi.  
-- **MC < 0** → più vendi, più perdi.  
-- **Break-even**: punto in cui \( MC \times Q = Fissi \).
+Margin Rush non è un calcolatore sterile: è un ambiente competitivo.  
+Ti mette di fronte a **3 concorrenti virtuali** che cambiano strategia di giorno in giorno, proprio come avviene in un mercato reale.
 
-## 📱 Compatibilità
-- Mobile (iPhone/Android) e Desktop (Windows, macOS, Linux)
-- Responsive: controlli leggibili su schermi piccoli e grandi
+---
+
+## ⚙️ Come funziona la simulazione
+- Il **mercato** è composto da un numero variabile di clienti al giorno (M).  
+- Ogni offerta (tu + 3 competitor) ha un’**utilità percepita** determinata da:
+  - **Prezzo** (più basso → più appetibile, ma riduce margini),
+  - **Qualità (Q)**,
+  - **Brand (B)**,
+  - **Servizio (S)**,
+  - **Stagionalità** (fluttuazioni della domanda).
+- La quota di mercato viene calcolata con un modello **logit**, tipico dell’analisi di marketing.  
+
+### I tre concorrenti
+- **Comp A (Price-war)** → abbassa i prezzi per guadagnare quota.  
+- **Comp B (Premium)** → investe in qualità e brand, mantenendo prezzi alti.  
+- **Comp C (Bandit AI)** → usa un algoritmo adattivo (*ε-greedy*) che prova diverse strategie e adotta quelle più efficaci.
+
+---
+
+## 📘 Manuale d’uso passo–passo
+1. **Avvia l’app** (aprendo `index.html` in un browser moderno o installando la PWA).  
+2. **Imposta le leve principali**:
+   - Prezzo (con IVA inclusa o esclusa),
+   - Investimenti in Qualità (Q), Brand (B), Servizio (S),
+   - Capienza ordini massima al giorno.  
+3. **Definisci i costi**:
+   - Variabili (acquisto, overhead, garanzia, commissioni di canale),
+   - Fissi (personale, affitto, SaaS, altre spese).  
+4. **Scegli il canale di vendita**:
+   - Online,
+   - Venditore a Partita IVA,
+   - Dipendente aziendale.  
+5. **Avanza di un giorno**: i concorrenti reagiscono, i clienti si ridistribuiscono.  
+6. **Analizza il report**: unità vendute, quota di mercato, utile netto, margini, indicatori, grafici.  
+7. Dopo 10 giorni → valuta il tuo utile cumulato e confrontalo con i competitor.
+
+---
+
+## 🧩 Legenda simboli e sigle
+- **Q (Qualità)** → investimenti sul prodotto, riducono reclami ma aumentano costi.  
+- **B (Brand)** → forza del marchio, riduce sensibilità al prezzo.  
+- **S (Servizio)** → assistenza e customer care, incrementa fiducia.  
+- **MC/u** → Margine di Contribuzione per unità.  
+- **MC tot** → Margine di Contribuzione totale (giorno).  
+- **BE (Break-even)** → unità minime da vendere per non perdere.  
+- **MoS (Margine di Sicurezza)** → quanto sei sopra il BE.  
+- **Copertura** → % del prezzo che resta disponibile per coprire i costi fissi.  
+- **Advisor** → prezzo suggerito dal sistema come più conveniente.  
+- **Clienti spostati (Δ)** → clienti guadagnati o persi rispetto a ieri, divisi per causa (Prezzo, Q, B, S).
+
+---
+
+## 📊 Indicatori di redditività
+
+### 1. Margine di Contribuzione (MC)
+- **Divulgativo**: indica quanto ogni pezzo venduto contribuisce a coprire i costi fissi.  
+- **Formula**:  
+  \[
+  MC/u = Prezzo\ Netto - Costi\ Variabili
+  \]  
+  \[
+  MC_{tot} = MC/u \times Quantità
+  \]  
+- **Esempio**: Prezzo netto 50€, costi variabili 30€ → MC/u = 20€.  
+  Se vendi 100 pezzi, MC totale = 2.000€.
+
+---
+
+### 2. Break-even (BE)
+- **Divulgativo**: è il punto in cui le vendite coprono esattamente i costi fissi.  
+- **Formula**:  
+  \[
+  BE = \frac{Costi\ Fissi}{MC/u \cdot (1 - Tax\%)}
+  \]  
+- **Esempio**: Costi fissi giornalieri 1.000€, MC/u 20€, tax 24% →  
+  BE ≈ 66 unità.  
+  Vendendo almeno 66 unità, non perdi.
+
+---
+
+### 3. Margine di Sicurezza (MoS)
+- **Divulgativo**: misura quanto sei sopra il pareggio; più è alto, più sei resiliente.  
+- **Formula**:  
+  \[
+  MoS = \frac{Vendite\ Effettive - Vendite\ a\ BE}{Vendite\ Effettive}
+  \]  
+- **Esempio**: vendi 100 unità, BE = 66 → MoS = 34%.
+
+---
+
+### 4. Indice di Copertura
+- **Divulgativo**: mostra la quota di prezzo che rimane per coprire i fissi.  
+- **Formula**:  
+  \[
+  Copertura = \frac{MC/u}{Prezzo\ Netto}
+  \]  
+- **Esempio**: Prezzo netto 50€, MC/u 20€ → Copertura = 40%.  
+
+---
+
+## 🛠️ Aspetti tecnici
+- **Motore di mercato**: modello logit per la distribuzione della domanda.  
+- **Strategie competitor**: price-war, premium, bandit AI.  
+- **Persistenza**: parametri salvati in `localStorage`.  
+- **Grafici**: break-even (ricavi vs costi totali), margine di contribuzione (ricavi vs costi variabili).  
+- **PWA**: installabile e funzionante offline, con service worker e manifest.
+
+---
+
+## 🚀 Installazione
+1. Scarica i file e apri `index.html`.  
+2. Su smartphone → “Aggiungi a schermata Home” per installare come app.  
+3. L’app funziona offline; i tuoi dati restano salvati sul dispositivo.
+
+---
 
 ## 👤 Autore
 **Alessandro Pezzali**  
-www.alessandropezzali.it · [pezzaliAPP.com](https://www.pezzaliapp.com)
+[https://github.com/pezzaliapp](https://github.com/pezzaliapp) · [pezzaliAPP.com](https://www.pezzaliapp.com)
+
+---
 
 ## 📄 Licenza
 Rilasciato sotto **MIT License** (2025).
