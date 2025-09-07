@@ -2,42 +2,39 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Margin Rush — v4 Market Duel</title>
-<link rel="manifest" href="manifest.json">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<title>Margin Rush — v4.1 Market Duel (Bandit AI)</title>
 <meta name="theme-color" content="#0b1220">
-<link rel="icon" href="icon-192.png">
 <style>
-  :root{--bg:#0b1220;--card:#0f1930;--ink:#eaf0ff;--muted:#b9c7eb;--grid:#1f2d4f;--accent:#87a7ff;--good:#6be675;--bad:#ff7a88;--gold:#ffd166;}
+  :root{--bg:#0b1220;--card:#0f1930;--ink:#eaf0ff;--muted:#b9c7eb;--grid:#1f2d4f;--accent:#87a7ff;--good:#6be675;--bad:#ff7a88;}
   *{box-sizing:border-box} html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-  header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg, rgba(11,18,32,.96), rgba(11,18,32,.82));backdrop-filter: blur(6px)}
+  header{position:sticky;top:0;z-index:30;background:linear-gradient(180deg, rgba(11,18,32,.96), rgba(11,18,32,.82));backdrop-filter: blur(6px)}
   .wrap{max-width:1200px;margin:0 auto;padding:14px}
-  h1{margin:0;font-size:1.25rem}.pill{display:inline-block;padding:2px 8px;border:1px solid var(--grid);border-radius:999px;background:#132046;color:var(--muted)}
+  h1{margin:0;font-size:1.25rem}.pill{display:inline-block;padding:2px 8px;border:1px solid var(--grid);border-radius:999px;background:#132046;color:#cfe}
   .top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}
-  .badge{padding:6px 10px;border:1px solid var(--grid);border-radius:10px;color:var(--muted)}
-  button{background:#1a2647;color:var(--ink);border:1px solid var(--grid);padding:8px 12px;border-radius:10px;cursor:pointer}
+  .badge{padding:6px 10px;border:1px solid var(--grid);border-radius:10px;color:#c8d4f6;background:#0c1630}
+  button{background:#1a2647;color:var(--ink);border:1px solid var(--grid);padding:10px 14px;border-radius:12px;cursor:pointer}
   button.primary{background:var(--accent);color:#0a1025;border:none;font-weight:700}
   button.danger{background:#ff5b6b;color:#0a1025;border:none;font-weight:700}
   main{padding:14px}
-  .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;align-items:start}
+  .grid{display:grid;grid-template-columns:1.15fr 1fr;gap:14px;align-items:start}
   .card{background:var(--card);border:1px solid var(--grid);border-radius:14px;overflow:hidden}
   .card h3{margin:0;padding:10px;border-bottom:1px solid var(--grid)}
   .section{padding:10px}
   table{width:100%;border-collapse:collapse}
-  th,td{padding:8px;border-bottom:1px solid var(--grid);text-align:right}
+  th,td{padding:10px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric: tabular-nums}
   th:first-child, td:first-child{text-align:left}
   .kpi{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:8px}
   .kpi .box{padding:10px;border:1px solid var(--grid);border-radius:12px;background:#0c1530}
-  .gain{color:var(--good)} .loss{color:var(--bad)} .note{color:var(--muted);font-size:.9rem}
-  .bar{height:10px;background:#1b2b5a;border-radius:999px;overflow:hidden}
-  .bar>i{display:block;height:100%;background:#6be675;width:0}
-  @media (max-width:1024px){.grid{grid-template-columns:1fr} .kpi{grid-template-columns:repeat(2,1fr)}}
+  .gain{color:var(--good)} .loss{color:#ffb0ba} .note{color:var(--muted);font-size:.92rem}
+  @media (max-width:1100px){.grid{grid-template-columns:1fr}.kpi{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:760px){html{font-size:15px} th,td{padding:8px} .badge{padding:5px 8px} button{padding:9px 12px}}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <h1>Margin Rush <span class="pill">v4 — Market Duel</span></h1>
+    <h1>Margin Rush <span class="pill">v4.1 — Market Duel • Bandit AI</span></h1>
     <div class="top">
       <div class="badge">Giorno: <b id="day">1</b>/10</div>
       <div class="badge">Cassa: <b id="cash">0 €</b></div>
@@ -52,19 +49,17 @@
 <main class="wrap">
   <div class="grid">
     <div class="card">
-      <h3>Il mercato (nostro vs 3 competitor)</h3>
+      <h3>Il mercato (noi vs 3 competitor)</h3>
       <div class="section">
         <div class="kpi">
           <div class="box">Mercato M (clienti/g): <b id="M">1200</b></div>
           <div class="box">Stagionalità: <b id="seasonEcho">+0%</b></div>
-          <div class="box">Sensibilità prezzo β: <b id="betaEcho">0.080</b></div>
-          <div class="box">Capienza ordini: <b id="capEcho">1000</b></div>
+          <div class="box">β sensibilità: <b id="betaEcho">0.080</b></div>
+          <div class="box">Capienza: <b id="capEcho">1000</b></div>
         </div>
-        <div class="note" style="margin-top:6px">Ogni giorno i competitor possono tagliare/aumentare prezzo o investire in Qualità (Q), Brand (B), Servizio (S). Tu scegli prezzo e dove investire. La domanda sceglie in base a prezzo e appeal (Q,B,S).</div>
+        <div class="note" style="margin-top:6px">Scelta domanda = logit su Prezzo e Appeal (Q,B,S). <b>Comp C</b> usa <b>bandit ε-greedy</b> per apprendere mosse che massimizzano la sua quota.</div>
         <table id="tbl">
-          <thead>
-            <tr><th>Offerta</th><th>Prezzo</th><th>Q</th><th>B</th><th>S</th><th>Quota</th><th>Unità</th><th>Δ vs ieri</th></tr>
-          </thead>
+          <thead><tr><th>Offerta</th><th>Prezzo</th><th>Q</th><th>B</th><th>S</th><th>Quota</th><th>Unità</th><th>Δ vs ieri</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -73,7 +68,7 @@
     <div class="card">
       <h3>Leve & Pianificazione</h3>
       <div class="section">
-        <div class="note">Imposta il tuo <b>prezzo</b> e decidi dove investire. I costi si pagano subito; gli effetti di Q/B durano 3 giorni, S è persistente.</div>
+        <div class="note">Imposta <b>Prezzo</b> e gli <b>Investimenti</b>. Q e B durano 3 giorni; S è permanente.</div>
         <table>
           <tr><td style="text-align:left">Prezzo nostro</td><td><input id="price" type="range" min="5" max="120" step="0.5"></td><td width="90"><b id="priceEcho">0 €</b></td></tr>
           <tr><td style="text-align:left">Investi in Qualità (Q)</td><td><input id="invQ" type="range" min="0" max="3" step="1"></td><td><b id="invQEcho">0</b></td></tr>
@@ -81,9 +76,7 @@
           <tr><td style="text-align:left">Investi in Servizio (S)</td><td><input id="invS" type="range" min="0" max="2" step="1"></td><td><b id="invSEcho">0</b></td></tr>
           <tr><td style="text-align:left">Capienza (ordini/g)</td><td><input id="cap" type="range" min="300" max="3000" step="50"></td><td><b id="capVal">1000</b></td></tr>
         </table>
-        <div class="note" style="margin-top:6px">
-          Costi: Q=€300/step (3gg), B=€250/step (3gg), S=€200/step (permanente), Capienza=€0.2 per punto (una tantum). Costi fissi: €500/g. Costo unitario: €8 + €2·Q. IVA opzionale.
-        </div>
+        <div class="note" style="margin-top:6px">Costi: Q=€300/step (3gg), B=€250/step (3gg), S=€200/step (permanente), Capienza=€0.2/punto. Fissi: €500/g. Costo unitario: €8 + €2·Q.</div>
         <hr style="border-color:var(--grid)">
         <div class="kpi">
           <div class="box">IVA incl.? <input type="checkbox" id="iva" checked></div>
@@ -104,30 +97,36 @@
         <div class="box">Utile netto giorno: <b id="pMe">0 €</b></div>
         <div class="box">Clienti spostati (Δ vs comp): <b id="moved">0</b></div>
       </div>
-      <div class="note" style="margin-top:8px">
-        Breakdown Δ: <span class="gain">Prezzo <b id="bp">0</b></span> · <span class="gain">Q <b id="bq">0</b></span> · <span class="gain">B <b id="bb">0</b></span> · <span class="gain">S <b id="bs">0</b></span> (clienti). Approccio additivo approssimato.
-      </div>
+      <div class="note" style="margin-top:8px">Breakdown Δ stimato (clienti): Prezzo <b id="bp">0</b> · Q <b id="bq">0</b> · B <b id="bb">0</b> · S <b id="bs">0</b></div>
     </div>
   </div>
 </main>
 
 <script>
 // ---------- Utilities
-function euro(n){return (Math.round(n*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'})}
-function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
+const euro = n => (Math.round(n*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 
 // ---------- State
-const rng = (seed => {let a=seed; return ()=>{a = (a*1664525 + 1013904223) % 4294967296; return a/4294967296;}})(123456);
 let day=1, daysMax=10;
 let M=1200, beta=0.08, season=0;
 let ivaIncl=true, ivaPct=0.22;
 let cap=1000;
 let cash=5000, cumProfit=0;
-let our = {name:"Noi", p:49, Q:1, B:1, S:1, Qbuff:0, Bbuff:0};
+let our = {name:"Noi", p:49, Q:1, B:1, S:1, Qbuff:0, Bbuff:0, QbuffDays:0, BbuffDays:0};
 let comps = [
   {name:"Comp A (Price-war)", p:45, Q:1, B:1, S:1, strat:"price"},
   {name:"Comp B (Premium)",   p:70, Q:2, B:2, S:2, strat:"premium"},
-  {name:"Comp C (Follower)",  p:52, Q:1, B:1, S:1, strat:"follow", lastMe:49}
+  {name:"Comp C (Bandit)",    p:52, Q:1, B:1, S:1, strat:"bandit",
+   actions:[
+     {dp:-0.10, dQ:0, dB:0, dS:0, name:"Price -10%"},
+     {dp:-0.05, dQ:0, dB:0, dS:0, name:"Price -5%"},
+     {dp:0.00,  dQ:0, dB:1, dS:0, name:"+Brand"},
+     {dp:0.00,  dQ:1, dB:0, dS:0, name:"+Quality"},
+     {dp:+0.05, dQ:0, dB:0, dS:1, name:"+Service & Price +5%"}
+   ],
+   Qvals:[0,0,0,0,0], N:[0,0,0,0,0], epsilon:0.25, lastShare:0
+  }
 ];
 
 // ---------- DOM
@@ -147,90 +146,70 @@ const els = {
   M:document.getElementById('M'), advance:document.getElementById('advance'), reset:document.getElementById('reset')
 };
 
-// ---------- Helpers
-function util(a){ return a.base + a.price + a.q + a.b + a.s + a.shock; }
+// ---------- Model
 function shares(players){
-  // players: [{p,Q,B,S}... first is us]
   const seasonBoost = season/100;
-  const arr = players.map(obj=>{
-    const base = 0.6 + (obj.B-1)*0.15 + (obj.Q-1)*0.2; // α
+  const U = players.map(obj=>{
+    const base = 0.6 + (obj.B-1)*0.15 + (obj.Q-1)*0.2;
     const price = -beta * obj.p;
-    const q = 0.25*(obj.Q-1) + 0.25*(obj.Qbuff||0); // buff dura 3gg
+    const q = 0.25*(obj.Q-1) + 0.25*(obj.Qbuff||0);
     const b = 0.20*(obj.B-1) + 0.20*(obj.Bbuff||0);
     const s = 0.15*(obj.S-1);
-    const shock = seasonBoost * (0.1 + 0.2*(obj.B-1)); // brand reagisce meglio a stagionalità
-    return {base, price, q, b, s, shock};
+    const shock = seasonBoost * (0.1 + 0.2*(obj.B-1));
+    return base + price + q + b + s + shock;
   });
-  const U = arr.map(util);
   const mx = Math.max.apply(null, U);
-  const exp = U.map(u=>Math.exp(u-mx));
-  const sum = exp.reduce((a,b)=>a+b,0);
-  return exp.map(e=>e/sum);
+  const exps = U.map(u=>Math.exp(u-mx));
+  const sum = exps.reduce((a,b)=>a+b,0);
+  return exps.map(e=>e/sum);
+}
+const costUnit = Q => 8 + 2*Q;
+const netPrice = p => ivaIncl? p/(1+ivaPct) : p;
+
+// ---------- Bandit AI (ε-greedy)
+function banditChoose(c){
+  const k = c.actions.length;
+  if(Math.random() < c.epsilon) return Math.floor(Math.random()*k);
+  let best=0; for(let i=1;i<k;i++){ if(c.Qvals[i]>c.Qvals[best]) best=i; } return best;
+}
+function banditUpdate(c, aIdx, reward){
+  c.N[aIdx] += 1;
+  const n = c.N[aIdx];
+  c.Qvals[aIdx] = c.Qvals[aIdx] + (reward - c.Qvals[aIdx]) / n;
+  c.epsilon = Math.max(0.05, c.epsilon*0.98);
+}
+function compMove(c){
+  if(c.strat==='price'){
+    const target = Math.max(12, our.p*0.95);
+    c.p = clamp((c.p*0.6 + target*0.4), 10, 120);
+  }else if(c.strat==='premium'){
+    if(day%2===0 && Math.random()<0.6){ c.B = clamp(c.B+1,1,5); } else if(Math.random()<0.5){ c.Q = clamp(c.Q+1,1,5); }
+    c.p = clamp(c.p*1.01, 30, 140);
+  }else if(c.strat==='bandit'){
+    const before = shares([our].concat(comps))[2]; // quota attuale
+    const idx = banditChoose(c);
+    const a = c.actions[idx];
+    // applica azione
+    c.p = clamp(c.p*(1+a.dp), 10, 140);
+    if(a.dQ) c.Q = clamp(c.Q + a.dQ, 1, 5);
+    if(a.dB) c.B = clamp(c.B + a.dB, 1, 5);
+    if(a.dS) c.S = clamp(c.S + a.dS, 1, 5);
+    const after = shares([our].concat(comps))[2];
+    banditUpdate(c, idx, after - before);
+  }
 }
 
-function costUnit(Q){ return 8 + 2*Q; }
-function netPrice(p){ return ivaIncl? p/(1+ivaPct) : p; }
-
-function simulateDay(){
-  // 1) Pedido: set by UI
-  our.p = parseFloat(els.price.value);
-  // 2) Compute shares
-  const players=[our].concat(comps);
-  const s = shares(players);
-  const marketToday = Math.round(M * (1 + season/100));
-  const q = s.map(x=>Math.round(x*marketToday));
-  // Capienza nostra
-  q[0] = Math.min(q[0], cap);
-  // 3) Ricavi/costi
-  const rev = netPrice(our.p)*q[0];
-  const cost = costUnit(our.Q)*q[0];
-  const fixed = 500;
-  const profit = rev - cost - fixed;
-  cash += profit - investCost; // investCost calcolato prima di chiamare simulateDay
-  cumProfit += profit;
-  // 4) Aggiorna UI tabella
-  renderTable(q, s);
-  // 5) Feedback delta vs prezzo competitor principale (il più vicino)
-  const nearest = comps.reduce((a,c)=> Math.abs(c.p-our.p) < Math.abs(a.p-our.p) ? c : a, comps[0]);
-  const pv = [nearest.p].concat(comps.map(c=>c.p));
-  const s_vs = shares([{...our,p:nearest.p}].concat(comps));
-  const q_vs = Math.round(s_vs[0]*marketToday);
-  const delta = q[0]-q_vs;
-  // Breakdown approssimato (cambia un fattore alla volta)
-  const s_price = s_vs[0];
-  const s_q = shares([{...our,Q:our.Q- (our.Qbuff?0:0), p:our.p}].concat(comps))[0]; // già incluso Q attuale
-  const s_b = shares([{...our,B:our.B- (our.Bbuff?0:0), p:our.p}].concat(comps))[0];
-  const s_s = shares([{...our,S:our.S-0, p:our.p}].concat(comps))[0];
-  const d_price = Math.round((s[0]-s_price)*marketToday);
-  const d_q = Math.max(0, Math.round((s[0]-s_q)*marketToday));
-  const d_b = Math.max(0, Math.round((s[0]-s_b)*marketToday));
-  const d_s = Math.max(0, Math.round((s[0]-s_s)*marketToday));
-  // 6) Aggiorna KPIs
-  els.qMe.textContent=q[0].toLocaleString('it-IT');
-  els.sMe.textContent=(s[0]*100).toFixed(1)+'%';
-  els.pMe.textContent=euro(profit);
-  els.moved.textContent=Math.abs(delta).toLocaleString('it-IT');
-  els.bp.textContent=(d_price>=0?'+':'')+d_price;
-  els.bq.textContent='+'+d_q; els.bb.textContent='+'+d_b; els.bs.textContent='+'+d_s;
-  // 7) avanzamento buff durata
-  if(our.QbuffDays>0){our.QbuffDays--; if(our.QbuffDays===0) our.Qbuff=0;}
-  if(our.BbuffDays>0){our.BbuffDays--; if(our.BbuffDays===0) our.Bbuff=0;}
-  // 8) Riepilogo top bar
-  els.share.textContent=(s[0]*100).toFixed(1)+'%';
-  els.cash.textContent=euro(cash);
-  els.cumprofit.textContent=euro(cumProfit);
-}
-
-function renderTable(q,s){
+// ---------- UI helpers
+function renderTable(q=null,s=null){
   const rows=[our].concat(comps).map((p,i)=>{
     const quota=(s? (s[i]*100).toFixed(1)+'%' : '—');
     const units=(q? q[i].toLocaleString('it-IT') : '—');
-    const d=(i===0? (q? q[0] - (window.prevQ||0) : 0) : 0);
+    const d=(i===0 && q? q[0] - (window.prevQ||0) : 0);
     return `<tr>
       <td>${p.name}</td>
       <td>${euro(p.p)}</td>
-      <td>${p.Q+(p.Qbuff?` (+${p.Qbuff})`:'')}</td>
-      <td>${p.B+(p.Bbuff?` (+${p.Bbuff})`:'')}</td>
+      <td>${p.Q + (p.Qbuff?` (+${p.Qbuff})`:'')}</td>
+      <td>${p.B + (p.Bbuff?` (+${p.Bbuff})`:'')}</td>
       <td>${p.S}</td>
       <td>${quota}</td>
       <td>${units}</td>
@@ -238,54 +217,9 @@ function renderTable(q,s){
     </tr>`;
   }).join('');
   els.tbl.innerHTML=rows;
-  if(q){ window.prevQ = q[0]; }
+  if(q) window.prevQ=q[0];
 }
 
-// ---------- Investment costs and UI bindings
-let investCost=0;
-function calcInvestCost(){
-  const iQ=parseInt(els.invQ.value,10)||0;
-  const iB=parseInt(els.invB.value,10)||0;
-  const iS=parseInt(els.invS.value,10)||0;
-  const capTarget=parseInt(els.cap.value,10)||cap;
-  const capDelta=Math.max(0, capTarget - cap);
-  investCost = iQ*300 + iB*250 + iS*200 + capDelta*0.2;
-  return {iQ,iB,iS,capDelta};
-}
-
-function applyInvestments(){
-  const {iQ,iB,iS,capDelta} = calcInvestCost();
-  if(investCost>cash){ alert('Cassa insufficiente per questo piano di investimenti.'); return false; }
-  cash -= investCost;
-  if(iQ>0){ our.Qbuff += iQ*0.5; our.QbuffDays = 3; }
-  if(iB>0){ our.Bbuff += iB*0.5; our.BbuffDays = 3; }
-  if(iS>0){ our.S = clamp(our.S + iS, 1, 5); }
-  if(capDelta>0){ cap += capDelta; }
-  // reset sliders
-  els.invQ.value=0; els.invB.value=0; els.invS.value=0; els.cap.value=cap;
-  els.invQEcho.textContent='0'; els.invBEcho.textContent='0'; els.invSEcho.textContent='0'; els.capVal.textContent=cap;
-  els.cash.textContent=euro(cash);
-  return true;
-}
-
-// ---------- Competitor strategies (very light)
-function compMove(c){
-  if(c.strat==='price'){
-    // guerra prezzi: cerca di stare 5% sotto di noi (min margine 10% su costo base)
-    const target = Math.max(12, our.p*0.95);
-    c.p = clamp((c.p*0.6 + target*0.4), 10, 120);
-  }else if(c.strat==='premium'){
-    // premium: mantiene prezzo alto, investe a step alterni su B o Q
-    if(day%2===0 && rng()<0.6){ c.B = clamp(c.B+1,1,5); } else if(rng()<0.5){ c.Q = clamp(c.Q+1,1,5); }
-    c.p = clamp(c.p*1.01, 30, 140);
-  }else if(c.strat==='follow'){
-    // follower con smoothing sul tuo ultimo prezzo
-    c.p = clamp(c.p*0.7 + our.p*0.3, 10, 120);
-    if(rng()<0.3){ c.B = clamp(c.B+1,1,5); }
-  }
-}
-
-// ---------- Init UI
 function refreshEcho(){
   els.priceEcho.textContent = euro(parseFloat(els.price.value));
   els.invQEcho.textContent = els.invQ.value;
@@ -299,40 +233,97 @@ function refreshEcho(){
   els.cash.textContent = euro(cash);
   els.cumprofit.textContent = euro(cumProfit);
 }
+
+// ---------- Investments
+let investCost=0;
+function calcInvestCost(){
+  const iQ=parseInt(els.invQ.value||'0',10);
+  const iB=parseInt(els.invB.value||'0',10);
+  const iS=parseInt(els.invS.value||'0',10);
+  const capTarget=parseInt(els.cap.value||cap,10);
+  const capDelta=Math.max(0, capTarget - cap);
+  investCost = iQ*300 + iB*250 + iS*200 + capDelta*0.2;
+  return {iQ,iB,iS,capDelta};
+}
+function applyInvestments(){
+  const {iQ,iB,iS,capDelta} = calcInvestCost();
+  if(investCost>cash){ alert('Cassa insufficiente per questo piano di investimenti.'); return false; }
+  cash -= investCost;
+  if(iQ>0){ our.Qbuff += iQ*0.5; our.QbuffDays = 3; }
+  if(iB>0){ our.Bbuff += iB*0.5; our.BbuffDays = 3; }
+  if(iS>0){ our.S = clamp(our.S + iS, 1, 5); }
+  if(capDelta>0){ cap += capDelta; }
+  els.invQ.value=0; els.invB.value=0; els.invS.value=0; els.cap.value=cap;
+  refreshEcho();
+  return true;
+}
+
+// ---------- Day simulation
+function simulateDay(){
+  our.p = parseFloat(els.price.value);
+  // quote
+  const players=[our].concat(comps);
+  const s = shares(players);
+  const marketToday = Math.round(M * (1 + season/100));
+  const q = s.map(x=>Math.round(x*marketToday));
+  // capienza
+  q[0] = Math.min(q[0], cap);
+  // profit
+  const rev = netPrice(our.p)*q[0];
+  const cost = costUnit(our.Q)*q[0];
+  const fixed = 500;
+  const profit = rev - cost - fixed;
+  cash += profit;
+  cumProfit += profit;
+  // breakdown (approssimato)
+  const nearest = comps.reduce((a,c)=> Math.abs(c.p-our.p) < Math.abs(a.p-our.p) ? c : a, comps[0]);
+  const s_vs_price = shares([{...our,p:nearest.p}].concat(comps))[0];
+  const d_price = Math.round((s[0]-s_vs_price)*marketToday);
+  const d_q = Math.round(0.5*our.Qbuff*marketToday*0.01);
+  const d_b = Math.round(0.5*our.Bbuff*marketToday*0.008);
+  const d_s = Math.round((our.S-1)*marketToday*0.002);
+  // buffs decay
+  if(our.QbuffDays>0){ our.QbuffDays--; if(our.QbuffDays===0) our.Qbuff=0; }
+  if(our.BbuffDays>0){ our.BbuffDays--; if(our.BbuffDays===0) our.Bbuff=0; }
+  // UI
+  renderTable(q,s);
+  els.qMe.textContent=q[0].toLocaleString('it-IT');
+  els.sMe.textContent=(s[0]*100).toFixed(1)+'%';
+  els.pMe.textContent=euro(profit);
+  els.moved.textContent=(Math.abs(d_price)+Math.abs(d_q)+Math.abs(d_b)+Math.abs(d_s)).toLocaleString('it-IT');
+  els.bp.textContent=(d_price>=0?'+':'')+d_price; els.bq.textContent='+'+d_q; els.bb.textContent='+'+d_b; els.bs.textContent='+'+d_s;
+  els.share.textContent=(s[0]*100).toFixed(1)+'%';
+  els.cash.textContent=euro(cash);
+  els.cumprofit.textContent=euro(cumProfit);
+}
+
+// ---------- Init
 els.price.value=our.p; els.cap.value=cap;
 refreshEcho(); renderTable();
 
 ['input','change'].forEach(ev=>{
-  els.price.addEventListener(ev, refreshEcho);
-  els.invQ.addEventListener(ev, refreshEcho);
-  els.invB.addEventListener(ev, refreshEcho);
-  els.invS.addEventListener(ev, refreshEcho);
-  els.cap.addEventListener(ev, refreshEcho);
-  els.beta.addEventListener(ev, ()=>{ beta = parseFloat(els.beta.value); refreshEcho(); });
-  els.season.addEventListener(ev, ()=>{ season = parseInt(els.season.value,10); refreshEcho(); });
-  els.iva.addEventListener(ev, ()=>{ ivaIncl = els.iva.checked; });
-  els.ivaPct.addEventListener(ev, ()=>{ ivaPct = parseFloat(els.ivaPct.value)/100; });
+  ['price','invQ','invB','invS','cap'].forEach(id=> els[id].addEventListener(ev, refreshEcho));
+  els.beta.addEventListener(ev, ()=>{ beta=parseFloat(els.beta.value); refreshEcho(); });
+  els.season.addEventListener(ev, ()=>{ season=parseInt(els.season.value,10); refreshEcho(); });
+  els.iva.addEventListener(ev, ()=>{ ivaIncl=els.iva.checked; });
+  els.ivaPct.addEventListener(ev, ()=>{ ivaPct=parseFloat(els.ivaPct.value)/100; });
 });
 
-// ---------- Turn handling
+// ---------- Turn button
 els.advance.addEventListener('click', ()=>{
-  // applica investimenti scelti
   if(!applyInvestments()) return;
   // mosse competitor
   comps.forEach(compMove);
-  // simula mercato
+  // simula
   simulateDay();
-  // avanza giorno
-  day+=1; els.day.textContent=day;
+  // next
+  day++; els.day.textContent=day;
   if(day>daysMax){
     alert('Partita finita! Utile cumulato: '+euro(cumProfit)+' — Quota ultimo giorno: '+document.getElementById('sMe').textContent);
-    day=1; cash=5000; cumProfit=0; our={name:'Noi',p:49,Q:1,B:1,S:1,Qbuff:0,Bbuff:0}; comps=[{name:'Comp A (Price-war)',p:45,Q:1,B:1,S:1,strat:'price'},{name:'Comp B (Premium)',p:70,Q:2,B:2,S:2,strat:'premium'},{name:'Comp C (Follower)',p:52,Q:1,B:1,S:1,strat:'follow',lastMe:49}]; cap=1000; season=0; beta=0.08; ivaIncl=true; ivaPct=0.22;
-    els.price.value=our.p; els.cap.value=cap; els.beta.value=beta; els.season.value=season; els.iva.checked=ivaIncl; els.ivaPct.value=ivaPct*100;
-    refreshEcho(); renderTable();
+    location.reload();
   }
 });
-
-els.reset.addEventListener('click', ()=>{ location.reload(); });
+els.reset.addEventListener('click', ()=> location.reload());
 </script>
 </body>
 </html>
