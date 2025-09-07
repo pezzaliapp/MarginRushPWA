@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Margin Rush — Micro Tycoon da 60s</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b1220">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --bg:#0b1220;
+    --card:#111a2e;
+    --ink:#e7eefc;
+    --muted:#b6c3e6;
+    --accent:#6be675;
+    --accent2:#87a7ff;
+    --bad:#ff7a88;
+    --grid:#1c2640;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif}
+  header{position:sticky;top:0;background:linear-gradient(180deg, rgba(11,18,32,.95), rgba(11,18,32,.75));backdrop-filter: blur(6px);z-index:10}
+  .wrap{max-width:980px;margin:0 auto;padding:16px}
+  h1{font-size:1.25rem;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:.9rem}
+  .topbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .badge{padding:6px 10px;border:1px solid var(--grid);border-radius:10px;color:var(--muted);}
+  .timer{font-weight:700;color:var(--accent)}
+  .score{font-weight:700;color:var(--accent2)}
+  .buttons{margin-left:auto;display:flex;gap:8px}
+  button{background:#192342;color:var(--ink);border:1px solid var(--grid);padding:8px 12px;border-radius:10px;cursor:pointer}
+  button.primary{background:var(--accent2);color:#0a0f20;border-color:transparent;font-weight:700}
+  button.danger{background:#ff5b6b;color:#0a0f20;border-color:transparent;font-weight:700}
+  main{padding:12px 16px}
+  .card{background:var(--card);border:1px solid var(--grid);border-radius:14px;overflow:hidden}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid var(--grid);text-align:right}
+  th:nth-child(1), td:nth-child(1){text-align:left}
+  tr:last-child td{border-bottom:none}
+  input[type=range]{width:130px}
+  .muted{color:var(--muted);font-size:.9rem}
+  .footer{color:var(--muted);font-size:.85rem;margin-top:12px}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#122042;border:1px solid var(--grid);color:var(--muted)}
+  .ghost{color:#9ad3a1}
+  .flex{display:flex;gap:12px;flex-wrap:wrap}
+  .half{flex:1 1 420px}
+  .note{background:#0f1730;border:1px dashed var(--grid);border-radius:10px;padding:10px;color:var(--muted)}
+  .strike{color:#ffb3bc}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Margin Rush <span class="pill">micro-tycoon da 60s</span></h1>
+    <div class="sub">Massimizza l'<b>utile netto</b> regolando i prezzi in <b>60 secondi</b>. Ogni settimana una nuova <b>Season</b>.</div>
+    <div class="topbar">
+      <div class="badge">Season: <span id="seasonLabel">—</span></div>
+      <div class="badge">Tempo: <span class="timer" id="timeLeft">60</span>s</div>
+      <div class="badge">Utile netto: <span class="score" id="score">0</span> €</div>
+      <div class="badge">Best stagione: <span class="ghost" id="best">0</span> €</div>
+      <div class="buttons">
+        <button id="startBtn" class="primary">Start</button>
+        <button id="retryBtn">Retry</button>
+        <button id="practiceBtn">Practice</button>
+        <button id="shareBtn">Condividi</button>
+        <button id="resetBtn" class="danger">Reset dati</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="flex">
+    <section class="half card">
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>Prodotto</th>
+            <th>Cost (€)</th>
+            <th>Prezzo (€)</th>
+            <th>Domanda stim.</th>
+            <th>Utile</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" style="text-align:right;font-weight:700">Totale</td>
+            <td id="totalProfit" style="font-weight:700">0 €</td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+    <section class="half">
+      <div class="card" style="padding:12px">
+        <h3 style="margin-top:0">Regole lampo</h3>
+        <ul>
+          <li>Ogni prodotto ha <span class="muted">costo</span>, <span class="muted">domanda di riferimento</span> e <span class="muted">elasticità</span>.</li>
+          <li>La domanda decresce con il prezzo: <span class="muted">D(p) ≈ D₀ · e^{-ε · (p−p₀)/p₀}</span>.</li>
+          <li>L'utile per prodotto è <b>(p − costo) × D(p)</b>.</li>
+          <li>Hai <b>60s</b> per regolare i prezzi. Salva il best della Season.</li>
+        </ul>
+        <div class="note">
+          <b>Tip</b>: se l'elasticità è alta, piccoli aumenti di prezzo abbattono la domanda.
+        </div>
+        <div class="footer">Made with ❤️, offline-first PWA. Nessun backend.</div>
+      </div>
+      <div class="card" style="padding:12px;margin-top:12px">
+        <div class="muted">Parametri stagione (seed): <span id="seedEcho" class="pill">—</span></div>
+        <div class="muted">Ghost (miglior tuo): <span id="ghostEcho" class="pill">—</span></div>
+        <div class="muted">Modalità: <span id="modeEcho" class="pill">Season</span></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+// ---------- Utilities ----------
+function mulberry32(a){return function(){var t = a += 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; } }
+function seedFromString(s){
+  let h=1779033703^s.length;
+  for (let i=0;i<s.length;i++){h = Math.imul(h ^ s.charCodeAt(i), 3432918353); h = (h<<13) | (h>>>19);}
+  return h>>>0;
+}
+function clamp(x,a,b){return Math.min(b,Math.max(a,x));}
+function euro(n){return (Math.round(n*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'})}
+function fmt(n){return (Math.round(n*100)/100).toLocaleString('it-IT')}
+function weekKey(d){
+  const dt = d? new Date(d): new Date();
+  // ISO week
+  const tmp = new Date(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate()));
+  const dayNum = (tmp.getUTCDay() + 6) % 7;
+  tmp.setUTCDate(tmp.getUTCDate() - dayNum + 3);
+  const firstThu = new Date(Date.UTC(tmp.getUTCFullYear(),0,4));
+  const week = 1 + Math.round(((tmp - firstThu)/86400000 - 3 + ((firstThu.getUTCDay()+6)%7))/7);
+  return tmp.getUTCFullYear()+"-W"+String(week).padStart(2,'0');
+}
+
+// ---------- Game State ----------
+const tbody = document.getElementById('tbody');
+const totalProfitEl = document.getElementById('totalProfit');
+const timeLeftEl = document.getElementById('timeLeft');
+const scoreEl = document.getElementById('score');
+const bestEl = document.getElementById('best');
+const seasonLabel = document.getElementById('seasonLabel');
+const seedEcho = document.getElementById('seedEcho');
+const ghostEcho = document.getElementById('ghostEcho');
+const modeEcho = document.getElementById('modeEcho');
+
+let products = []; // {name,cost,refPrice,refDemand,elasticity,price}
+let timer=null, timeLeft=60, running=false;
+let mode = "season"; // or "practice"
+let currentSeed = null;
+let season = weekKey();
+
+// ---------- Season setup ----------
+function setupSeason(seedStr){
+  season = weekKey();
+  seasonLabel.textContent = season;
+  const s = seedStr || season;
+  currentSeed = s;
+  seedEcho.textContent = s;
+  const rng = mulberry32(seedFromString(s));
+  const names = ["Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Gamma","Orion","Vega","Nova"];
+  products = [];
+  for(let i=0;i<5;i++){
+    const name = names[Math.floor(rng()*names.length)] + " " + (1+Math.floor(rng()*9));
+    const cost = Math.round( (5 + rng()*45) * 100)/100; // €5–€50
+    const refMargin = 0.25 + rng()*0.45; // 25–70%
+    const refPrice = Math.round( cost * (1+refMargin) * 100)/100;
+    const refDemand = Math.floor(20 + rng()*180); // 20–200
+    const elasticity = 0.4 + rng()*1.6; // 0.4–2.0
+    const minP = Math.max(0.5, cost*0.7);
+    const maxP = cost*3.0;
+    const startPrice = Math.round( refPrice * (0.9 + rng()*0.2) * 100)/100;
+    products.push({name, cost, refPrice, refDemand, elasticity, price:startPrice, minP, maxP});
+  }
+  renderTable();
+  updateTotals();
+  loadBest();
+}
+
+function demandFor(p, price){
+  // D(p) = D0 * exp( -epsilon * (price - p0)/p0 ), floored >= 0
+  const rel = (price - p.refPrice)/p.refPrice;
+  const d = p.refDemand * Math.exp(-p.elasticity * rel);
+  return Math.max(0, Math.floor(d));
+}
+
+function profitFor(p){
+  const u = Math.max(0, p.price - p.cost);
+  const q = demandFor(p, p.price);
+  return u * q;
+}
+
+function renderTable(){
+  tbody.innerHTML = "";
+  products.forEach((p, idx)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${p.name}<div class="muted">ε=${p.elasticity.toFixed(2)} · D₀=${p.refDemand} @ p₀=${euro(p.refPrice)}</div></td>
+      <td>${euro(p.cost)}</td>
+      <td>
+        <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
+          <button data-i="${idx}" data-d="-1">−</button>
+          <input type="range" min="${p.minP}" max="${p.maxP}" step="0.1" value="${p.price}" data-i="${idx}" class="slider">
+          <button data-i="${idx}" data-d="+1">+</button>
+          <span id="price_${idx}">${euro(p.price)}</span>
+        </div>
+      </td>
+      <td><span id="dem_${idx}">0</span> <span class="muted">u</span></td>
+      <td><span id="prof_${idx}">0 €</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('.slider').forEach(sl=>{
+    sl.addEventListener('input', (e)=>{
+      const i = +e.target.dataset.i;
+      products[i].price = parseFloat(e.target.value);
+      document.getElementById('price_'+i).textContent = euro(products[i].price);
+      updateTotals();
+    });
+  });
+  tbody.querySelectorAll('button[data-d]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const i = +e.target.dataset.i;
+      const dir = e.target.dataset.d === "+1" ? 1 : -1;
+      const step = 0.1;
+      products[i].price = clamp( Math.round((products[i].price + dir*step)*10)/10, products[i].minP, products[i].maxP );
+      const slider = tbody.querySelector('input.slider[data-i="'+i+'"]');
+      slider.value = products[i].price;
+      document.getElementById('price_'+i).textContent = euro(products[i].price);
+      updateTotals();
+    });
+  });
+}
+
+function updateTotals(){
+  let tot = 0;
+  products.forEach((p,i)=>{
+    const q = demandFor(p, p.price);
+    const pr = profitFor(p);
+    tot += pr;
+    document.getElementById('dem_'+i).textContent = q.toLocaleString('it-IT');
+    document.getElementById('prof_'+i).textContent = euro(pr);
+  });
+  totalProfitEl.textContent = euro(tot);
+  scoreEl.textContent = euro(tot);
+}
+
+function tick(){
+  if(!running)return;
+  timeLeft -= 1;
+  timeLeftEl.textContent = timeLeft;
+  if(timeLeft<=0){ endRun(); }
+  else setTimeout(tick, 1000);
+}
+
+function startRun(){
+  if(running) return;
+  running = true;
+  timeLeft = 60;
+  timeLeftEl.textContent = timeLeft;
+  document.querySelectorAll('input,button[data-d]').forEach(el=>el.disabled=false);
+  setTimeout(tick, 1000);
+}
+
+function endRun(){
+  running = false;
+  document.querySelectorAll('input,button[data-d]').forEach(el=>el.disabled=true);
+  // save best for this seed if higher
+  const score = parseFloat(scoreEl.textContent.replace(/[^0-9,.-]/g,'').replace('.','').replace(',','.'));
+  const key = "mr.best."+currentSeed;
+  const prev = parseFloat(localStorage.getItem(key) || "0");
+  if(!isNaN(score) && score>prev){
+    localStorage.setItem(key, String(score));
+  }
+  loadBest();
+}
+
+function loadBest(){
+  const key = "mr.best."+currentSeed;
+  const best = parseFloat(localStorage.getItem(key) || "0");
+  bestEl.textContent = euro(best);
+  ghostEcho.textContent = euro(best);
+}
+
+// ---------- Controls ----------
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  mode = "season"; modeEcho.textContent = "Season";
+  setupSeason(weekKey());
+  startRun();
+});
+
+document.getElementById('retryBtn').addEventListener('click', ()=>{
+  setupSeason(currentSeed);
+  startRun();
+});
+
+document.getElementById('practiceBtn').addEventListener('click', ()=>{
+  mode = "practice"; modeEcho.textContent = "Practice";
+  const rnd = Math.floor(Math.random()*1e9).toString(36);
+  setupSeason("PRAC-"+rnd);
+  startRun();
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(confirm("Cancellare tutti i best salvati?")){
+    Object.keys(localStorage).filter(k=>k.startsWith("mr.best.")).forEach(k=>localStorage.removeItem(k));
+    loadBest();
+  }
+});
+
+document.getElementById('shareBtn').addEventListener('click', async ()=>{
+  const url = new URL(location.href);
+  url.searchParams.set('seed', currentSeed);
+  const text = `Il mio utile in Margin Rush (${mode}) — Season ${season}: ${scoreEl.textContent}. Prova la stessa partita: ${url.toString()}`;
+  try {
+    await navigator.clipboard.writeText(text);
+    alert("Copiato negli appunti! Incolla dove vuoi per sfidare altri.");
+  } catch(e){
+    prompt("Copia questo testo e condividilo:", text);
+  }
+});
+
+// ---------- Init ----------
+(function init(){
+  // load by seed query ?seed=...
+  const url = new URL(location.href);
+  const s = url.searchParams.get('seed');
+  if(s){
+    mode = s.startsWith("PRAC-")? "practice" : "season";
+    modeEcho.textContent = mode[0].toUpperCase()+mode.slice(1);
+    setupSeason(s);
+  }else{
+    setupSeason(weekKey());
+  }
+  document.querySelectorAll('input,button[data-d]').forEach(el=>el.disabled=true);
+})();
+
+// ---------- PWA ----------
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js');
+  });
+}
+</script>
+</body>
+</html>
