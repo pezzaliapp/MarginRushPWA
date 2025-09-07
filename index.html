@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
-<title>Margin Rush — v4.5 Pro (Tax, Fixed breakdown, BE chart)</title>
+<title>Margin Rush — v4.5.1 Pro (Tax, Fixed breakdown, BE chart, Clienti spostati)</title>
 <meta name="theme-color" content="#0b1220"/>
 <style>
 :root{--bg:#0b1220;--card:#0f1930;--ink:#eaf0ff;--muted:#b9c7eb;--grid:#1f2d4f;--accent:#87a7ff;--good:#6be675;--bad:#ff7a88;--warn:#ffd166;}
@@ -42,7 +42,7 @@ th:first-child,td:first-child{text-align:left}
 <body>
 <header>
   <div class="wrap">
-    <h1>Margin Rush <span class="pill">v4.5 Pro — Tax • Fixed breakdown • BE chart</span></h1>
+    <h1>Margin Rush <span class="pill">v4.5.1 Pro — Tax • Fixed breakdown • BE chart • Clienti spostati</span></h1>
     <div class="top">
       <div class="badge">Giorno: <b id="day">1</b>/10</div>
       <div class="badge">Cassa: <b id="cash">€5.000,00</b></div>
@@ -125,6 +125,9 @@ th:first-child,td:first-child{text-align:left}
         <div class="box">Utile netto: <b id="pMe">€0,00</b></div>
         <div class="box">Clienti spostati: <b id="moved">0</b></div>
       </div>
+      <div class="note" style="margin-top:8px">
+        Δ stimato (clienti) — Prezzo: <b id="bp">0</b> · Q: <b id="bq">0</b> · B: <b id="bb">0</b> · S: <b id="bs">0</b>
+      </div>
     </div>
   </div>
 </main>
@@ -137,14 +140,12 @@ const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 function saveLS(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch(e){}}
 function loadLS(key,def){try{const v=localStorage.getItem(key);return v?JSON.parse(v):def;}catch(e){return def}}
 
-/* Stato */
+/* Stato base */
 let day=1,M=1200,beta=0.08,season=0,ivaIncl=true,ivaPct=0.22,cap=1000;
 let fixed = loadLS('mr_fixed',{staff:300,rent:120,saas:60,other:20});
 let varOver = loadLS('mr_varOver',1.20);
-let taxPct = loadLS('mr_taxPct',24)/100; // come decimale
+let taxPct = loadLS('mr_taxPct',24)/100;
 let cash=5000,cumProfit=0;
-
-const logEl=$('log'); function pushLog(who,what){const d=document.createElement('div');d.className='log-item';d.innerHTML=`<span class="dot"></span><span class="who">${who}</span><span class="what">${what}</span>`;logEl.prepend(d);}
 
 /* Offerte */
 let our={name:"Noi",p:49,Q:1,B:1,S:1};
@@ -155,6 +156,9 @@ let comps=[
   actions:[{dp:-0.10,dQ:0,dB:0,dS:0,name:"Price −10%"},{dp:-0.05,dQ:0,dB:0,dS:0,name:"Price −5%"},{dp:0,dQ:1,dB:0,dS:0,name:"+Quality"},{dp:0,dQ:0,dB:1,dS:0,name:"+Brand"},{dp:+0.05,dQ:0,dB:0,dS:1,name:"+Service & +5%"}],
   Qvals:[0,0,0,0,0],N:[0,0,0,0,0],epsilon:0.25}
 ];
+
+/* Log UI */
+const logEl=$('log'); function pushLog(who,what){const d=document.createElement('div');d.className='log-item';d.innerHTML=`<span class="dot"></span><span class="who">${who}</span><span class="what">${what}</span>`;logEl.prepend(d);}
 
 /* Modello domanda (logit) */
 function shares(players){
@@ -202,7 +206,7 @@ function renderTable(q=null,s=null){
   }).join(''); document.querySelector('#tbl tbody').innerHTML=rows;
 }
 
-/* Fixed costs, BE post-tax */
+/* Costi fissi & break-even post-tax */
 function fixedTotal(){ return (+fxStaff.value||0)+(+fxRent.value||0)+(+fxSaaS.value||0)+(+fxOther.value||0); }
 function bePostTax(){
   const pNet=netP(our.p), mc = pNet - (costUnit(our.Q) + (+varOverInp.value||0));
@@ -212,7 +216,7 @@ function bePostTax(){
   return {units:u, revenue: u * pNet};
 }
 
-/* Chart */
+/* BE chart */
 function drawChart(){
   const c=$('beChart'), ctx=c.getContext('2d');
   const w=c.clientWidth, h=c.clientHeight; if(c.width!==w){c.width=w;c.height=h;}
@@ -223,17 +227,13 @@ function drawChart(){
   function x(q){return pad + (q/maxQ)*(w-pad*1.2);}
   function y(v){const maxV=Math.max(pNet*maxQ, (vCost*maxQ+F)/(1-tau)); return h-pad - (v/maxV)*(h-pad*1.2);}
 
-  // assi
   ctx.strokeStyle="#254"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(pad, y(0)); ctx.lineTo(w-pad*0.2, y(0)); ctx.moveTo(pad, y(0)); ctx.lineTo(pad, pad*0.2); ctx.stroke();
 
-  // Ricavi
   ctx.strokeStyle="#7aa7ff"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x(0), y(0)); ctx.lineTo(x(maxQ), y(pNet*maxQ)); ctx.stroke(); ctx.fillStyle="#7aa7ff"; ctx.fillText("Ricavi", x(maxQ)-50, y(pNet*maxQ)-6);
 
-  // Costi totali post-tax equivalenti: (VC+F)/(1-tau)
   const totAtQ = q => (vCost*q + F) / (1 - tau);
   ctx.strokeStyle="#ff7a88"; ctx.beginPath(); ctx.moveTo(x(0), y(totAtQ(0))); ctx.lineTo(x(maxQ), y(totAtQ(maxQ))); ctx.stroke(); ctx.fillStyle="#ff7a88"; ctx.fillText("Costi totali", x(maxQ)-80, y(totAtQ(maxQ))-6);
 
-  // Break-even
   const be = bePostTax(); 
   if(isFinite(be.units) && be.units<=maxQ){
     ctx.fillStyle="#6be675"; ctx.beginPath(); ctx.arc(x(be.units), y(pNet*be.units), 4, 0, Math.PI*2); ctx.fill();
@@ -255,6 +255,32 @@ function runAdvisor(){
   $('advisor').innerHTML=`Advisor: <b>${euro(best)}</b> — utile atteso ${euro(bestProf)} (post-tax).`;
 }
 
+/* === Clienti spostati: stato “ieri” e stima === */
+let prev = { p: our.p, Q: our.Q, B: our.B, S: our.S, share: 0, units: 0 };
+
+function ourShareWith(cfg){
+  const meTmp = { ...our, ...cfg };
+  return shares([meTmp].concat(comps))[0];
+}
+
+function estimateMovedAndBreakdown(marketToday){
+  const s_prev = prev.share || ourShareWith({ p: prev.p, Q: prev.Q, B: prev.B, S: prev.S });
+  const s_now  = ourShareWith({ p: our.p, Q: our.Q, B: our.B, S: our.S });
+  const moved = Math.round((s_now - s_prev) * marketToday);
+
+  // breakdown additivo: Prezzo -> Q -> B -> S
+  const s_p = ourShareWith({ p: our.p,   Q: prev.Q, B: prev.B, S: prev.S });
+  const s_q = ourShareWith({ p: our.p,   Q: our.Q,  B: prev.B, S: prev.S });
+  const s_b = ourShareWith({ p: our.p,   Q: our.Q,  B: our.B,  S: prev.S });
+
+  const d_price = Math.round((s_p - s_prev) * marketToday);
+  const d_q     = Math.round((s_q - s_p)    * marketToday);
+  const d_b     = Math.round((s_b - s_q)    * marketToday);
+  const d_s     = Math.round((s_now - s_b)  * marketToday);
+
+  return { moved, d_price, d_q, d_b, d_s, s_now };
+}
+
 /* Simulazione giorno (post-tax) */
 function simulateDay(){
   const F=fixedTotal(), v=+varOverInp.value||0, tau=(+taxPctInp.value||0)/100;
@@ -262,16 +288,33 @@ function simulateDay(){
   const marketToday=Math.round(M*(1+season/100));
   const q=s.map(x=>Math.round(x*marketToday));
   q[0]=Math.min(q[0],cap);
+
+  // nuovi KPI spostati + breakdown
+  const { moved, d_price, d_q, d_b, d_s, s_now } = estimateMovedAndBreakdown(marketToday);
+
   const rev=netP(our.p)*q[0];
   const cost=(costUnit(our.Q)+v)*q[0];
   let profitPre = rev - cost - F;
-  let profit = profitPre>0 ? profitPre*(1 - tau) : profitPre;
+  let profit    = profitPre>0 ? profitPre*(1 - tau) : profitPre;
 
   cash+=profit; cumProfit+=profit;
+
   renderTable(q,s);
-  $('qMe').textContent=q[0].toLocaleString('it-IT'); $('sMe').textContent=(s[0]*100).toFixed(1)+'%';
-  $('pMe').textContent=euro(profit); $('cash').textContent=euro(cash); $('cumprofit').textContent=euro(cumProfit);
+  $('qMe').textContent=q[0].toLocaleString('it-IT');
+  $('sMe').textContent=(s[0]*100).toFixed(1)+'%';
+  $('pMe').textContent=euro(profit);
+  $('cash').textContent=euro(cash);
+  $('cumprofit').textContent=euro(cumProfit);
   $('share').textContent=(s[0]*100).toFixed(1)+'%';
+
+  $('moved').textContent = (moved>=0?'+':'') + moved.toLocaleString('it-IT');
+  $('bp').textContent = (d_price>=0?'+':'') + d_price.toLocaleString('it-IT');
+  $('bq').textContent = (d_q>=0?'+':'') + d_q.toLocaleString('it-IT');
+  $('bb').textContent = (d_b>=0?'+':'') + d_b.toLocaleString('it-IT');
+  $('bs').textContent = (d_s>=0?'+':'') + d_s.toLocaleString('it-IT');
+
+  // aggiorna "ieri"
+  prev = { p: our.p, Q: our.Q, B: our.B, S: our.S, share: s_now, units: q[0] };
 }
 
 /* DOM refs */
@@ -286,7 +329,6 @@ function refreshEcho(){
   $('capEcho').textContent=cap; $('capVal').textContent=cap;
   $('cash').textContent=euro(cash); $('cumprofit').textContent=euro(cumProfit);
 
-  // save & derived
   fixed={staff:+fxStaff.value||0, rent:+fxRent.value||0, saas:+fxSaaS.value||0, other:+fxOther.value||0};
   varOver=+varOverInp.value||0; taxPct=(+taxPctInp.value||0)/100;
   saveLS('mr_fixed',fixed); saveLS('mr_varOver',varOver); saveLS('mr_taxPct',(+taxPctInp.value||0));
@@ -300,7 +342,7 @@ function refreshEcho(){
 
 /* Init inputs from LS */
 fxStaff.value=fixed.staff; fxRent.value=fixed.rent; fxSaaS.value=fixed.saas; fxOther.value=fixed.other;
-varOverInp.value=varOver.toFixed(2); taxPctInp.value=(taxPct*100).toFixed(1);
+varOverInp.value=Number(varOver).toFixed(2); taxPctInp.value=(taxPct*100).toFixed(1);
 
 /* Bindings */
 $('price').value=our.p; $('cap').value=cap;
@@ -316,7 +358,7 @@ $('ivaPct').oninput=()=>{ ivaPct=parseFloat($('ivaPct').value)/100; refreshEcho(
 [fxStaff,fxRent,fxSaaS,fxOther,varOverInp,taxPctInp].forEach(el=>el.addEventListener('input',refreshEcho));
 
 $('advance').onclick=()=>{
-  // investimenti semplici (applico subito; puoi reintrodurre buff a durata se ti serve)
+  // investimenti semplici (applico subito; opzionale reintrodurre buff a durata)
   const iQ=parseInt($('invQ').value||'0',10), iB=parseInt($('invB').value||'0',10), iS=parseInt($('invS').value||'0',10);
   let invest = iQ*300 + iB*250 + iS*200;
   if(invest>0 && invest>cash){ alert('Cassa insufficiente per gli investimenti.'); return; }
