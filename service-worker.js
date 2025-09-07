@@ -1,5 +1,5 @@
-// Offline cache-first (v2.4)
-const CACHE = 'marginrush-v2-4';
+// Offline cache-first (v2.5)
+const CACHE = 'marginrush-v2-5';
 const ASSETS = ['./','index.html','style.css','app.js','manifest.json','icon-192.png','icon-512.png'];
 self.addEventListener('install', e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))); });
 self.addEventListener('activate', e=>{ e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))); });
