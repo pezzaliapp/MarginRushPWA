@@ -348,6 +348,7 @@ function getSystemTheme(){ return matchMedia("(prefers-color-scheme: light)").ma
   const cb = ()=>{ const pref=localStorage.getItem(THEME_KEY); if (pref!=='light'&&pref!=='dark') applyTheme(getSystemTheme()); };
   if (mq.addEventListener) mq.addEventListener('change', cb); else mq.addListener(cb);
 })();
+
 document.getElementById("toggle-theme").addEventListener("click", () => {
   const next = lightStyle.disabled ? 'light' : 'dark';
   localStorage.setItem(THEME_KEY, next);
@@ -413,7 +414,7 @@ let lastMyUnits = 0;
 let prev = {p:our.p,Q:our.Q,B:our.B,S:our.S,share:0,units:0};
 window.lastAdvisorPrice = null;
 
-/* ====== Core ====== */
+/* ====== Funzioni core ====== */
 const netP = p => ivaIncl ? p/(1+ivaPct) : p;
 const costQ = Q => 8 + 2*Q;
 
@@ -621,15 +622,18 @@ function refreshEcho(){
   if (el('invBEcho'))  el('invBEcho').textContent  = our.B;
   if (el('invSEcho'))  el('invSEcho').textContent  = our.S;
   if (el('capVal'))    el('capVal').textContent    = cap;
+  if (el('capEcho'))   el('capEcho').textContent   = cap;
   if (el('M'))         el('M').textContent = M;
   if (el('seasonEcho'))el('seasonEcho').textContent = (season>=0?'+':'') + season + '%';
   if (el('betaEcho'))  el('betaEcho').textContent = beta.toFixed(3);
 
+  // calcola quote + unità
   const players = [our].concat(comps);
   const s = shares(players);
   const market = Math.round(M * (1 + season/100));
   const qList = s.map(si => Math.min(Math.round(si * market), cap));
 
+  // tabella
   const tbody = el('tbl')?.querySelector('tbody');
   if (tbody){
     tbody.innerHTML = '';
@@ -651,6 +655,7 @@ function refreshEcho(){
     });
   }
 
+  // KPI & costi
   const pNet = netP(our.p);
   const vc = buyCost + varOver + costQ(our.Q) + wCostPerUnit() + channelVarPerUnit(pNet);
   const mcUnit = pNet - vc;
@@ -677,8 +682,11 @@ function refreshEcho(){
     el('minMarginWarn').textContent = our.p < minPLordo ? '⚠️ sotto margine minimo' : 'OK';
   }
 
+  // grafici
   drawBEChart(myQ, pNet, vc, F);
   drawMCChart(myQ, pNet, vc);
+
+  // advisor
   runAdvisor();
 
   if (el('day'))       el('day').textContent = day;
@@ -686,6 +694,7 @@ function refreshEcho(){
   if (el('cumprofit')) el('cumprofit').textContent = euro(cumProfit);
   if (el('share'))     el('share').textContent = pct(s[0]||0);
 
+  // save
   save('day',day); save('M',M); save('beta',beta); save('season',season); save('cap',cap);
   save('ivaIncl',ivaIncl); save('ivaPct',ivaPct*100); save('tax',tax*100);
   save('our',our); save('buyCost',buyCost); save('varOver',varOver); save('minMargin',minMargin);
@@ -801,6 +810,7 @@ function simulateDay(){
   el('share').textContent=(s[0]*100).toFixed(1)+'%';
   el('moved').textContent=(moved>=0?'+':'')+moved.toLocaleString('it-IT');
 
+  // KPI secondari
   const mcU = pNet - vc;
   const mcTot = Math.max(0, mcU) * q[0];
   const cover = pNet>0 ? (mcU/pNet*100) : 0;
@@ -813,6 +823,7 @@ function simulateDay(){
 
   prev={p:our.p,Q:our.Q,B:our.B,S:our.S,share:s_now,units:q[0]};
 
+  // Grafici & echo
   drawBEChart(q[0], pNet, vc, F);
   drawMCChart(q[0], pNet, vc);
   runAdvisor();
@@ -863,12 +874,14 @@ function hydrateInputs(){
 
   el('channel').value=channel;
 
+  // canali
   el('onFeePct').value=ch.online.feePct; el('onPayPct').value=ch.online.payPct; el('onFixedPer').value=ch.online.fixedPer; el('onLogPer').value=ch.online.logPer; el('onSaaS').value=ch.online.saasM; el('onMgmt').value=ch.online.mgmtM;
   el('pvAuto').value=ch.piva.autoM; el('pvFixed').value=ch.piva.fixedM; el('pvPct').value=ch.piva.pct; el('pvTeleKm').value=ch.piva.teleKm; el('pvKm').value=ch.piva.kmM; el('pvKml').value=ch.piva.kml; el('pvFuel').value=ch.piva.fuel; el('pvOtherM').value=ch.piva.otherM;
   el('emRal').value=ch.employee.ralY; el('emAuto').value=ch.employee.autoM; el('emTele').value=ch.employee.teleM; el('emTrips').value=ch.employee.tripsM; el('emPct').value=ch.employee.pct; el('emKm').value=ch.employee.kmM; el('emKml').value=ch.employee.kml; el('emFuel').value=ch.employee.fuel;
 }
 
 function wire(){
+  // leve principali
   bind('price','input', ()=>{ our.p=+el('price').value; refreshEcho(); });
   bind('invQ','input',  ()=>{ our.Q=+el('invQ').value; refreshEcho(); });
   bind('invB','input',  ()=>{ our.B=+el('invB').value; refreshEcho(); });
@@ -880,16 +893,26 @@ function wire(){
   bind('beta','input',  ()=>{ beta=+el('beta').value||beta; refreshEcho(); });
   bind('season','input',()=>{ season=+el('season').value||season; refreshEcho(); });
 
+  // costi base
   bind('buyCost','input', ()=>{ buyCost=+el('buyCost').value||buyCost; refreshEcho(); });
   bind('varOver','input', ()=>{ varOver=+el('varOver').value||varOver; refreshEcho(); });
   bind('minMarginPct','input', ()=>{ minMargin=+el('minMarginPct').value||minMargin; refreshEcho(); });
   bind('taxPct','input', ()=>{ tax=(+el('taxPct').value||24)/100; refreshEcho(); });
 
+  // garanzia
+  bind('wTier','change', ()=>{ warranty.months=+el('wTier').value||warranty.months; refreshEcho(); });
+  bind('wRateIn','input', ()=> refreshEcho());
+  bind('wCostIn','input', ()=> refreshEcho());
+  bind('wRateOut','input',()=> refreshEcho());
+  bind('wCostOut','input',()=> refreshEcho());
+
+  // fissi
   ['fxStaff','fxRent','fxSaaS','fxOther'].forEach(id=>bind(id,'input', ()=>{ 
     fixedBase={ staff:+el('fxStaff').value||0, rent:+el('fxRent').value||0, saas:+el('fxSaaS').value||0, other:+el('fxOther').value||0 }; 
     refreshEcho();
   }));
 
+  // canale
   bind('channel','change', ()=>{ channel=el('channel').value; showChannelPanels(); refreshEcho(); });
   ['onFeePct','onPayPct','onFixedPer','onLogPer','onSaaS','onMgmt','pvAuto','pvFixed','pvPct','pvTeleKm','pvKm','pvKml','pvFuel','pvOtherM','emRal','emAuto','emTele','emTrips','emPct','emKm','emKml','emFuel']
   .forEach(id=> bind(id,'input', ()=>{ 
@@ -901,20 +924,29 @@ function wire(){
     showChannelPanels(); refreshEcho();
   }));
 
+  // avanzamento e reset
   bind('advance','click', ()=> simulateDay());
   bind('reset','click',   ()=>{ if(confirm('Nuova partita?')){ localStorage.clear(); location.reload(); } });
-}
 
-/* ====== Soluzione (advisor) ====== */
-function computeAdvisorNow(){
-  try {
-    refreshEcho();
-    runAdvisor();
-    return Number.isFinite(window.lastAdvisorPrice) ? window.lastAdvisorPrice : null;
-  } catch(e) {
-    console.error('Advisor error:', e);
-    return null;
-  }
+  // 💡 Indica la soluzione (un solo bind)
+  bind('show-solution','click', ()=>{
+    try {
+      refreshEcho();
+      runAdvisor();
+      const price = window.lastAdvisorPrice;
+      const box = el('solution-box');
+      if (Number.isFinite(price)){
+        box.innerHTML = `👉 Prezzo suggerito dal sistema: <b>${euro(price)}</b>`;
+      } else {
+        const pNet = (ivaIncl ? our.p/(1+ivaPct) : our.p);
+        box.innerHTML = `⚠️ Non riesco a stimare ora l'ottimo. Riferimento: prezzo attuale <b>${euro(our.p)}</b> (netto: ${euro(pNet)}).`;
+      }
+      box.style.display='block';
+    } catch(e){
+      console.error('Advisor error:', e);
+      alert('Errore nel calcolo della soluzione. Controlla i parametri.');
+    }
+  });
 }
 
 /* ====== Start ====== */
@@ -922,24 +954,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
   hydrateInputs();
   showChannelPanels();
   refreshEcho();
-  runAdvisor();
-  wire();
-
-  const btn = document.getElementById('show-solution');
-  const box = document.getElementById('solution-box');
-  if (btn && box){
-    btn.addEventListener('click', ()=>{
-      const price = computeAdvisorNow();
-      if (price != null) {
-        box.innerHTML = `👉 Prezzo suggerito dal sistema: <b>${euro(price)}</b>`;
-      } else {
-        const pNet = (ivaIncl ? our.p/(1+ivaPct) : our.p);
-        box.innerHTML = `⚠️ Non riesco a stimare ora l'ottimo. Riferimento: prezzo attuale <b>${euro(our.p)}</b> (netto: ${euro(pNet)}).`;
-      }
-      box.style.display = 'block';
-    });
-  }
+  runAdvisor();        // calcola subito una prima soluzione
+  wire();              // attacca tutti i listener (incluso "Indica la soluzione")
 });
 </script>
+
 </body>
 </html>
