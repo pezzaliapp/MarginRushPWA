@@ -917,13 +917,14 @@ function wire(){
   }));
 
   // avanzamento e reset
-  bind('advance','click', ()=> simulateDay());
+ bind('advance','click', ()=> simulateDay());
   bind('reset','click',   ()=>{ if(confirm('Nuova partita?')){ localStorage.clear(); location.reload(); } });
+} // 👈 chiudo la funzione qui
+
 
  // 💡 Indica la soluzione — versione robusta
 function computeAdvisorNow(){
   try {
-    // assicura che gli echo e i costi siano allineati prima del calcolo
     refreshEcho();
     runAdvisor(); // imposta window.lastAdvisorPrice
     return window.lastAdvisorPrice;
@@ -940,7 +941,6 @@ bind('show-solution','click', ()=>{
   if (Number.isFinite(price)) {
     box.innerHTML = `👉 Prezzo suggerito dal sistema: <b>${euro(price)}</b>`;
   } else {
-    // Fallback semplice: mostra almeno il prezzo corrente netto come riferimento
     const pNet = (ivaIncl ? our.p/(1+ivaPct) : our.p);
     box.innerHTML = `⚠️ Non riesco a stimare ora l'ottimo. Riferimento: prezzo attuale <b>${euro(our.p)}</b> (netto: ${euro(pNet)}).`;
   }
