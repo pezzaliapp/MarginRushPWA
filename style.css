@@ -27,7 +27,6 @@ th:first-child,td:first-child{text-align:left}
 .log-item{padding:7px 10px;border-bottom:1px dashed #1e2a4e}
 .chart{width:100%;height:220px;background:#0b1432;border:1px solid var(--grid);border-radius:10px;margin-top:8px}
 
-/* === Controls grid: etichetta | controllo | valore (anticut) === */
 .controls-grid{
   display:grid;
   grid-template-columns: minmax(160px,1fr) minmax(260px,2fr) minmax(120px,auto);
@@ -41,34 +40,18 @@ th:first-child,td:first-child{text-align:left}
 .controls-grid input[type="range"]{width: 100%;}
 .controls-grid input[type="number"], .controls-grid select{width: 100%;max-width: 100%;}
 
-/* desktop: un filo più largho e overflow di salvataggio */
 @media (min-width: 1024px){
   .wrap{ max-width: 1320px; }
   .card .section{ overflow-x: auto; }
 }
-
-/* mobile: valore sotto al controllo */
 @media (max-width: 700px){
   .controls-grid{ grid-template-columns: 1fr 1fr; }
   .controls-grid .value{ grid-column: 2 / 3; justify-self: end; }
   .kpi{ grid-template-columns: 1fr 1fr; }
 }
-/* === MOBILE FIXES — iPhone safe layout === */
-
-/* 1) a larghezze medio/piccole passa a UNA colonna */
-@media (max-width: 1100px){
-  .grid{ grid-template-columns: 1fr; }
-}
-
-/* 2) su tablet/phone le KPI diventano 2 colonne, poi 1 colonna su telefoni stretti */
-@media (max-width: 900px){
-  .kpi{ grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 420px){
-  .kpi{ grid-template-columns: 1fr; }
-}
-
-/* 3) controlli a griglia: su mobile metti valore sotto al controllo e niente tagli */
+@media (max-width: 1100px){ .grid{ grid-template-columns: 1fr; } }
+@media (max-width: 900px){ .kpi{ grid-template-columns: 1fr 1fr; } }
+@media (max-width: 420px){ .kpi{ grid-template-columns: 1fr; } }
 @media (max-width: 700px){
   .controls-grid{ grid-template-columns: 1fr; }
   .controls-grid .value{
@@ -77,16 +60,8 @@ th:first-child,td:first-child{text-align:left}
     margin-top: -4px;
   }
 }
-
-/* 4) evita overflow orizzontale ovunque e permetti scroll di salvataggio se serve */
 html, body { overflow-x: hidden; }
 .card .section{ overflow-x: auto; }
-
-/* 5) tabelle sempre scrollabili su x quando lo spazio non basta */
 table{ display: block; overflow-x: auto; }
-
-/* 6) gli input non devono mai uscire dal contenitore */
 input, select { max-width: 100%; }
-
-/* 7) canvas responsive: il contenitore fa la misura, il JS fa resize */
 .chart{ width: 100% !important; height: 220px; }
