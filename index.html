@@ -117,9 +117,10 @@
       <div class="badge">Quota oggi: <b id="share">0%</b></div>
       <div class="badge">Utile cumulato: <b id="cumprofit">€0,00</b></div>
       <button id="advance" class="btn primary">Avanza giorno</button>
-      <button id="reset" class="btn danger">Nuova partita</button>
-      <button id="show-solution" class="btn">💡 Indica la soluzione</button>
-      <button id="toggle-theme" class="btn">🌗 Tema</button>
+<button id="reset" class="btn danger">Nuova partita</button>
+<button id="open-readme" class="btn">📖 Istruzioni</button>
+<button id="show-solution" class="btn">💡 Indica la soluzione</button>
+<button id="toggle-theme" class="btn">🌗 Tema</button>
     </div>
   </div>
 </header>
@@ -871,7 +872,7 @@ function showChannelPanels(){
   if (m[channel]) m[channel].style.display='block';
 
   const pNet = netP(our.p);
-  if (el('chVarEcho')) el('chVarEcho').textContent = euro(channelVarPerUnit(pNet));
+  if (el('chVarEcho'))   el('chVarEcho').textContent   = euro(channelVarPerUnit(pNet));
   if (el('chFixedEcho')) el('chFixedEcho').textContent = euro(channelFixedPerDay());
   if (el('chPctEcho')){
     const pctV =
@@ -905,49 +906,60 @@ function hydrateInputs(){
 
   el('channel').value=channel;
 
+  // Canali
   el('onFeePct').value=ch.online.feePct; el('onPayPct').value=ch.online.payPct; el('onFixedPer').value=ch.online.fixedPer; el('onLogPer').value=ch.online.logPer; el('onSaaS').value=ch.online.saasM; el('onMgmt').value=ch.online.mgmtM;
   el('pvAuto').value=ch.piva.autoM; el('pvFixed').value=ch.piva.fixedM; el('pvPct').value=ch.piva.pct; el('pvTeleKm').value=ch.piva.teleKm; el('pvKm').value=ch.piva.kmM; el('pvKml').value=ch.piva.kml; el('pvFuel').value=ch.piva.fuel; el('pvOtherM').value=ch.piva.otherM;
   el('emRal').value=ch.employee.ralY; el('emAuto').value=ch.employee.autoM; el('emTele').value=ch.employee.teleM; el('emTrips').value=ch.employee.tripsM; el('emPct').value=ch.employee.pct; el('emKm').value=ch.employee.kmM; el('emKml').value=ch.employee.kml; el('emFuel').value=ch.employee.fuel;
 }
 function wire(){
+  // Leve principali
   bind('price','input', ()=>{ our.p=+el('price').value; refreshEcho(); });
   bind('invQ','input',  ()=>{ our.Q=+el('invQ').value; refreshEcho(); });
   bind('invB','input',  ()=>{ our.B=+el('invB').value; refreshEcho(); });
   bind('invS','input',  ()=>{ our.S=+el('invS').value; refreshEcho(); });
-  bind('cap','input',   ()=>{ cap=+el('cap').value; refreshEcho(); });
+  bind('cap','input',   ()=>{ cap=+el('cap').value;   refreshEcho(); });
 
+  // IVA & domanda
   bind('iva','change',  ()=>{ ivaIncl=el('iva').checked; refreshEcho(); });
   bind('ivaPct','input',()=>{ ivaPct=(+el('ivaPct').value||22)/100; refreshEcho(); });
   bind('beta','input',  ()=>{ beta=+el('beta').value||beta; refreshEcho(); });
   bind('season','input',()=>{ season=+el('season').value||season; refreshEcho(); });
 
+  // Costi & vincoli
   bind('buyCost','input', ()=>{ buyCost=+el('buyCost').value||buyCost; refreshEcho(); });
   bind('varOver','input', ()=>{ varOver=+el('varOver').value||varOver; refreshEcho(); });
   bind('minMarginPct','input', ()=>{ minMargin=+el('minMarginPct').value||minMargin; refreshEcho(); });
   bind('taxPct','input', ()=>{ tax=(+el('taxPct').value||24)/100; refreshEcho(); });
 
+  // Garanzia
   bind('wTier','change', ()=>{ warranty.months=+el('wTier').value||warranty.months; refreshEcho(); });
   bind('wRateIn','input', ()=> refreshEcho());
   bind('wCostIn','input', ()=> refreshEcho());
   bind('wRateOut','input',()=> refreshEcho());
   bind('wCostOut','input',()=> refreshEcho());
 
+  // Fissi base
   ['fxStaff','fxRent','fxSaaS','fxOther'].forEach(id=>bind(id,'input', ()=>{ 
     fixedBase={ staff:+el('fxStaff').value||0, rent:+el('fxRent').value||0, saas:+el('fxSaaS').value||0, other:+el('fxOther').value||0 }; 
     refreshEcho();
   }));
 
+  // Canali
   bind('channel','change', ()=>{ channel=el('channel').value; showChannelPanels(); refreshEcho(); });
-  ['onFeePct','onPayPct','onFixedPer','onLogPer','onSaaS','onMgmt','pvAuto','pvFixed','pvPct','pvTeleKm','pvKm','pvKml','pvFuel','pvOtherM','emRal','emAuto','emTele','emTrips','emPct','emKm','emKml','emFuel']
-  .forEach(id=> bind(id,'input', ()=>{ 
+  ['onFeePct','onPayPct','onFixedPer','onLogPer','onSaaS','onMgmt',
+   'pvAuto','pvFixed','pvPct','pvTeleKm','pvKm','pvKml','pvFuel','pvOtherM',
+   'emRal','emAuto','emTele','emTrips','emPct','emKm','emKml','emFuel'
+  ].forEach(id=> bind(id,'input', ()=>{ 
     ch = {
       online:{feePct:+el('onFeePct').value||0,payPct:+el('onPayPct').value||0,fixedPer:+el('onFixedPer').value||0,logPer:+el('onLogPer').value||0,saasM:+el('onSaaS').value||0,mgmtM:+el('onMgmt').value||0},
       piva:{autoM:+el('pvAuto').value||0,fixedM:+el('pvFixed').value||0,pct:+el('pvPct').value||0,teleKm:+el('pvTeleKm').value||0,kmM:+el('pvKm').value||0,kml:+el('pvKml').value||1,fuel:+el('pvFuel').value||0,otherM:+el('pvOtherM').value||0},
       employee:{ralY:+el('emRal').value||0,autoM:+el('emAuto').value||0,teleM:+el('emTele').value||0,tripsM:+el('emTrips').value||0,pct:+el('emPct').value||0,kmM:+el('emKm').value||0,kml:+el('emKml').value||1,fuel:+el('emFuel').value||0}
     }; 
-    showChannelPanels(); refreshEcho();
+    showChannelPanels(); 
+    refreshEcho();
   }));
 
+  // Controlli principali
   bind('advance','click', ()=> simulateDay());
   bind('reset','click',   ()=>{ 
     if(!confirm('Nuova partita?')) return;
@@ -988,8 +1000,15 @@ function wire(){
       box.style.display = 'block';
     }
   });
-}
 
+  // 📖 Istruzioni (apre readme.html)
+  const readmeBtn = document.getElementById('open-readme');
+  if (readmeBtn){
+    readmeBtn.addEventListener('click', () => {
+      window.location.href = 'readme.html';
+    });
+  }
+}
 /* ====== Start ====== */
 document.addEventListener('DOMContentLoaded', ()=>{
   hydrateInputs();
