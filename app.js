@@ -89,8 +89,12 @@ let comps = load('comps', [
 let lastShares = null;
 let lastMyUnits = 0;
 
+// Stato precedente delle nostre leve (per breakdown Δ clienti)
+let prevOur = { p: our.p, Q: our.Q, B: our.B, S: our.S };
+
 // Advisor globale per pulsante "Indica la soluzione"
 window.lastAdvisorPrice = null;
+window.lastAdvisorProfit = null;
 
 ////////////////////////////
 // Funzioni di calcolo    //
@@ -176,7 +180,6 @@ function shares(players){
 ////////////////////////////
 
 function compMovePriceWar(c){ // abbassa leggermente prezzo se siamo più competitivi
-  // se la nostra quota > loro, provano ad abbassare
   if (lastShares){
     const idx = 1 + comps.findIndex(x=>x.name===c.name);
     const myS = lastShares[0], theirS = lastShares[idx] ?? 0;
@@ -188,7 +191,6 @@ function compMovePriceWar(c){ // abbassa leggermente prezzo se siamo più compet
 }
 
 function compMovePremium(c){
-  // investe in Q/B e sostiene prezzo con piccoli aggiustamenti
   if (Math.random()<0.5) c.Q = clamp(c.Q+1,1,3);
   else c.B = clamp(c.B+1,1,3);
   c.S = clamp(c.S + (Math.random()<0.3?1:0),1,2);
@@ -196,26 +198,22 @@ function compMovePremium(c){
 }
 
 function compMoveBandit(c){
-  // ε-greedy su azioni: valuta con reward = delta quota prevista
   const eps = c.epsilon ?? 0.25;
   let aIdx;
   if (Math.random() < eps){
     aIdx = Math.floor(Math.random()*c.actions.length);
   } else {
-    // scegli l'azione migliore finora
     let best=-Infinity, idx=0;
     c.Qvals.forEach((q,i)=>{ if(q>best){best=q; idx=i;} });
     aIdx = idx;
   }
   const a = c.actions[aIdx];
 
-  // stato attuale
   const basePlayers = [our].concat(comps.map(x=>({...x})));
   const beforeS = shares(basePlayers);
   const meIdx = 1 + comps.findIndex(x=>x.name===c.name);
   const before = beforeS[meIdx];
 
-  // applica mossa (simulazione locale)
   const simPlayers = [our].concat(comps.map(x=>{
     if (x.name!==c.name) return {...x};
     const nx = {...x};
@@ -227,12 +225,10 @@ function compMoveBandit(c){
   }));
   const after = shares(simPlayers)[meIdx];
 
-  const reward = after - before; // delta quota
-  // update valori attesi
+  const reward = after - before;
   c.N[aIdx] += 1;
   c.Qvals[aIdx] = c.Qvals[aIdx] + (reward - c.Qvals[aIdx]) / c.N[aIdx];
 
-  // applica davvero la mossa alla versione reale
   if (a.dp) c.p = clamp(c.p*(1+a.dp), 5, 220);
   if (a.dQ) c.Q = clamp(c.Q + a.dQ, 1, 3);
   if (a.dB) c.B = clamp(c.B + a.dB, 1, 3);
@@ -341,7 +337,7 @@ function drawMCChart(q, pNet, vc){
   } ctx.stroke();
 
   // area MC fino a q
-  ctx.fillStyle="rgba(107,230,117,0.25)"; // area verde
+  ctx.fillStyle="rgba(107,230,117,0.25)";
   ctx.beginPath();
   ctx.moveTo(x2px(0), y2px(0));
   ctx.lineTo(x2px(q), y2px(vc*q));
@@ -380,8 +376,25 @@ function runAdvisor(){
     }
   }
 
-  window.lastAdvisorPrice = best;
+  window.lastAdvisorPrice  = best;
+  window.lastAdvisorProfit = bestProf;
   if (el('advisor')) el('advisor').innerHTML = `Advisor: <b>${euro(best)}</b> — utile atteso ${euro(bestProf)} (post-tax).`;
+}
+
+// ==========================
+// Mostra la soluzione (UI)
+// ==========================
+function showSolution(){
+  const box = el('solution-box'); if (!box) return;
+  let msg = '';
+  if (window.lastAdvisorPrice != null){
+    const prof = window.lastAdvisorProfit ?? 0;
+    msg = `👉 Prezzo suggerito dal sistema: <b>${euro(window.lastAdvisorPrice)}</b><br><small>Utile atteso: ${euro(prof)}</small>`;
+  } else {
+    msg = "⚠️ Non ci sono ancora dati sufficienti, avanza almeno 1 turno.";
+  }
+  box.innerHTML = msg;
+  box.style.display = 'block';
 }
 
 //////////////////////
@@ -428,7 +441,7 @@ function refreshEcho(){
         pct(s[i]),
         qList[i].toString()
       ];
-      cols.forEach((c,ci)=>{
+      cols.forEach((c)=>{
         const td = document.createElement('td');
         td.textContent = c;
         tr.appendChild(td);
@@ -517,11 +530,12 @@ function simulateDay(){
   // breakdown "clienti spostati" (semplice: confronto con ieri)
   if (lastShares){
     const delta = (s[0] - lastShares[0]) * market;
-    // stima rozza contributi (variazioni nostre leve rispetto ieri)
-    const bp = ((our.p - prevOur.p) !== 0) ? -Math.sign(our.p - prevOur.p) * Math.abs(delta)*0.5 : 0;
-    const bq = (our.Q - prevOur.Q) * Math.abs(delta)*0.25;
-    const bb = (our.B - prevOur.B) * Math.abs(delta)*0.15;
-    const bs = (our.S - prevOur.S) * Math.abs(delta)*0.10;
+    // contributi grezzi basati sul cambiamento delle nostre leve rispetto a prevOur
+    const absDelta = Math.abs(delta);
+    const bp = (our.p - prevOur.p) !== 0 ? -Math.sign(our.p - prevOur.p) * absDelta * 0.5 : 0;
+    const bq = (our.Q - prevOur.Q) * absDelta * 0.25;
+    const bb = (our.B - prevOur.B) * absDelta * 0.15;
+    const bs = (our.S - prevOur.S) * absDelta * 0.10;
     if (el('moved')) el('moved').textContent = delta.toFixed(0);
     if (el('bp')) el('bp').textContent = (bp>=0?'+':'')+Math.round(bp);
     if (el('bq')) el('bq').textContent = (bq>=0?'+':'')+Math.round(bq);
@@ -531,13 +545,12 @@ function simulateDay(){
     if (el('moved')) el('moved').textContent = '0';
   }
 
-  // Log mosse competitor (dopo che si muovono)
-  // salva stato precedente per breakdown
-  var prevOur = {...our};
+  // salva stato per confronto nel prossimo giorno
   lastShares = s;
   lastMyUnits = myQ;
+  prevOur = { ...our }; // <-- aggiornato QUI (non più "var prevOur" locale)
 
-  // Competitor si muovono per il giorno seguente
+  // Mosse competitor per il giorno seguente
   comps.forEach(c=>{
     if (c.strat==='price') compMovePriceWar(c);
     else if (c.strat==='premium') compMovePremium(c);
@@ -662,24 +675,15 @@ function wireAll(){
         Qvals:[0,0,0,0,0], N:[0,0,0,0,0], epsilon:0.25
       }
     ];
-    cash=5000; cumProfit=0; lastShares=null; lastMyUnits=0; window.lastAdvisorPrice=null;
-    // svuota log
+    cash=5000; cumProfit=0; lastShares=null; lastMyUnits=0;
+    prevOur = { p: our.p, Q: our.Q, B: our.B, S: our.S };
+    window.lastAdvisorPrice=null; window.lastAdvisorProfit=null;
     if (logEl) logEl.innerHTML='';
     refreshEcho();
   });
 
   // Pulsante "💡 Indica la soluzione"
-  bind('show-solution','click', ()=>{
-    const box = el('solution-box'); if (!box) return;
-    let msg = '';
-    if (window.lastAdvisorPrice!=null) {
-      msg = `👉 Prezzo suggerito dal sistema: <b>${euro(window.lastAdvisorPrice)}</b>`;
-    } else {
-      msg = "⚠️ Non ci sono ancora dati sufficienti, avanza almeno 1 turno.";
-    }
-    box.innerHTML = msg;
-    box.style.display = 'block';
-  });
+  bind('show-solution','click', ()=> showSolution());
 }
 
 //////////////////////
