@@ -955,37 +955,7 @@ function wire(){
   bind('advance','click', ()=> simulateDay());
   bind('reset','click',   ()=>{ if(confirm('Nuova partita?')){ localStorage.clear(); location.reload(); } });
 
-  // 💡 Indica la soluzione
-document.getElementById('show-solution').addEventListener('click', () => {
-  const box = document.getElementById('solution-box');
-  if (!box) return;
-
-  try {
-    const market = Math.round(M * (1 + season/100));
-    let bestP = our.p, bestProfit = -Infinity;
-
-    for (let p = 10; p <= 120; p += 0.5) {
-      const s = shares([{...our, p}].concat(comps))[0];
-      const q = Math.min(Math.round(s * market), cap);
-
-      const pNet = ivaIncl ? p/(1+ivaPct) : p;
-      const vc = buyCost + varOver + (8 + 2*our.Q) + wCostPerUnit() + channelVarPerUnit(pNet);
-      const F  = fixedTotalPerDay();
-
-      const pre  = Math.max(0, pNet - vc) * q - F;
-      const post = pre > 0 ? pre * (1 - tax) : pre;
-
-      if (post > bestProfit) { bestProfit = post; bestP = p; }
-    }
-
-    box.innerHTML = `👉 Prezzo suggerito dal sistema: <b>${euro(bestP)}</b><br><small>Utile atteso: ${euro(bestProfit)}</small>`;
-    box.style.display = 'block';
-  } catch (e) {
-    console.error('Advisor error:', e);
-    box.innerHTML = '⚠️ Errore nel calcolo della soluzione.';
-    box.style.display = 'block';
-  }
-});
+  
 /* ====== Start ====== */
 document.addEventListener('DOMContentLoaded', ()=>{
   hydrateInputs();
