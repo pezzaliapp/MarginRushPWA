@@ -922,30 +922,51 @@ function wire(){
 } // 👈 chiudo la funzione qui
 
 
- // 💡 Indica la soluzione — versione robusta
+ <script>
+// 💡 Indica la soluzione — versione robusta (safe)
 function computeAdvisorNow(){
   try {
+    // riallinea UI → stato → costi
     refreshEcho();
-    runAdvisor(); // imposta window.lastAdvisorPrice
-    return window.lastAdvisorPrice;
+    runAdvisor(); // aggiorna window.lastAdvisorPrice
+    return Number.isFinite(window.lastAdvisorPrice) ? window.lastAdvisorPrice : null;
   } catch(e) {
     console.error('Advisor error:', e);
     return null;
   }
 }
 
-bind('show-solution','click', ()=>{
-  const box = el('solution-box');
-  const price = computeAdvisorNow();
+// ⚠️ Aggancio del click DOPO il DOMContentLoaded (evita race)
+document.addEventListener('DOMContentLoaded', ()=>{
+  // inizializzazione standard
+  hydrateInputs();
+  showChannelPanels();
+  refreshEcho();
+  runAdvisor();             // prima soluzione subito disponibile
+  wire();                   // bind di tutti i controlli
 
-  if (Number.isFinite(price)) {
-    box.innerHTML = `👉 Prezzo suggerito dal sistema: <b>${euro(price)}</b>`;
+  // bind esplicito del pulsante soluzione (senza helper)
+  const btn = document.getElementById('show-solution');
+  const box = document.getElementById('solution-box');
+
+  if (btn && box){
+    btn.addEventListener('click', ()=>{
+      const price = computeAdvisorNow();
+
+      if (price != null) {
+        box.innerHTML = `👉 Prezzo suggerito dal sistema: <b>${euro(price)}</b>`;
+      } else {
+        // Fallback: mostra almeno il riferimento attuale
+        const pNet = (ivaIncl ? our.p/(1+ivaPct) : our.p);
+        box.innerHTML = `⚠️ Non riesco a stimare ora l'ottimo. Riferimento: prezzo attuale <b>${euro(our.p)}</b> (netto: ${euro(pNet)}).`;
+      }
+      box.style.display = 'block';
+    });
   } else {
-    const pNet = (ivaIncl ? our.p/(1+ivaPct) : our.p);
-    box.innerHTML = `⚠️ Non riesco a stimare ora l'ottimo. Riferimento: prezzo attuale <b>${euro(our.p)}</b> (netto: ${euro(pNet)}).`;
+    console.warn('show-solution o solution-box non trovati nel DOM');
   }
-  box.style.display = 'block';
 });
+</script>
 /* ====== Start ====== */
 document.addEventListener('DOMContentLoaded', ()=>{
   hydrateInputs();
