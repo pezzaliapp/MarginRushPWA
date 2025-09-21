@@ -326,11 +326,38 @@
 <script>
 /* ===== Service Worker ===== */
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js')
-    .then(()=>console.log('✅ Service Worker registrato'))
-    .catch(err=>console.error('❌ SW errore', err));
-}
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('service-worker.js', { updateViaCache: 'all' })
+      .then(reg => {
+        // forza subito il check di update
+        reg.update();
 
+        // auto-refresh quando arriva una nuova versione
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!window.__reloaded) {
+            window.__reloaded = true;
+            location.reload();
+          }
+        });
+
+        // se c’è già un worker in waiting, fallo prendere il controllo
+        if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          if (!nw) return;
+          nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              reg.waiting?.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        });
+      })
+      .catch(err => console.error('❌ SW register error', err));
+  });
+}
+</script>
 /* ===== Tema: auto/manuale ===== */
 const THEME_KEY = "theme";
 const darkStyle  = document.getElementById('theme-dark');
