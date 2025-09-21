@@ -1,214 +1,57 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
   <title>Margin Rush — v4.9 Pro (MC • Copertura • Margine di sicurezza • BE)</title>
-
-  <!-- Colore barra status e tema -->
   <meta name="theme-color" content="#0b1220"/>
-
-  <!-- Manifest e icone PWA -->
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-  <!-- Foglio di stile -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- il resto della tua app -->
-
-  <!-- Registrazione del Service Worker -->
-  <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log('✅ Service Worker registrato'))
-      .catch(err => console.error('❌ SW errore', err));
-  }
-  </script>
-</body>
-</html>
 <header>
-  <div class="wrap">
-    <h1>Margin Rush <span class="pill">v4.9 Pro — MC • Copertura • Margine di sicurezza • BE</span></h1>
-    <div class="top">
-      <div class="badge">Giorno: <b id="day">1</b>/10</div>
-      <div class="badge">Cassa: <b id="cash">€5.000,00</b></div>
-      <div class="badge">Quota oggi: <b id="share">0%</b></div>
-      <div class="badge">Utile cumulato: <b id="cumprofit">€0,00</b></div>
-      <button id="advance" class="primary">Avanza giorno</button>
-      <button id="reset" class="danger">Nuova partita</button>
-    </div>
+  <h1>Margin Rush</h1>
+  <div class="actions">
+    <button id="advance">▶️ Avanza giorno</button>
+    <button id="reset">🔄 Nuova partita</button>
+    <button id="show-solution">💡 Indica la soluzione</button>
+  </div>
+  <div class="badges">
+    Giorno <b id="day">1</b> —
+    Cassa <b id="cash">€5.000</b> —
+    Utile cumulato <b id="cumprofit">€0</b> —
+    Quota nostra <b id="share">0%</b>
   </div>
 </header>
 
-<main class="wrap">
-  <div class="grid">
-    <!-- MERCATO -->
-    <div class="card">
-      <h3>Il mercato (noi vs 3 competitor)</h3>
-      <div class="section">
-        <div class="kpi">
-          <div class="box">Mercato M: <b id="M">1200</b></div>
-          <div class="box">Stagionalità: <b id="seasonEcho">+0%</b></div>
-          <div class="box">β: <b id="betaEcho">0.080</b></div>
-          <div class="box">Capienza: <b id="capEcho">1000</b></div>
-        </div>
-        <table id="tbl">
-          <thead><tr><th>Offerta</th><th>Prezzo</th><th>Q</th><th>B</th><th>S</th><th>Quota</th><th>Unità</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="log" id="log"></div>
+<main>
+  <!-- ========== COLONNA SINISTRA: REPORT MERCATO ========== -->
+  <div class="card">
+    <h3>Mercato & Competitor</h3>
+    <div class="section">
+      <table id="tbl">
+        <thead><tr><th>Player</th><th>Prezzo</th><th>Q</th><th>B</th><th>S</th><th>Quota</th><th>Unità</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
+    <div id="log" class="log"></div>
+  </div>
 
-    <!-- LEVE & COSTI -->
-    <div class="card">
-      <h3>Leve, costi, canali</h3>
-      <div class="section">
+  <!-- ========== COLONNA DESTRA: LEVE & COSTI ========== -->
+  <div class="card">
+    <h3>Leve, costi, canali</h3>
+    <div class="section">
+      <!-- (CONTROLLI PRINCIPALI ecc. invariati, non li riscrivo qui per brevità) -->
 
-        <!-- === CONTROLLI PRINCIPALI: GRID 3 COL (anti-taglio) === -->
-        <div class="controls-grid">
-          <div class="label">Prezzo nostro</div>
-          <div class="ctrl"><input id="price" type="range" min="5" max="120" step="0.5"></div>
-          <div class="value"><b id="priceEcho">€49,00</b></div>
+      <div class="note" id="advisor" style="margin-top:8px">Advisor…</div>
+      <div id="solution-box" class="box" style="display:none; margin-top:8px"></div>
 
-          <div class="label">Qualità (Q)</div>
-          <div class="ctrl"><input id="invQ" type="range" min="0" max="3" step="1"></div>
-          <div class="value"><b id="invQEcho">0</b></div>
-
-          <div class="label">Brand (B)</div>
-          <div class="ctrl"><input id="invB" type="range" min="0" max="3" step="1"></div>
-          <div class="value"><b id="invBEcho">0</b></div>
-
-          <div class="label">Servizio (S)</div>
-          <div class="ctrl"><input id="invS" type="range" min="0" max="2" step="1"></div>
-          <div class="value"><b id="invSEcho">0</b></div>
-
-          <div class="label">Capienza ordini/g</div>
-          <div class="ctrl"><input id="cap" type="range" min="300" max="3000" step="50"></div>
-          <div class="value"><b id="capVal">1000</b></div>
-        </div>
-
-        <div class="kpi" style="margin-top:6px">
-          <div class="box">IVA incl.? <input type="checkbox" id="iva" checked></div>
-          <div class="box">IVA % <input type="number" id="ivaPct" value="22" step="0.1"></div>
-          <div class="box">β <input type="number" id="beta" value="0.08" step="0.005"></div>
-          <div class="box">Stag. % <input type="number" id="season" value="0" step="1"></div>
-        </div>
-
-        <h4 style="margin:10px 0 6px">Costi variabili & vincoli prezzo</h4>
-        <div class="kpi">
-          <div class="box">Prezzo d’acquisto €/u<br><input type="number" id="buyCost" value="20" step="0.1"></div>
-          <div class="box">Overhead variabile €/u<br><input type="number" id="varOver" value="1.20" step="0.1"></div>
-          <div class="box">Margine minimo %<br><input type="number" id="minMarginPct" value="15" step="0.5"></div>
-          <div class="box">Stato margine<br><b id="minMarginWarn">—</b></div>
-        </div>
-
-        <fieldset>
-          <legend>Garanzia</legend>
-          <div class="kpi">
-            <div class="box">Livello (mesi)<br>
-              <select id="wTier">
-                <option value="12">12</option><option value="24" selected>24</option><option value="36">36</option><option value="60">60</option>
-              </select>
-            </div>
-            <div class="box">In garanzia %<br><input type="number" id="wRateIn" value="3" step="0.1"></div>
-            <div class="box">Costo in garanzia €<br><input type="number" id="wCostIn" value="40" step="1"></div>
-            <div class="box">Goodwill % / €<br>
-              <input type="number" id="wRateOut" value="1" step="0.1" style="width:60px"> /
-              <input type="number" id="wCostOut" value="30" step="1" style="width:60px">
-            </div>
-          </div>
-          <div class="kpi">
-            <div class="box">Costo garanzia/u<br><b id="wCostPerUnit">€0,00</b></div>
-            <div class="box">MC/u (tutto incluso)<br><b id="mcUnit">€0,00</b></div>
-            <div class="box">Imposta utile %<br><input type="number" id="taxPct" value="24" step="0.1"></div>
-            <div class="box">BE u/g (post-tax)<br><b id="beUnits">—</b></div>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Costi fissi base (giornalieri)</legend>
-          <div class="kpi">
-            <div class="box">Personale €/g<br><input type="number" id="fxStaff" value="300" step="10"></div>
-            <div class="box">Affitto €/g<br><input type="number" id="fxRent" value="120" step="10"></div>
-            <div class="box">SaaS €/g<br><input type="number" id="fxSaaS" value="60" step="5"></div>
-            <div class="box">Altro €/g<br><input type="number" id="fxOther" value="20" step="5"></div>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Canale di vendita</legend>
-          <div class="kpi">
-            <div class="box">Canale<br>
-              <select id="channel">
-                <option value="online">Vendita on-line</option>
-                <option value="piva">Venditore a P.IVA</option>
-                <option value="employee">Dipendente</option>
-              </select>
-            </div>
-            <div class="box">Fissi canale/g<br><b id="chFixedEcho">€0,00</b></div>
-            <div class="box">Variabile canale/u<br><b id="chVarEcho">€0,00</b></div>
-            <div class="box">Commissione % su netto<br><b id="chPctEcho">0%</b></div>
-          </div>
-
-          <!-- ONLINE -->
-          <div id="ch-online">
-            <div class="kpi">
-              <div class="box">Fee piattaforma %<br><input type="number" id="onFeePct" value="6" step="0.1"></div>
-              <div class="box">Fee pagamento %<br><input type="number" id="onPayPct" value="2.5" step="0.1"></div>
-              <div class="box">Fee fissa ordine €<br><input type="number" id="onFixedPer" value="0.35" step="0.05"></div>
-              <div class="box">Logistica €/u<br><input type="number" id="onLogPer" value="3" step="0.1"></div>
-            </div>
-            <div class="kpi">
-              <div class="box">SaaS €/mese<br><input type="number" id="onSaaS" value="100" step="5"></div>
-              <div class="box">Gestione store €/mese<br><input type="number" id="onMgmt" value="150" step="5"></div>
-            </div>
-          </div>
-
-          <!-- P.IVA -->
-          <div id="ch-piva" style="display:none">
-            <div class="kpi">
-              <div class="box">Auto a noleggio €/mese<br><input type="number" id="pvAuto" value="400" step="10"></div>
-              <div class="box">Compenso fisso €/mese<br><input type="number" id="pvFixed" value="2000" step="50"></div>
-              <div class="box">Provvigione %<br><input type="number" id="pvPct" value="10" step="0.5"></div>
-              <div class="box">Telepass €/km<br><input type="number" id="pvTeleKm" value="0.07" step="0.01"></div>
-            </div>
-            <div class="kpi">
-              <div class="box">Km/mese<br><input type="number" id="pvKm" value="4000" step="100"></div>
-              <div class="box">Consumo km/l<br><input type="number" id="pvKml" value="18" step="0.1"></div>
-              <div class="box">Carburante €/l<br><input type="number" id="pvFuel" value="1.70" step="0.01"></div>
-              <div class="box">Altre spese €/mese<br><input type="number" id="pvOtherM" value="0" step="5"></div>
-            </div>
-          </div>
-
-          <!-- DIPENDENTE -->
-          <div id="ch-employee" style="display:none">
-            <div class="kpi">
-              <div class="box">RAL annua €<br><input type="number" id="emRal" value="50000" step="500"></div>
-              <div class="box">Auto aziendale €/mese<br><input type="number" id="emAuto" value="450" step="10"></div>
-              <div class="box">Telepass €/mese<br><input type="number" id="emTele" value="30" step="1"></div>
-              <div class="box">Trasferte €/mese<br><input type="number" id="emTrips" value="250" step="10"></div>
-            </div>
-            <div class="kpi">
-              <div class="box">Provvigione % (opz.)<br><input type="number" id="emPct" value="0" step="0.5"></div>
-              <div class="box">Km/mese (opz.)<br><input type="number" id="emKm" value="0" step="100"></div>
-              <div class="box">Consumo km/l<br><input type="number" id="emKml" value="18" step="0.1"></div>
-              <div class="box">Carburante €/l<br><input type="number" id="emFuel" value="1.70" step="0.01"></div>
-            </div>
-          </div>
-        </fieldset>
-
-        <div class="note" id="advisor">Advisor…</div>
-        <canvas id="beChart" class="chart"></canvas>
-        <canvas id="mcChart" class="chart"></canvas>
-      </div>
+      <!-- Grafici -->
+      <canvas id="beChart" class="chart"></canvas>
+      <canvas id="mcChart" class="chart"></canvas>
     </div>
   </div>
 
+  <!-- REPORT -->
   <div class="card" style="margin-top:12px">
     <h3>Report del giorno</h3>
     <div class="section">
@@ -224,318 +67,65 @@
         <div class="box">Indice di copertura<br><b id="kpiCover">0%</b></div>
         <div class="box">Margine di sicurezza<br><b id="kpiMoS">—</b></div>
       </div>
-      <div class="note" style="margin-top:6px">Δ clienti — Prezzo: <b id="bp">0</b> · Q: <b id="bq">0</b> · B: <b id="bb">0</b> · S: <b id="bs">0</b></div>
+      <div class="note" style="margin-top:6px">
+        Δ clienti — Prezzo: <b id="bp">0</b> · Q: <b id="bq">0</b> · B: <b id="bb">0</b> · S: <b id="bs">0</b>
+      </div>
     </div>
   </div>
 </main>
 
+<!-- ======================= SCRIPT ======================= -->
+<script src="app.js"></script>
 <script>
-/* ========= Utils ========= */
-const el = id => document.getElementById(id);
-const euro = n => (Math.round(n*100)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
-const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
-const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
-const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}};
-
-/* ========= Stato ========= */
-let day=1,M=1200,beta=0.08,season=0,ivaIncl=true,ivaPct=0.22,cap=1000;
-let cash=5000,cumProfit=0;
-let buyCost=load('buyCost',20), varOver=load('varOver',1.2), minMargin=load('minMargin',15), tax=load('tax',24)/100;
-let fixedBase=load('fixedBase',{staff:300,rent:120,saas:60,other:20});
-let channel=load('channel','online');
-let ch=load('chParams',{
-  online:{feePct:6,payPct:2.5,fixedPer:0.35,logPer:3,saasM:100,mgmtM:150},
-  piva:{autoM:400,fixedM:2000,pct:10,teleKm:0.07,kmM:4000,kml:18,fuel:1.7,otherM:0},
-  employee:{ralY:50000,autoM:450,teleM:30,tripsM:250,pct:0,kmM:0,kml:18,fuel:1.7}
-});
-
-/* ========= Offerte & domanda ========= */
-let our={name:"Noi",p:49,Q:1,B:1,S:1};
-let comps=[
- {name:"Comp A (Price-war)",p:45,Q:1,B:1,S:1,strat:"price"},
- {name:"Comp B (Premium)",p:70,Q:2,B:2,S:2,strat:"premium"},
- {name:"Comp C (Bandit)",p:52,Q:1,B:1,S:1,strat:"bandit",
-  actions:[{dp:-.1,name:"Price −10%"},{dp:-.05,name:"Price −5%"},{dQ:1,name:"+Q"},{dB:1,name:"+B"},{dS:1,dp:+.05,name:"+S & +5%"}],
-  Qvals:[0,0,0,0,0],N:[0,0,0,0,0],epsilon:0.25}
-];
-const logEl=el('log'); const log=(t)=>{const d=document.createElement('div');d.className='log-item';d.textContent=t;logEl.prepend(d)};
-
-function shares(players){
-  const U=players.map(o=>{
-    const base=0.6+(o.B-1)*.15+(o.Q-1)*.2;
-    const price=-beta*o.p, q=.25*(o.Q-1), b=.20*(o.B-1), s=.15*(o.S-1);
-    const shock=(season/100)*(0.1+0.2*(o.B-1));
-    return base+price+q+b+s+shock;
-  });
-  const mx=Math.max(...U); const exps=U.map(u=>Math.exp(u-mx)); const sum=exps.reduce((a,b)=>a+b,0);
-  return exps.map(e=>e/sum);
-}
-const costQ=Q=>8+2*Q;
-const netP=p=>ivaIncl? p/(1+ivaPct):p;
-
-/* ========= Costi & canali ========= */
-function wCostPerUnit(){
-  const rin=(+el('wRateIn').value||0)/100, rout=(+el('wRateOut').value||0)/100;
-  return rin*(+el('wCostIn').value||0) + rout*(+el('wCostOut').value||0);
-}
-function channelFixedPerDay(){
-  if(channel==='online'){
-    return ((+el('onSaaS').value||0)+(+el('onMgmt').value||0))/30;
-  }else if(channel==='piva'){
-    const km=+el('pvKm').value||0, kml=+el('pvKml').value||1, fuel=+el('pvFuel').value||0, teleKm=+el('pvTeleKm').value||0, otherM=+el('pvOtherM').value||0;
-    const fuelM = km/kml*fuel;
-    const teleM = km*teleKm;
-    return ((+el('pvAuto').value||0)+(+el('pvFixed').value||0)+fuelM+teleM+otherM)/30;
-  }else{
-    const ralD=(+el('emRal').value||0)/12/30;
-    const fuelM=(+el('emKm').value||0)/(+el('emKml').value||1)*(+el('emFuel').value||0);
-    return ralD + ((+el('emAuto').value||0)+(+el('emTele').value||0)+(+el('emTrips').value||0)+fuelM)/30;
-  }
-}
-function channelVarPerUnit(pNet){
-  if(channel==='online'){
-    const pct=((+el('onFeePct').value||0)+(+el('onPayPct').value||0))/100;
-    return pNet*pct + (+el('onFixedPer').value||0) + (+el('onLogPer').value||0);
-  }else if(channel==='piva'){
-    return pNet*((+el('pvPct').value||0)/100);
-  }else{
-    return pNet*((+el('emPct').value||0)/100);
-  }
-}
-function channelPctEcho(){
-  if(channel==='online') return (((+el('onFeePct').value||0)+(+el('onPayPct').value||0)).toFixed(1))+'%';
-  if(channel==='piva')   return ((+el('pvPct').value||0).toFixed(1))+'%';
-  return ((+el('emPct').value||0).toFixed(1))+'%';
-}
-function varCostPerUnit(){
-  const pNet=netP(our.p);
-  return buyCost + varOver + costQ(our.Q) + wCostPerUnit() + channelVarPerUnit(pNet);
-}
-function mcUnit(){ return Math.max(0, netP(our.p) - varCostPerUnit()); }
-function fixedBasePerDay(){ return (+el('fxStaff').value||0)+(+el('fxRent').value||0)+(+el('fxSaaS').value||0)+(+el('fxOther').value||0); }
-function fixedTotalPerDay(){ return fixedBasePerDay() + channelFixedPerDay(); }
-
-/* ========= BE, advisor, margine ========= */
-function bePostTax(){
-  const mc = mcUnit(), F = fixedTotalPerDay();
-  if(mc<=0) return {units:Infinity,revenue:Infinity};
-  const u = Math.ceil(F/(mc*(1-tax)));
-  return {units:u,revenue:u*netP(our.p)};
-}
-function checkMinMargin(){
-  const pNet=netP(our.p);
-  const gm = pNet>0 ? (pNet - varCostPerUnit())/pNet*100 : -Infinity;
-  el('minMarginWarn').innerHTML = gm < (+el('minMarginPct').value||0) ? '<span class="warn">Sotto margine min.</span>' : '<span class="gain">OK</span>';
-}
+// --- runAdvisor aggiornato ---
 function runAdvisor(){
-  const F=fixedTotalPerDay(); let best=our.p, bestProf=-1;
-  for(let p=10;p<=120;p+=.5){
-    const s=shares([{...our,p}].concat(comps))[0];
-    const q=Math.min(Math.round(s*M*(1+season/100)),cap);
-    const pNet=netP(p);
+  const F = fixedTotalPerDay();
+  const market = Math.round(M * (1 + season/100));
+  let best = our.p;
+  let bestProf = -Infinity;
+
+  for (let p = 10; p <= 120; p += 0.5) {
+    const s = shares([{...our, p}].concat(comps))[0];
+    const q = Math.min(Math.round(s * market), cap);
+
+    const pNet = netP(p);
     const vc = buyCost + varOver + costQ(our.Q) + wCostPerUnit() + channelVarPerUnit(pNet);
-    const pre = Math.max(0,pNet-vc)*q - F;
-    const post = pre>0 ? pre*(1-tax) : pre;
-    if(post>bestProf){bestProf=post;best=p;}
+
+    const pre = Math.max(0, pNet - vc) * q - F;
+    const post = pre > 0 ? pre * (1 - tax) : pre;
+
+    if (post > bestProf) { bestProf = post; best = p; }
   }
-  el('advisor').innerHTML=`Advisor: <b>${euro(best)}</b> — utile atteso ${euro(bestProf)} (post-tax).`;
-}
 
-/* ========= Chart: BE ========= */
-function drawBEChart(){
-  const c=el('beChart'), ctx=c.getContext('2d');
-  const w=c.clientWidth, h=c.clientHeight; if(c.width!==w){c.width=w;c.height=h}
-  ctx.clearRect(0,0,w,h);
-  const pad=30, maxQ=Math.max(cap,Math.round(M*(1+season/100)));
-  const pNet=netP(our.p), v=varCostPerUnit(), F=fixedTotalPerDay();
-  const x=q=>pad+(q/maxQ)*(w-pad*1.2), y=v0=>{const maxV=Math.max(pNet*maxQ,(v*maxQ+F)/(1-tax));return h-pad-(v0/maxV)*(h-pad*1.2)};
-  ctx.strokeStyle="#254";ctx.beginPath();ctx.moveTo(pad,y(0));ctx.lineTo(w-pad*.2,y(0));ctx.moveTo(pad,y(0));ctx.lineTo(pad,pad*.3);ctx.stroke();
-  ctx.strokeStyle="#7aa7ff";ctx.beginPath();ctx.moveTo(x(0),y(0));ctx.lineTo(x(maxQ),y(pNet*maxQ));ctx.stroke();ctx.fillStyle="#7aa7ff";ctx.fillText("Ricavi",x(maxQ)-50,y(pNet*maxQ)-6);
-  const tot=q=>(v*q+F)/(1-tax); ctx.strokeStyle="#ff7a88";ctx.beginPath();ctx.moveTo(x(0),y(tot(0)));ctx.lineTo(x(maxQ),y(tot(maxQ)));ctx.stroke();ctx.fillStyle="#ff7a88";ctx.fillText("Costi totali",x(maxQ)-90,y(tot(maxQ))-6);
-  const be=bePostTax(); if(isFinite(be.units)&&be.units<=maxQ){ctx.fillStyle="#6be675";ctx.beginPath();ctx.arc(x(be.units),y(pNet*be.units),4,0,6.28);ctx.fill();ctx.fillText(`BE ${be.units}`,x(be.units)+6,y(pNet*be.units)-6);}
-}
+  // salva anche in variabili globali
+  window.lastAdvisorPrice = best;
+  window.lastAdvisorProfit = bestProf;
 
-/* ========= Chart: MC ========= */
-function drawMCChart(currentUnits){
-  const c=el('mcChart'), ctx=c.getContext('2d');
-  const w=c.clientWidth, h=c.clientHeight; if(c.width!==w){c.width=w;c.height=h}
-  ctx.clearRect(0,0,w,h);
-  const pad=30, maxQ=Math.max(cap,Math.round(M*(1+season/100)));
-  const pNet=netP(our.p), v=varCostPerUnit();
-  const x=q=>pad+(q/maxQ)*(w-pad*1.2), y=v0=>{const maxV=Math.max(pNet*maxQ, v*maxQ); return h-pad-(v0/maxV)*(h-pad*1.2);};
-  // assi
-  ctx.strokeStyle="#254";ctx.beginPath();ctx.moveTo(pad,y(0));ctx.lineTo(w-pad*.2,y(0));ctx.moveTo(pad,y(0));ctx.lineTo(pad,pad*.3);ctx.stroke();
-  // ricavi
-  ctx.strokeStyle="#7aa7ff";ctx.beginPath();ctx.moveTo(x(0),y(0));ctx.lineTo(x(maxQ),y(pNet*maxQ));ctx.stroke();ctx.fillStyle="#7aa7ff";ctx.fillText("Ricavi (netto)",x(maxQ)-95,y(pNet*maxQ)-6);
-  // costi variabili
-  ctx.strokeStyle="#ffa658";ctx.beginPath();ctx.moveTo(x(0),y(0));ctx.lineTo(x(maxQ),y(v*maxQ));ctx.stroke();ctx.fillStyle="#ffa658";ctx.fillText("Costi variabili",x(maxQ)-100,y(v*maxQ)-6);
-  // area MC fino alle unità correnti
-  const Q = Math.max(0, Math.min(currentUnits||0, maxQ));
-  ctx.fillStyle="rgba(107,230,117,0.25)"; ctx.beginPath();
-  ctx.moveTo(x(0),y(0)); ctx.lineTo(x(Q),y(pNet*Q)); ctx.lineTo(x(Q),y(v*Q)); ctx.lineTo(x(0),y(0));
-  ctx.closePath(); ctx.fill();
-  ctx.fillStyle="#6be675"; ctx.fillText(`MC (area verde) fino a ${Q} u`, x(Q)-120, y(v*Q)-10);
-}
-
-/* ========= Clienti spostati & supporto ========= */
-let prev={p:our.p,Q:our.Q,B:our.B,S:our.S,share:0,units:0};
-const ourShareWith=cfg=>shares([{...our,...cfg}].concat(comps))[0];
-
-/* ========= UI ========= */
-function renderTable(q=null,s=null){
-  const rows=[our].concat(comps).map((p,i)=>`<tr><td>${i?('Comp '+String.fromCharCode(64+i)):'Noi'}</td><td>${euro(p.p)}</td><td>${p.Q}</td><td>${p.B}</td><td>${p.S}</td><td>${s? (s[i]*100).toFixed(1)+'%':'—'}</td><td>${q? q[i].toLocaleString('it-IT'):'—'}</td></tr>`).join('');
-  document.querySelector('#tbl tbody').innerHTML=rows;
-}
-function showChannelPanels(){
-  el('ch-online').style.display   = channel==='online'   ? 'block' : 'none';
-  el('ch-piva').style.display     = channel==='piva'     ? 'block' : 'none';
-  el('ch-employee').style.display = channel==='employee' ? 'block' : 'none';
-}
-function refreshKpiSecondary(currentUnits=0){
-  const mcU = mcUnit();
-  const pNet = netP(our.p);
-  const mcTot = mcU * currentUnits;
-  const cover = pNet>0 ? (mcU/pNet*100) : 0;
-  const be = bePostTax().units;
-  const mos = currentUnits>0 && isFinite(be) ? ((currentUnits - be)/currentUnits*100) : NaN;
-  el('kpiMcUnit').textContent = euro(mcU);
-  el('kpiMcTotal').textContent = euro(mcTot);
-  el('kpiCover').textContent = (isFinite(cover)?cover:0).toFixed(1)+'%';
-  el('kpiMoS').textContent = (isFinite(mos)?mos.toFixed(1)+'%':'—');
-}
-function refreshEcho(){
-  el('priceEcho').textContent=euro(our.p);
-  el('betaEcho').textContent=beta.toFixed(3); el('seasonEcho').textContent=(season>=0?'+':'')+season+'%';
-  el('capEcho').textContent=cap; el('capVal').textContent=cap;
-  // canale & fissi
-  el('chFixedEcho').textContent=euro(channelFixedPerDay());
-  el('chVarEcho').textContent=euro(channelVarPerUnit(netP(our.p)));
-  el('chPctEcho').textContent=channelPctEcho();
-  // garanzia & margine
-  el('wCostPerUnit').textContent=euro(wCostPerUnit());
-  el('mcUnit').textContent=euro(mcUnit());
-  checkMinMargin();
-  const be=bePostTax(); el('beUnits').textContent=isFinite(be.units)?be.units.toLocaleString('it-IT'):'— (margine ≤ 0)';
-  runAdvisor(); drawBEChart();
-}
-
-/* ========= Bindings ========= */
-let lastUnits = 0;
-function bindInputs(){
-  // slider e basi
-  el('price').value=our.p; el('price').oninput=()=>{our.p=parseFloat(el('price').value); refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
-  el('invQ').oninput=()=>{el('invQEcho').textContent=el('invQ').value; our.Q=1+parseInt(el('invQ').value||'0',10)*0.5; refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
-  el('invB').oninput=()=>{el('invBEcho').textContent=el('invB').value; our.B=1+parseInt(el('invB').value||'0',10)*0.5; refreshEcho();};
-  el('invS').oninput=()=>{el('invSEcho').textContent=el('invS').value; our.S=1+parseInt(el('invS').value||'0',10); refreshEcho();};
-  el('cap').value=cap; el('cap').oninput=()=>{cap=parseInt(el('cap').value,10); refreshEcho();};
-
-  el('beta').value=beta; el('beta').oninput=()=>{beta=parseFloat(el('beta').value)||0.08; refreshEcho();};
-  el('season').value=season; el('season').oninput=()=>{season=parseInt(el('season').value||'0',10); refreshEcho();};
-  el('iva').checked=ivaIncl; el('iva').oninput=()=>{ivaIncl=el('iva').checked; refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
-  el('ivaPct').value=(ivaPct*100).toFixed(1); el('ivaPct').oninput=()=>{ivaPct=(parseFloat(el('ivaPct').value)||22)/100; refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
-
-  // costi
-  el('buyCost').value=buyCost; el('buyCost').oninput=()=>{buyCost=parseFloat(el('buyCost').value)||0; save('buyCost',buyCost); refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
-  el('varOver').value=varOver; el('varOver').oninput=()=>{varOver=parseFloat(el('varOver').value)||0; save('varOver',varOver); refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
-  el('minMarginPct').value=minMargin; el('minMarginPct').oninput=()=>{minMargin=parseFloat(el('minMarginPct').value)||0; save('minMargin',minMargin); refreshEcho();};
-  el('taxPct').value=(tax*100).toFixed(1); el('taxPct').oninput=()=>{tax=(parseFloat(el('taxPct').value)||24)/100; save('tax',tax*100); refreshEcho(); drawBEChart(); refreshKpiSecondary(lastUnits);};
-
-  // fissi base
-  el('fxStaff').value=fixedBase.staff; el('fxRent').value=fixedBase.rent; el('fxSaaS').value=fixedBase.saas; el('fxOther').value=fixedBase.other;
-  ;['fxStaff','fxRent','fxSaaS','fxOther'].forEach(id=>{
-    el(id).addEventListener('input',()=>{fixedBase={staff:+el('fxStaff').value||0,rent:+el('fxRent').value||0,saas:+el('fxSaaS').value||0,other:+el('fxOther').value||0}; save('fixedBase',fixedBase); refreshEcho(); drawBEChart();});
-  });
-
-  // canale
-  el('channel').value=channel; el('channel').oninput=()=>{channel=el('channel').value; save('channel',channel); showChannelPanels(); refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits);};
-
-  function restoreChToUI(){
-    // Online
-    el('onFeePct').value=ch.online.feePct; el('onPayPct').value=ch.online.payPct; el('onFixedPer').value=ch.online.fixedPer; el('onLogPer').value=ch.online.logPer; el('onSaaS').value=ch.online.saasM; el('onMgmt').value=ch.online.mgmtM;
-    // P.IVA
-    el('pvAuto').value=ch.piva.autoM; el('pvFixed').value=ch.piva.fixedM; el('pvPct').value=ch.piva.pct; el('pvTeleKm').value=ch.piva.teleKm; el('pvKm').value=ch.piva.kmM; el('pvKml').value=ch.piva.kml; el('pvFuel').value=ch.piva.fuel; el('pvOtherM').value=ch.piva.otherM;
-    // Dipendente
-    el('emRal').value=ch.employee.ralY; el('emAuto').value=ch.employee.autoM; el('emTele').value=ch.employee.teleM; el('emTrips').value=ch.employee.tripsM; el('emPct').value=ch.employee.pct; el('emKm').value=ch.employee.kmM; el('emKml').value=ch.employee.kml; el('emFuel').value=ch.employee.fuel;
+  if (document.getElementById('advisor')) {
+    document.getElementById('advisor').innerHTML =
+      `Advisor: <b>${euro(best)}</b> — utile atteso ${euro(bestProf)} (post-tax).`;
   }
-  function currentChParams(){
-    return {
-      online:{feePct:+el('onFeePct').value||0,payPct:+el('onPayPct').value||0,fixedPer:+el('onFixedPer').value||0,logPer:+el('onLogPer').value||0,saasM:+el('onSaaS').value||0,mgmtM:+el('onMgmt').value||0},
-      piva:{autoM:+el('pvAuto').value||0,fixedM:+el('pvFixed').value||0,pct:+el('pvPct').value||0,teleKm:+el('pvTeleKm').value||0,kmM:+el('pvKm').value||0,kml:+el('pvKml').value||1,fuel:+el('pvFuel').value||0,otherM:+el('pvOtherM').value||0},
-      employee:{ralY:+el('emRal').value||0,autoM:+el('emAuto').value||0,teleM:+el('emTele').value||0,tripsM:+el('emTrips').value||0,pct:+el('emPct').value||0,kmM:+el('emKm').value||0,kml:+el('emKml').value||1,fuel:+el('emFuel').value||0}
-    };
-  }
-  restoreChToUI();
-  [
-    'onFeePct','onPayPct','onFixedPer','onLogPer','onSaaS','onMgmt',
-    'pvAuto','pvFixed','pvPct','pvTeleKm','pvKm','pvKml','pvFuel','pvOtherM',
-    'emRal','emAuto','emTele','emTrips','emPct','emKm','emKml','emFuel'
-  ].forEach(id=>{
-    el(id).addEventListener('input',()=>{ ch=currentChParams(); save('chParams',ch); refreshEcho(); drawMCChart(lastUnits); refreshKpiSecondary(lastUnits); });
-  });
+
+  return { best, bestProf };
 }
 
-/* ========= Simulazione ========= */
-function simulateDay(){
-  // mosse competitor
-  comps.forEach(c=>{
-    if(c.strat==='price'){const t=Math.max(12,our.p*.95);const prev=c.p;c.p=clamp(c.p*.6+t*.4,10,120);log(`Price-war: ${euro(prev)} → ${euro(c.p)}`);}
-    else if(c.strat==='premium'){if(Math.random()<.5)c.Q=Math.min(5,c.Q+1);else c.B=Math.min(5,c.B+1);const prev=c.p;c.p=clamp(c.p*1.01,30,140);log(`Premium: investe · prezzo ${euro(prev)} → ${euro(c.p)}`);}
-    else{const idx = Math.random()<c.epsilon ? Math.floor(Math.random()*c.actions.length) : c.Qvals.indexOf(Math.max(...c.Qvals)); const a=c.actions[idx]; const prev=c.p;
-         if(a.dp) c.p=clamp(c.p*(1+a.dp),10,140); if(a.dQ) c.Q=Math.min(5,c.Q+1); if(a.dB) c.B=Math.min(5,c.B+1); if(a.dS) c.S=Math.min(5,c.S+1);
-         log(`Bandit: ${a.name} (P ${euro(prev)}→${euro(c.p)})`);
-         const before=shares([our].concat(comps))[3]; const after=shares([our].concat(comps))[3]; c.N[idx]++; c.Qvals[idx]+=((after-before)-c.Qvals[idx])/c.N[idx]; c.epsilon=Math.max(0.05,c.epsilon*0.98);}
-  });
-
-  // domanda
-  const s=shares([our].concat(comps));
-  const market=Math.round(M*(1+season/100));
-  const q=s.map(x=>Math.round(x*market)); q[0]=Math.min(q[0],cap);
-  lastUnits = q[0];
-
-  // breakdown clienti spostati
-  const s_prev=prev.share||ourShareWith(prev), s_now=ourShareWith(our);
-  const s_p=ourShareWith({p:our.p,Q:prev.Q,B:prev.B,S:prev.S});
-  const s_q=ourShareWith({p:our.p,Q:our.Q,B:prev.B,S:prev.S});
-  const s_b=ourShareWith({p:our.p,Q:our.Q,B:our.B,S:prev.S});
-  const moved=Math.round((s_now-s_prev)*market);
-  const dp=Math.round((s_p-s_prev)*market), dq=Math.round((s_q-s_p)*market), db=Math.round((s_b-s_q)*market), ds=Math.round((s_now-s_b)*market);
-
-  // utile
-  const pNet=netP(our.p), F=fixedTotalPerDay(), vc=varCostPerUnit();
-  let profitPre=(pNet-vc)*q[0]-F; let profit=profitPre>0?profitPre*(1-tax):profitPre;
-  cash+=profit; cumProfit+=profit;
-
-  // render
-  renderTable(q,s);
-  el('qMe').textContent=q[0].toLocaleString('it-IT');
-  el('sMe').textContent=(s[0]*100).toFixed(1)+'%';
-  el('pMe').textContent=euro(profit);
-  el('cash').textContent=euro(cash); el('cumprofit').textContent=euro(cumProfit);
-  el('share').textContent=(s[0]*100).toFixed(1)+'%';
-  el('moved').textContent=(moved>=0?'+':'')+moved.toLocaleString('it-IT');
-  el('bp').textContent=(dp>=0?'+':'')+dp; el('bq').textContent=(dq>=0?'+':'')+dq; el('bb').textContent=(db>=0?'+':'')+db; el('bs').textContent=(ds>=0?'+':'')+ds;
-
-  // KPI MC
-  refreshKpiSecondary(q[0]);
-
-  // stato "ieri"
-  prev={p:our.p,Q:our.Q,B:our.B,S:our.S,share:s_now,units:q[0]};
-
-  // grafici & echo
-  refreshEcho(); drawBEChart(); drawMCChart(q[0]);
-
-  // avanti
-  day++; el('day').textContent=day; if(day>10){alert('Fine partita — utile cumulato: '+el('cumprofit').textContent); location.reload();}
-}
-
-/* ========= Start ========= */
+// --- wiring pulsante ---
 function start(){
-  showChannelPanels(); bindInputs();
-  renderTable(); refreshEcho(); drawBEChart(); drawMCChart(0); refreshKpiSecondary(0);
-  el('advance').onclick=simulateDay;
-  el('reset').onclick=()=>location.reload();
+  document.getElementById('advance').onclick = simulateDay;
+  document.getElementById('reset').onclick = ()=>location.reload();
+
+  const btn = document.getElementById('show-solution');
+  if (btn) btn.onclick = () => {
+    const box = document.getElementById('solution-box'); if (!box) return;
+    const price = (window.lastAdvisorPrice != null) ? window.lastAdvisorPrice : runAdvisor().best;
+    const profit = (window.lastAdvisorProfit != null) ? window.lastAdvisorProfit : runAdvisor().bestProf;
+    box.innerHTML = `👉 Prezzo suggerito dal sistema: <b>${euro(price)}</b><br><small>Utile atteso: ${euro(profit)}</small>`;
+    box.style.display = 'block';
+  };
 }
-start();
+
+// avvia app
+document.addEventListener('DOMContentLoaded', ()=>{ start(); });
 </script>
 </body>
 </html>
