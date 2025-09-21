@@ -108,7 +108,6 @@
 </head>
 <body>
 
-<!-- ======================= HEADER ======================= -->
 <header>
   <div class="wrap">
     <h1>Margin Rush <span class="pill">v4.9 Pro — MC • Copertura • MoS • BE</span></h1>
@@ -125,10 +124,8 @@
   </div>
 </header>
 
-<!-- ======================= MAIN ======================= -->
 <main class="wrap">
   <div class="grid">
-    <!-- ========== COLONNA SINISTRA: MERCATO ========== -->
     <div class="card">
       <h3>Il mercato (noi vs 3 competitor)</h3>
       <div class="section">
@@ -138,22 +135,17 @@
           <div class="box">β sensibilità prezzo: <b id="betaEcho">0.080</b></div>
           <div class="box">Capienza: <b id="capEcho">1000</b></div>
         </div>
-
         <table id="tbl">
-          <thead>
-            <tr><th>Offerta</th><th>Prezzo</th><th>Q</th><th>B</th><th>S</th><th>Quota</th><th>Unità</th></tr>
-          </thead>
+          <thead><tr><th>Offerta</th><th>Prezzo</th><th>Q</th><th>B</th><th>S</th><th>Quota</th><th>Unità</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
       <div class="log" id="log"></div>
     </div>
 
-    <!-- ========== COLONNA DESTRA: LEVE & COSTI ========== -->
     <div class="card">
       <h3>Leve, costi, canali</h3>
-      <div class="section">
-        <!-- CONTROLLI PRINCIPALI -->
+      <<div class="section">
         <div class="controls-grid">
           <div>Prezzo nostro</div>
           <div><input id="price" type="range" min="5" max="120" step="0.5" value="49"></div>
@@ -292,14 +284,12 @@
         <div class="note" id="advisor" style="margin-top:8px">Advisor…</div>
         <div id="solution-box" class="box" style="display:none; margin-top:8px"></div>
 
-        <!-- Grafici -->
         <canvas id="beChart" class="chart"></canvas>
         <canvas id="mcChart" class="chart"></canvas>
       </div>
     </div>
   </div>
 
-  <!-- REPORT -->
   <div class="card" style="margin-top:12px">
     <h3>Report del giorno</h3>
     <div class="section">
@@ -322,7 +312,6 @@
   </div>
 </main>
 
-<!-- ======================= SCRIPT ======================= -->
 <script>
 /* ===== Service Worker ===== */
 if ('serviceWorker' in navigator) {
@@ -330,20 +319,11 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker
       .register('service-worker.js', { updateViaCache: 'all' })
       .then(reg => {
-        // forza subito il check di update
         reg.update();
-
-        // auto-refresh quando arriva una nuova versione
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!window.__reloaded) {
-            window.__reloaded = true;
-            location.reload();
-          }
+          if (!window.__reloaded) { window.__reloaded = true; location.reload(); }
         });
-
-        // se c’è già un worker in waiting, fallo prendere il controllo
         if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-
         reg.addEventListener('updatefound', () => {
           const nw = reg.installing;
           if (!nw) return;
@@ -359,6 +339,7 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script>
+/* ===== Tema ===== */
 const THEME_KEY = "theme";
 const darkStyle  = document.getElementById('theme-dark');
 const lightStyle = document.getElementById('theme-light');
@@ -375,7 +356,6 @@ function getSystemTheme(){ return matchMedia("(prefers-color-scheme: light)").ma
   const cb = ()=>{ const pref=localStorage.getItem(THEME_KEY); if (pref!=='light'&&pref!=='dark') applyTheme(getSystemTheme()); };
   if (mq.addEventListener) mq.addEventListener('change', cb); else mq.addListener(cb);
 })();
-
 document.getElementById("toggle-theme").addEventListener("click", () => {
   const next = lightStyle.disabled ? 'light' : 'dark';
   localStorage.setItem(THEME_KEY, next);
@@ -389,6 +369,9 @@ const pct = x => `${(x*100).toFixed(1)}%`;
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const save=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} };
 const load=(k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch{ return d; } };
+
+// LIMITE GIORNI
+const MAX_DAYS = 10;
 
 /* ====== Stato ====== */
 let day = load('day', 1);
@@ -452,7 +435,6 @@ function wCostPerUnit(){
   const cout = (+el('wCostOut')?.value || warranty.costOut);
   return rin*cin + rout*cout;
 }
-
 function channelFixedPerDay(){
   if (channel==='online'){
     const saas = +el('onSaaS')?.value || ch.online.saasM;
@@ -467,7 +449,7 @@ function channelFixedPerDay(){
     const otherM = +el('pvOtherM')?.value || ch.piva.otherM;
     const fuelM = km/kml*fuel;
     const teleM = km*tele;
-    return ( (+el('pvAuto')?.value||ch.piva.autoM) + (+el('pvFixed')?.value||ch.piva.fixedM) + fuelM + teleM + otherM)/30;
+    return ((+el('pvAuto')?.value||ch.piva.autoM) + (+el('pvFixed')?.value||ch.piva.fixedM) + fuelM + teleM + otherM)/30;
   }
   const ralD = (+el('emRal')?.value || ch.employee.ralY)/365;
   const autoD= (+el('emAuto')?.value || ch.employee.autoM)/30;
@@ -475,7 +457,6 @@ function channelFixedPerDay(){
   const tripD= (+el('emTrips')?.value || ch.employee.tripsM)/30;
   return ralD + autoD + teleD + tripD;
 }
-
 function channelVarPerUnit(pNet){
   if (channel==='online'){
     const feePct = (+el('onFeePct')?.value || ch.online.feePct)/100;
@@ -491,13 +472,11 @@ function channelVarPerUnit(pNet){
   const pct = (+el('emPct')?.value || ch.employee.pct)/100;
   return pNet*pct;
 }
-
 function fixedTotalPerDay(){
   const base = (+el('fxStaff')?.value || fixedBase.staff) + (+el('fxRent')?.value || fixedBase.rent) +
                (+el('fxSaaS')?.value || fixedBase.saas) + (+el('fxOther')?.value || fixedBase.other);
   return base + channelFixedPerDay();
 }
-
 function shares(players){
   const U = players.map(o=>{
     const base = 0.6 + (o.B-1)*.15 + (o.Q-1)*.2;
@@ -529,7 +508,6 @@ function drawBEChart(q, pNet, vc, F){
   const x2px = x => 40 + (W-60)*(x/maxX);
   const y2px = y => (H-30) - (H-50)*(y/Math.max(pNet*maxX, (vc*maxX+F)*1.3, 1));
 
-  // Ricavi
   ctx.strokeStyle="#6ba8ff"; ctx.beginPath();
   for (let x=0;x<=maxX;x+=maxX/40){
     const y = pNet*x;
@@ -537,7 +515,6 @@ function drawBEChart(q, pNet, vc, F){
     if (x===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y);
   } ctx.stroke();
 
-  // Costi totali post-tax approx (vc*x + F)
   ctx.strokeStyle="#ff7a88"; ctx.beginPath();
   for (let x=0;x<=maxX;x+=maxX/40){
     const y = vc*x + F;
@@ -545,7 +522,6 @@ function drawBEChart(q, pNet, vc, F){
     if (x===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y);
   } ctx.stroke();
 
-  // BE (post-tax)
   const mcUnit = Math.max(pNet - vc, 0.0001);
   const beUnits = F / (mcUnit*(1 - tax || 1));
   const beX = x2px(beUnits);
@@ -654,13 +630,11 @@ function refreshEcho(){
   if (el('seasonEcho'))el('seasonEcho').textContent = (season>=0?'+':'') + season + '%';
   if (el('betaEcho'))  el('betaEcho').textContent = beta.toFixed(3);
 
-  // calcola quote + unità
   const players = [our].concat(comps);
   const s = shares(players);
   const market = Math.round(M * (1 + season/100));
   const qList = s.map(si => Math.min(Math.round(si * market), cap));
 
-  // tabella
   const tbody = el('tbl')?.querySelector('tbody');
   if (tbody){
     tbody.innerHTML = '';
@@ -682,7 +656,6 @@ function refreshEcho(){
     });
   }
 
-  // KPI & costi
   const pNet = netP(our.p);
   const vc = buyCost + varOver + costQ(our.Q) + wCostPerUnit() + channelVarPerUnit(pNet);
   const mcUnit = pNet - vc;
@@ -709,11 +682,9 @@ function refreshEcho(){
     el('minMarginWarn').textContent = our.p < minPLordo ? '⚠️ sotto margine minimo' : 'OK';
   }
 
-  // grafici
   drawBEChart(myQ, pNet, vc, F);
   drawMCChart(myQ, pNet, vc);
 
-  // advisor
   runAdvisor();
 
   if (el('day'))       el('day').textContent = day;
@@ -721,7 +692,6 @@ function refreshEcho(){
   if (el('cumprofit')) el('cumprofit').textContent = euro(cumProfit);
   if (el('share'))     el('share').textContent = pct(s[0]||0);
 
-  // save
   save('day',day); save('M',M); save('beta',beta); save('season',season); save('cap',cap);
   save('ivaIncl',ivaIncl); save('ivaPct',ivaPct*100); save('tax',tax*100);
   save('our',our); save('buyCost',buyCost); save('varOver',varOver); save('minMargin',minMargin);
@@ -731,10 +701,9 @@ function refreshEcho(){
   save('comps',comps);
 }
 
-/* ====== Simulazione giorno ====== */
-const logEl = el('log');
+/* ====== Simulazione ====== */
 function log(t){
-  if (!logEl) return;
+  const logEl = el('log'); if (!logEl) return;
   const d=document.createElement('div');
   d.className='log-item';
   d.textContent = `[G${day}] ${t}`;
@@ -768,7 +737,6 @@ function compMoveBandit(c){
     aIdx = idx;
   }
   const a = c.actions[aIdx];
-
   const basePlayers = [our].concat(comps.map(x=>({...x})));
   const beforeS = shares(basePlayers);
   const meIdx = 1 + comps.findIndex(x=>x.name===c.name);
@@ -799,7 +767,65 @@ function compMoveBandit(c){
 
 function simulateDay(){
   const playersBefore = [our].concat(comps);
-  lastShares = shares(playersBefore);
+  const s = shares(playersBefore);
+  const market = Math.round(M * (1 + season/100));
+  const q = s.map(x => Math.round(x * market));
+  q[0] = Math.min(q[0], cap);
+  const myQ = q[0];
+
+  const pNet = netP(our.p);
+  const vc = buyCost + varOver + costQ(our.Q) + wCostPerUnit() + channelVarPerUnit(pNet);
+  const F  = fixedTotalPerDay();
+
+  const mcUnit  = pNet - vc;
+  const preTax  = Math.max(0, mcUnit) * myQ - F;
+  const postTax = preTax > 0 ? preTax * (1 - tax) : preTax;
+
+  cash += postTax;
+  cumProfit += postTax;
+
+  if (el('qMe')) el('qMe').textContent = myQ.toLocaleString('it-IT');
+  if (el('sMe')) el('sMe').textContent = (s[0]*100).toFixed(1) + '%';
+  if (el('pMe')) el('pMe').textContent = euro(postTax);
+
+  const s_now = s[0];
+  const moved = Math.round((s_now - (prev?.share ?? s_now)) * market);
+  if (el('moved')) el('moved').textContent = (moved>=0?'+':'') + moved.toLocaleString('it-IT');
+
+  if (prev){
+    const deltaAbs = Math.abs(moved);
+    const bp = (our.p !== prev.p) ? -Math.sign(our.p - prev.p) * Math.round(deltaAbs * 0.50) : 0;
+    const bq = (our.Q - prev.Q) * Math.round(deltaAbs * 0.25);
+    const bb = (our.B - prev.B) * Math.round(deltaAbs * 0.15);
+    const bs = (our.S - prev.S) * Math.round(deltaAbs * 0.10);
+    if (el('bp')) el('bp').textContent = (bp>=0?'+':'') + bp;
+    if (el('bq')) el('bq').textContent = (bq>=0?'+':'') + bq;
+    if (el('bb')) el('bb').textContent = (bb>=0?'+':'') + bb;
+    if (el('bs')) el('bs').textContent = (bs>=0?'+':'') + bs;
+  }
+
+  const tbody = el('tbl')?.querySelector('tbody');
+  if (tbody){
+    tbody.innerHTML = '';
+    [our].concat(comps).forEach((p,i)=>{
+      const tr = document.createElement('tr');
+      const cols = [i===0?'Noi':p.name, euro(p.p), p.Q, p.B, p.S, ((s[i]*100).toFixed(1)+'%'), (q[i] ?? 0).toString()];
+      cols.forEach(c=>{ const td=document.createElement('td'); td.textContent=c; tr.appendChild(td); });
+      tbody.appendChild(tr);
+    });
+  }
+
+  drawBEChart(myQ, pNet, vc, F);
+  drawMCChart(myQ, pNet, vc);
+  runAdvisor();
+
+  if (el('cash')) el('cash').textContent = euro(cash);
+  if (el('cumprofit')) el('cumprofit').textContent = euro(cumProfit);
+  if (el('share')) el('share').textContent = (s[0]*100).toFixed(1)+'%';
+
+  lastShares   = s;
+  lastMyUnits  = myQ;
+  prev = { p:our.p, Q:our.Q, B:our.B, S:our.S, share:s_now, units:myQ };
 
   comps.forEach(c=>{
     if (c.strat==='price') compMovePriceWar(c);
@@ -807,55 +833,21 @@ function simulateDay(){
     else compMoveBandit(c);
   });
 
-  const s=shares([our].concat(comps));
-  const market=Math.round(M*(1+season/100));
-  const q=s.map(x=>Math.round(x*market)); q[0]=Math.min(q[0],cap);
-  lastMyUnits = q[0];
+  log(`Noi — prezzo ${euro(our.p)}, quota ${(s[0]*100).toFixed(1)}%, unità ${myQ.toLocaleString('it-IT')}, utile ${euro(postTax)}`);
 
-  const s_prev=prev.share||shares([our].concat(comps))[0], s_now=s[0];
-  const moved=Math.round((s_now-s_prev)*market);
+  // BLOCCO a 10 giorni
+  day++;
+  if (day > MAX_DAYS) day = MAX_DAYS;
+  if (el('day')) el('day').textContent = day;
+  save('day', day);
 
-  const pNet=netP(our.p), F=fixedTotalPerDay(), vc=buyCost + varOver + costQ(our.Q) + wCostPerUnit() + channelVarPerUnit(pNet);
-  let profitPre=(pNet-vc)*q[0]-F; let profit=profitPre>0?profitPre*(1-tax):profitPre;
-  cash+=profit; cumProfit+=profit;
-
-  const tbody = el('tbl')?.querySelector('tbody');
-  if (tbody){
-    tbody.innerHTML = '';
-    [our].concat(comps).forEach((p,i)=>{
-      const tr = document.createElement('tr');
-      const cols = [i===0?'Noi':p.name, euro(p.p), p.Q, p.B, p.S, pct(s[i]), q[i].toString()];
-      cols.forEach(c=>{ const td=document.createElement('td'); td.textContent=c; tr.appendChild(td); });
-      tbody.appendChild(tr);
-    });
+  if (day >= MAX_DAYS) {
+    const adv = el('advance');
+    if (adv) { adv.disabled = true; adv.textContent = 'Partita conclusa'; }
+    log('🎉 Fine partita (G10).');
   }
 
-  el('qMe').textContent=q[0].toLocaleString('it-IT');
-  el('sMe').textContent=(s[0]*100).toFixed(1)+'%';
-  el('pMe').textContent=euro(profit);
-  el('cash').textContent=euro(cash); el('cumprofit').textContent=euro(cumProfit);
-  el('share').textContent=(s[0]*100).toFixed(1)+'%';
-  el('moved').textContent=(moved>=0?'+':'')+moved.toLocaleString('it-IT');
-
-  // KPI secondari
-  const mcU = pNet - vc;
-  const mcTot = Math.max(0, mcU) * q[0];
-  const cover = pNet>0 ? (mcU/pNet*100) : 0;
-  const beUnits = mcU>0 ? (fixedTotalPerDay() / (mcU*(1-tax))) : Infinity;
-  const mos = (q[0]>0 && isFinite(beUnits)) ? ((q[0]-beUnits)/q[0]*100) : NaN;
-  el('kpiMcUnit').textContent = euro(mcU);
-  el('kpiMcTotal').textContent = euro(mcTot);
-  el('kpiCover').textContent = (isFinite(cover)?cover:0).toFixed(1)+'%';
-  el('kpiMoS').textContent    = (isFinite(mos)?mos.toFixed(1)+'%':'—');
-
-  prev={p:our.p,Q:our.Q,B:our.B,S:our.S,share:s_now,units:q[0]};
-
-  // Grafici & echo
-  drawBEChart(q[0], pNet, vc, F);
-  drawMCChart(q[0], pNet, vc);
-  runAdvisor();
-
-  day++; el('day').textContent=day;
+  refreshEcho();
 }
 
 /* ====== Wiring ====== */
@@ -875,9 +867,7 @@ function showChannelPanels(){
     el('chPctEcho').textContent = `${Number(pctV).toFixed(1)}%`;
   }
 }
-
 function bind(id, ev, fn){ const x=el(id); if (x) x.addEventListener(ev, fn); }
-
 function hydrateInputs(){
   el('price').value = our.p;
   el('invQ').value  = our.Q;
@@ -901,14 +891,11 @@ function hydrateInputs(){
 
   el('channel').value=channel;
 
-  // canali
   el('onFeePct').value=ch.online.feePct; el('onPayPct').value=ch.online.payPct; el('onFixedPer').value=ch.online.fixedPer; el('onLogPer').value=ch.online.logPer; el('onSaaS').value=ch.online.saasM; el('onMgmt').value=ch.online.mgmtM;
   el('pvAuto').value=ch.piva.autoM; el('pvFixed').value=ch.piva.fixedM; el('pvPct').value=ch.piva.pct; el('pvTeleKm').value=ch.piva.teleKm; el('pvKm').value=ch.piva.kmM; el('pvKml').value=ch.piva.kml; el('pvFuel').value=ch.piva.fuel; el('pvOtherM').value=ch.piva.otherM;
   el('emRal').value=ch.employee.ralY; el('emAuto').value=ch.employee.autoM; el('emTele').value=ch.employee.teleM; el('emTrips').value=ch.employee.tripsM; el('emPct').value=ch.employee.pct; el('emKm').value=ch.employee.kmM; el('emKml').value=ch.employee.kml; el('emFuel').value=ch.employee.fuel;
 }
-
 function wire(){
-  // leve principali
   bind('price','input', ()=>{ our.p=+el('price').value; refreshEcho(); });
   bind('invQ','input',  ()=>{ our.Q=+el('invQ').value; refreshEcho(); });
   bind('invB','input',  ()=>{ our.B=+el('invB').value; refreshEcho(); });
@@ -920,26 +907,22 @@ function wire(){
   bind('beta','input',  ()=>{ beta=+el('beta').value||beta; refreshEcho(); });
   bind('season','input',()=>{ season=+el('season').value||season; refreshEcho(); });
 
-  // costi base
   bind('buyCost','input', ()=>{ buyCost=+el('buyCost').value||buyCost; refreshEcho(); });
   bind('varOver','input', ()=>{ varOver=+el('varOver').value||varOver; refreshEcho(); });
   bind('minMarginPct','input', ()=>{ minMargin=+el('minMarginPct').value||minMargin; refreshEcho(); });
   bind('taxPct','input', ()=>{ tax=(+el('taxPct').value||24)/100; refreshEcho(); });
 
-  // garanzia
   bind('wTier','change', ()=>{ warranty.months=+el('wTier').value||warranty.months; refreshEcho(); });
   bind('wRateIn','input', ()=> refreshEcho());
   bind('wCostIn','input', ()=> refreshEcho());
   bind('wRateOut','input',()=> refreshEcho());
   bind('wCostOut','input',()=> refreshEcho());
 
-  // fissi
   ['fxStaff','fxRent','fxSaaS','fxOther'].forEach(id=>bind(id,'input', ()=>{ 
     fixedBase={ staff:+el('fxStaff').value||0, rent:+el('fxRent').value||0, saas:+el('fxSaaS').value||0, other:+el('fxOther').value||0 }; 
     refreshEcho();
   }));
 
-  // canale
   bind('channel','change', ()=>{ channel=el('channel').value; showChannelPanels(); refreshEcho(); });
   ['onFeePct','onPayPct','onFixedPer','onLogPer','onSaaS','onMgmt','pvAuto','pvFixed','pvPct','pvTeleKm','pvKm','pvKml','pvFuel','pvOtherM','emRal','emAuto','emTele','emTrips','emPct','emKm','emKml','emFuel']
   .forEach(id=> bind(id,'input', ()=>{ 
@@ -951,34 +934,39 @@ function wire(){
     showChannelPanels(); refreshEcho();
   }));
 
-  // avanzamento e reset
   bind('advance','click', ()=> simulateDay());
-  bind('reset','click',   ()=>{ if(confirm('Nuova partita?')){ localStorage.clear(); location.reload(); } });
+  bind('reset','click',   ()=>{ 
+    if(!confirm('Nuova partita?')) return;
+    localStorage.clear(); 
+    const adv = el('advance'); if (adv){ adv.disabled=false; adv.textContent='Avanza giorno'; }
+    location.reload(); 
+  });
 
-  // 💡 Indica la soluzione
+  // 💡 Indica la soluzione (usa advisor, fallback a ricalcolo)
   document.getElementById('show-solution').addEventListener('click', () => {
     const box = document.getElementById('solution-box');
     if (!box) return;
-
     try {
-      const market = Math.round(M * (1 + season/100));
-      let bestP = our.p, bestProfit = -Infinity;
+      let bestP = window.lastAdvisorPrice;
+      let bestProfit = null;
 
-      for (let p = 10; p <= 120; p += 0.5) {
-        const s = shares([{...our, p}].concat(comps))[0];
-        const q = Math.min(Math.round(s * market), cap);
-
-        const pNet = ivaIncl ? p/(1+ivaPct) : p;
-        const vc = buyCost + varOver + (8 + 2*our.Q) + wCostPerUnit() + channelVarPerUnit(pNet);
-        const F  = fixedTotalPerDay();
-
-        const pre  = Math.max(0, pNet - vc) * q - F;
-        const post = pre > 0 ? pre * (1 - tax) : pre;
-
-        if (post > bestProfit) { bestProfit = post; bestP = p; }
+      if (bestP == null) {
+        const market = Math.round(M * (1 + season/100));
+        let best = our.p, bestProf = -Infinity;
+        for (let p = 10; p <= 120; p += 0.5) {
+          const s = shares([{...our, p}].concat(comps))[0];
+          const q = Math.min(Math.round(s * market), cap);
+          const pNet = ivaIncl ? p/(1+ivaPct) : p;
+          const vc = buyCost + varOver + (8 + 2*our.Q) + wCostPerUnit() + channelVarPerUnit(pNet);
+          const F  = fixedTotalPerDay();
+          const pre  = Math.max(0, pNet - vc) * q - F;
+          const post = pre > 0 ? pre * (1 - tax) : pre;
+          if (post > bestProf) { bestProf = post; best = p; }
+        }
+        bestP = best; bestProfit = bestProf;
       }
 
-      box.innerHTML = `👉 Prezzo suggerito dal sistema: <b>${euro(bestP)}</b><br><small>Utile atteso: ${euro(bestProfit)}</small>`;
+      box.innerHTML = `👉 Prezzo suggerito dal sistema: <b>${euro(bestP)}</b>${bestProfit!=null?`<br><small>Utile atteso: ${euro(bestProfit)}</small>`:''}`;
       box.style.display = 'block';
     } catch (e) {
       console.error('Advisor error:', e);
@@ -987,13 +975,20 @@ function wire(){
     }
   });
 }
+
 /* ====== Start ====== */
 document.addEventListener('DOMContentLoaded', ()=>{
   hydrateInputs();
   showChannelPanels();
   refreshEcho();
-  runAdvisor();        // calcola subito una prima soluzione
-  wire();              // attacca tutti i listener (incluso "Indica la soluzione")
+  runAdvisor();
+  wire();
+
+  // Se rientriamo a G10, blocca subito il bottone
+  if (day >= MAX_DAYS) {
+    const adv = el('advance');
+    if (adv) { adv.disabled = true; adv.textContent = 'Partita conclusa'; }
+  }
 });
 </script>
 
