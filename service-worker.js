@@ -1,69 +1,65 @@
-// service-worker.js — Margin Rush PWA
-const CACHE = 'mr-v49';
+// service-worker.js
+const CACHE = 'mr-v4.9.3-2025-09-21-1'; // ↑ cambia versione ad ogni deploy
 const CORE = [
-  './',            // root
-  'index.html',
-  'style.css',
-  'app.js',        // rimuovi se non lo usi
-  'manifest.json',
-  'icon-192.png',
-  'icon-512.png',
-  'readme.html'    // opzionale, toglilo se non vuoi il manuale offline
+  './',
+  './index.html',
+  './style.css',
+  './app.js',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(CORE))
+// install: precache + attiva subito
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(CORE))
+      .then(() => self.skipWaiting())
   );
-  self.skipWaiting(); // aggiorna subito lo SW
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
+// activate: ripulisce vecchie cache + prende controllo
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim(); // prendi subito controllo delle pagine aperte
 });
 
-self.addEventListener('fetch', (event) => {
-  const req = event.request;
+// messaggi dal client (per SKIP_WAITING opzionale)
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
 
-  if (req.method !== 'GET') return;
+// fetch:
+// - HTML → network-first (così prendi SEMPRE l’ultima index)
+// - asset statici → stale-while-revalidate
+self.addEventListener('fetch', (e) => {
+  const req = e.request;
+  const isHTML = req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html');
 
-  const url = new URL(req.url);
-  const sameOrigin = url.origin === self.location.origin;
-
-  // Navigazioni (barra indirizzi, link interni) → fallback a index.html
-  if (req.mode === 'navigate' && sameOrigin) {
-    event.respondWith(
-      fetch(req).catch(() => caches.match('index.html'))
+  if (isHTML) {
+    e.respondWith(
+      fetch(req)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put('./index.html', copy)).catch(()=>{});
+          return res;
+        })
+        .catch(() => caches.match('./index.html'))
     );
     return;
   }
 
-  // Core asset: cache-first
-  if (sameOrigin && CORE.some(path => url.pathname.endsWith(path) || url.pathname === '/' )) {
-    event.respondWith(
-      caches.match(req).then(cached => cached || fetch(req))
-    );
-    return;
-  }
-
-  // Default: stale-while-revalidate per altre richieste same-origin
-  if (sameOrigin) {
-    event.respondWith((async () => {
-      const cache = await caches.open(CACHE);
-      const cached = await cache.match(req);
-      const fetched = fetch(req).then(resp => {
-        if (resp && resp.status === 200) cache.put(req, resp.clone());
-        return resp;
-      }).catch(() => cached);
-      return cached || fetched;
-    })());
-    return;
-  }
-
-  // Cross-origin → lascio passare
+  e.respondWith(
+    caches.match(req).then(hit => {
+      const fetcher = fetch(req).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(req, copy)).catch(()=>{});
+        return res;
+      }).catch(() => hit || Response.error());
+      return hit || fetcher;
+    })
+  );
 });
